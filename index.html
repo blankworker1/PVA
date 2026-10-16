@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PVA</title>
+<style>
+  :root {
+    --bg:#0f0e0c; --fg:#ece8df; --mute:#8b867c; --faint:#26241f;
+    --sun:#f0a838; --sun-soft:rgba(240,168,56,.18);
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg);
+    font:15px/1.5 system-ui, -apple-system, sans-serif; -webkit-text-size-adjust:100%; }
+  main { max-width:560px; margin:0 auto; padding:calc(28px + env(safe-area-inset-top)) 18px 110px; }
+  #title { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); margin:0 0 18px; }
+
+  /* the day's image */
+  #frame { position:relative; width:100%; aspect-ratio:1; background:#0b0a08; border-radius:2px; overflow:hidden; }
+  #big { width:100%; height:100%; display:block; }
+  #label { display:flex; align-items:center; gap:8px; margin:12px 0 0; font-size:13px; color:var(--mute);
+    font-variant-numeric:tabular-nums; }
+  #label b { color:var(--fg); font-weight:500; }
+  .live { width:8px; height:8px; border-radius:50%; background:var(--sun); box-shadow:0 0 0 4px var(--sun-soft);
+    animation:pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow:0 0 0 8px rgba(240,168,56,0); } }
+  #infoBtn { margin-left:auto; width:28px; height:28px; border-radius:50%; border:1px solid var(--faint);
+    background:transparent; color:var(--fg); font:italic 600 14px/1 Georgia, serif; cursor:pointer; }
+  #info { position:absolute; inset:0; display:none; flex-direction:column; justify-content:flex-end; gap:2px;
+    padding:20px; background:linear-gradient(to top, rgba(10,9,7,.92) 55%, rgba(10,9,7,.2));
+    font-size:13px; font-variant-numeric:tabular-nums; }
+  #info.on { display:flex; }
+  #info h2 { margin:0 0 8px; font:400 20px/1.3 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  #info .row { display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,.08); padding:5px 0; }
+  #info .row span { color:var(--mute); }
+  #msg { position:absolute; inset:0; display:grid; place-items:center; padding:30px; text-align:center;
+    color:var(--mute); font:17px/1.5 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+
+  /* gallery of past days */
+  .sect { margin:34px 0 12px; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); }
+  .sect:empty, #days:empty { display:none; }
+  #days { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px 10px; }
+  .day { background:none; border:0; padding:0; cursor:pointer; color:var(--mute);
+    font:11px/1.3 system-ui, sans-serif; text-align:left; font-variant-numeric:tabular-nums; }
+  .day canvas { width:100%; aspect-ratio:1; display:block; border-radius:2px; outline:1px solid transparent;
+    outline-offset:2px; background:#0b0a08; margin-bottom:6px; }
+  .day.sel canvas { outline-color:var(--fg); }
+  .day.sel { color:var(--fg); }
+
+  #mapLink { display:block; margin-top:36px; font-size:13px; color:var(--mute); text-decoration:none; }
+
+  /* live data */
+  #strip { position:fixed; left:0; right:0; bottom:0; display:flex; align-items:center; gap:14px;
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom)); background:var(--bg);
+    border-top:1px solid var(--faint); font-size:13px; color:var(--mute); font-variant-numeric:tabular-nums; }
+  #strip b { color:var(--fg); font-weight:500; }
+  .disc { width:12px; height:12px; border-radius:50%; background:var(--sun); box-shadow:0 0 0 4px var(--sun-soft); flex:none; }
+  .disc.dusk { background:linear-gradient(to top, var(--sun) 50%, transparent 50%); border:1.5px solid var(--sun); box-shadow:none; }
+  #sunset { margin-left:auto; }
+</style>
+</head>
+<body>
+<main>
+  <div id="title">PVA</div>
+
+  <div id="frame">
+    <canvas id="big"></canvas>
+    <div id="msg" hidden></div>
+    <div id="info"></div>
+  </div>
+  <div id="label"><span id="dot"></span><span id="labelText"></span>
+    <button id="infoBtn" aria-label="About this day">i</button></div>
+
+  <h2 class="sect" id="daysTitle"></h2>
+  <div id="days"></div>
+
+  <a id="mapLink" hidden>Leave this panel's Wi-Fi, then back to the map ›</a>
+</main>
+
+<div id="strip">
+  <span class="disc" id="disc"></span>
+  <span><b id="temp">–</b></span>
+  <span>light <b id="light">–</b></span>
+  <span id="sunset"></span>
+</div>
+
+<script>
+/* ======================================================================
+   THE RULES — how a day's data becomes its image.
+   PLACEHOLDER: a solargraph-like trace to test the system. To be designed.
+   Fixed scales (not per-day) so days can be compared across the series.
+   ====================================================================== */
+const RULES = 'rules-0-placeholder';      // keep in step with the firmware
+const SCALE = { tMin: 0, tMax: 60, vMax: 45 };
+
+function render(ctx, S, day, liveNow) {
+  const { rows, rise, set } = day;
+  ctx.fillStyle = '#0b0a08'; ctx.fillRect(0, 0, S, S);
+  const cx = S / 2, cy = S * 0.8, R = S * 0.44;
+
+  // faint rings: the sky's frame
+  ctx.lineWidth = Math.max(1, S / 400);
+  ctx.strokeStyle = 'rgba(255,236,200,.05)';
+  for (let k = 1; k <= 4; k++) { ctx.beginPath(); ctx.arc(cx, cy, R * k / 4, Math.PI, 2 * Math.PI); ctx.stroke(); }
+  if (!rows.length) return;
+
+  const t0 = Math.min(rise, rows[0].e), span = Math.max(3600, set - t0);
+  const ang  = e => Math.PI + Math.PI * Math.max(0, Math.min(1, (e - t0) / span));
+  const tn   = t => isFinite(t) ? Math.max(0, Math.min(1, (t - SCALE.tMin) / (SCALE.tMax - SCALE.tMin))) : .4;
+  const vn   = v => Math.max(0, Math.min(1, v / SCALE.vMax));
+  const pt   = r => { const a = ang(r.e), rr = R * (.28 + .72 * tn(r.t)); return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; };
+
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+  for (let i = 1; i < rows.length; i++) {
+    const a = rows[i - 1], b = rows[i];
+    if (b.e - a.e > 1800) continue;                     // a gap (cloud, power loss): leave it open
+    const [x1, y1] = pt(a), [x2, y2] = pt(b), f = tn(b.t), v = vn(b.v);
+    ctx.strokeStyle = `rgba(255,${Math.round(150 + 80 * (1 - f))},${Math.round(60 + 90 * (1 - f))},${(.18 + .5 * v).toFixed(3)})`;
+    for (const w of [9, 4, 1.4]) {                     // a soft trace, like light on paper
+      ctx.lineWidth = w * S / 400 * (.5 + v);
+      ctx.globalAlpha = w > 5 ? .18 : w > 2 ? .4 : 1;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+
+  if (liveNow) {                                         // today: where the light is now
+    const [x, y] = pt(liveNow);
+    ctx.fillStyle = 'rgba(255,214,150,.95)';
+    ctx.beginPath(); ctx.arc(x, y, S / 90, 0, 7); ctx.fill();
+  }
+}
+/* ====================================================================== */
+
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const hhmm = e => { const d = new Date(e * 1000); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const hm = s => Math.floor(s / 3600) + 'h ' + pad(Math.floor(s % 3600 / 60)) + 'm';
+const dayDiff = (a, b) => Math.round((Date.UTC(...b.split('-').map((x, i) => i === 1 ? x - 1 : +x)) -
+                                      Date.UTC(...a.split('-').map((x, i) => i === 1 ? x - 1 : +x))) / 864e5);
+const longDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' });
+const shortDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { day: 'numeric', month: 'short' });
+
+async function getJSON(u) { try { const r = await fetch(u, { cache: 'no-store' }); return r.ok ? r.json() : null; } catch { return null; } }
+async function getText(u) { try { const r = await fetch(u, { cache: 'no-store' }); return r.ok ? (await r.text()).trim() : ''; } catch { return ''; } }
+async function getRows(d) {
+  const t = await getText('/art/' + d + '.csv');
+  return t.split('\n').slice(1).map(l => { const [e, v, tc] = l.split(',').map(parseFloat); return { e, v, t: tc }; })
+          .filter(r => isFinite(r.e) && isFinite(r.v));
+}
+
+// lend the panel this phone's clock, only used if it has none
+fetch('/sync?t=' + Date.now(), { method: 'POST' }).catch(() => {});
+
+/* ---------- sunrise / sunset (same formula as the firmware) ---------- */
+function sunTimes(dateStr, lat, lng) {
+  const rad = Math.PI / 180, J1970 = 2440588, J2000 = 2451545;
+  const fromJ = j => (j + 0.5 - J1970) * 86400;
+  const noon = new Date(dateStr + 'T12:00:00').valueOf() / 1000;
+  const d = noon / 86400 - 0.5 + J1970 - J2000;
+  const lw = -lng * rad, phi = lat * rad;
+  const n = Math.round(d - 0.0009 - lw / (2 * Math.PI));
+  const ds = 0.0009 + lw / (2 * Math.PI) + n;
+  const M = rad * (357.5291 + 0.98560028 * ds);
+  const C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+  const L = M + C + rad * 102.9372 + Math.PI;
+  const dec = Math.asin(Math.sin(L) * Math.sin(rad * 23.4397));
+  const Jnoon = J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  const w = Math.acos((Math.sin(-0.833 * rad) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+  const Jset = J2000 + 0.0009 + (w + lw) / (2 * Math.PI) + n + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  return { rise: fromJ(2 * Jnoon - Jset), set: fromJ(Jset) };
+}
+
+/* ---------- state ---------- */
+let list = null, now = null, sel = null;
+const cache = {};          // date -> { rows, rise, set }
+
+function isToday(d) { return list && d === list.today && now && now.epoch < now.sunset; }
+
+async function dayData(d, fresh) {
+  if (!cache[d] || fresh) {
+    const st = sunTimes(d, list.lat, list.lng);
+    cache[d] = { rows: await getRows(d), rise: st.rise, set: st.set };
+  }
+  return cache[d];
+}
+
+function sizeCanvas(cv, css) {
+  const dpr = devicePixelRatio || 1, S = Math.round(css * dpr);
+  if (cv.width !== S) { cv.width = S; cv.height = S; }
+  return S;
+}
+
+/* ---------- the big image ---------- */
+async function show(d, fresh) {
+  sel = d;
+  document.querySelectorAll('.day').forEach(b => b.classList.toggle('sel', b.dataset.d === d));
+  const day = await dayData(d, fresh);
+  const cv = $('#big'), S = sizeCanvas(cv, cv.clientWidth);
+  const live = isToday(d);
+  const liveNow = live && now.epoch ? { e: now.epoch, v: now.v, t: now.t } : null;
+  render(cv.getContext('2d'), S, day, liveNow);
+
+  const n = dayDiff(list.start, d) + 1, of = dayDiff(list.start, list.end) + 1;
+  $('#dot').className = live ? 'live' : '';
+  $('#labelText').innerHTML = live ? `<b>Today</b> · forming until sunset ${hhmm(day.set)}`
+                                   : `<b>Day ${n} of ${of}</b> · ${shortDate(d)}`;
+  writeInfo(d, day, n, of, live);
+}
+
+function writeInfo(d, day, n, of, live) {
+  const r = day.rows, ts = r.map(x => x.t).filter(isFinite);
+  const first = r.length ? r[0].e : null, last = r.length ? r[r.length - 1].e : null;
+  const row = (k, v) => `<div class="row"><span>${k}</span><b>${v}</b></div>`;
+  $('#info').innerHTML =
+    `<h2>Day ${n} of ${of}<br>${longDate(d)}</h2>` +
+    row('First light on the panel', first ? hhmm(first) : '–') +
+    row(live ? 'Still forming' : 'Last light on the panel', last ? hhmm(last) : '–') +
+    row('Hours of light', first ? hm(last - first) : '–') +
+    row('Panel temperature', ts.length ? `${Math.min(...ts).toFixed(0)}° – ${Math.max(...ts).toFixed(0)}°` : '–') +
+    row(live ? 'Sealed at sunset' : 'Sealed at sunset', hhmm(day.set)) +
+    row('Rules', RULES);
+}
+
+$('#infoBtn').onclick = () => $('#info').classList.toggle('on');
+$('#frame').onclick = () => $('#info').classList.toggle('on');
+
+/* ---------- gallery of past days (today first while it forms, so there is a way back) ---------- */
+async function buildDays() {
+  const box = $('#days');
+  box.innerHTML = '';
+  const days = [...list.days].reverse();                     // newest first
+  if (days.length < 2 && !(days.length === 1 && !isToday(days[0]))) return;   // nothing past yet
+  $('#daysTitle').textContent = 'Past days';
+  for (const d of days) {
+    const n = dayDiff(list.start, d) + 1;
+    const b = document.createElement('button');
+    b.className = 'day'; b.dataset.d = d;
+    b.innerHTML = `<canvas></canvas>${isToday(d) ? 'Today · live' : `Day ${n} · ${shortDate(d)}`}`;
+    b.onclick = () => { show(d); scrollTo({ top: 0, behavior: 'smooth' }); };
+    box.appendChild(b);
+  }
+  document.querySelectorAll('.day').forEach(b => b.classList.toggle('sel', b.dataset.d === sel));
+  // draw one at a time: the panel serves slowly
+  for (const d of days) {
+    const cv = box.querySelector(`[data-d="${d}"] canvas`);
+    render(cv.getContext('2d'), sizeCanvas(cv, cv.clientWidth), await dayData(d), null);
+  }
+}
+
+/* ---------- live data ---------- */
+async function live() {
+  const n = await getJSON('/now');
+  if (!n) return;
+  now = n;
+  $('#temp').textContent = n.t == null ? '–' : n.t.toFixed(1) + '°';
+  $('#light').textContent = hm(n.uptime);
+  const after = n.epoch && n.epoch >= n.sunset;
+  $('#disc').className = 'disc' + (after ? ' dusk' : '');
+  $('#sunset').innerHTML = !n.epoch ? '' : after ? 'after sunset' : `sunset <b>${hhmm(n.sunset)}</b>`;
+}
+
+/* ---------- start ---------- */
+async function start() {
+  await live();
+  list = await getJSON('/art/list');
+  const msg = $('#msg');
+  if (!list || !list.start) { msg.hidden = false; msg.textContent = 'This panel is waiting for its exhibition to begin.'; return; }
+  if (!list.days.length) {
+    msg.hidden = false;
+    msg.textContent = list.today && list.today < list.start
+      ? `The exhibition begins on ${longDate(list.start)}.` : 'The first image begins at first light.';
+    return;
+  }
+  await show(list.days[list.days.length - 1]);
+  buildDays();
+}
+start();
+
+setInterval(async () => {
+  await live();
+  if (sel && isToday(sel)) show(sel);                  // move the live point
+}, 5000);
+setInterval(() => { if (sel && isToday(sel)) show(sel, true); }, 60000);   // fetch new records
+addEventListener('resize', () => sel && show(sel));
+
+/* ---------- this panel's name and the way back to the map ---------- */
+getText('/media/title.txt').then(t => { if (t) { $('#title').textContent = t; document.title = t; } });
+getText('/media/map.txt').then(u => { if (u) { $('#mapLink').href = u; $('#mapLink').hidden = false; } });
+</script>
+</body>
+</html>

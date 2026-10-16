@@ -1,2 +1,77 @@
-# PVA
-photovoltaic art
+# PVA — Photovoltaic Art
+
+Nine end-of-life solar panels placed around Bosa, each powering only itself. Each panel records its day of sun and turns it into an image, drawn by fixed rules, created and viewed live, then sealed at sunset. The image is seen only on a visitor's phone, through the panel's own Wi-Fi, for the run of the exhibition. Same sun, different data.
+
+First exhibition: **SUNDIAL · La Meridiana**, Bosa, summer 2027.
+
+This is a proof of concept: a bare-bones trial of the technology and the dial. There is no story or media layer; site-specific layers will come later.
+
+> Status: drafts, not yet tested on hardware. The drawing rules on the panel page are still a placeholder; the agreed rules (v1) are in `tools/pva_rules.py`.
+
+## How it fits together
+
+| Part | What it is | Where it runs |
+| --- | --- | --- |
+| The panel | PV panel + ESP32 + temperature probe + clock module, no battery, no internet | On a wall in Bosa |
+| The dial | Each day's image, drawn on the visitor's phone from the panel's data | The panel's own Wi-Fi |
+| The map | Route, pins, which panels are likely awake, the visitor's position | The PVA website (this repo's `docs/`) |
+| The print | The whole exhibition as one 9 × 9 four-colour screen print | Made after the run from the collected data |
+
+A visit: the flyer's QR code opens the map → at a pin, join that panel's Wi-Fi → the dial opens on its own → leave the Wi-Fi and return to the map.
+
+## Repository
+
+```
+docs/
+  index.html                  the map — the only part published on the website
+firmware/panel_page_server/
+  panel_page_server.ino       ESP32 firmware
+  partitions.csv              16 MB flash layout (~9.9 MB for pages and data)
+  panel_config.example.h      template for per-panel settings
+  data/                       copied into each panel's flash
+    index.html                the panel page: today's dial, gallery of past days, live data
+    admin.html                admin page: status, clock, exhibition dates, raw data download
+    media/title.txt           this panel's name
+    media/map.txt             the map's web address
+tools/
+  pva_rules.py                the dial rules as drawing code (canonical print, separations)
+  sample_a4.py                A4 sample sheet, invented data
+  requirements.txt
+```
+
+## Publishing the map
+
+In the repository's GitHub Pages settings, publish from the `docs` folder on the main branch, then point the PVA domain at it. Only `docs/` is published; the panel files stay in the repo but never appear online.
+
+Pins are placed on site: open the map with `?edit` after the address, drag the pins, tap **Copy positions** and paste them into the `PANELS` list at the top of `docs/index.html`.
+
+## Preparing a panel
+
+1. **Settings.** Copy `panel_config.example.h` to `panel_config.h` and set the panel's Wi-Fi name (`panel-01` … `panel-09`) and a long, unique admin key. `panel_config.h` is ignored by git; keep the keys somewhere safe.
+2. **Pins.** Set `PIN_PANEL_ADC` and `PIN_TEMP` in the firmware from the board's pinout (it will not compile until you do).
+3. **Media.** Edit `data/media/title.txt` (panel name) and `data/media/map.txt` (map address).
+4. **Build.** Arduino IDE, ESP32 core 3.x; board ESP32S3 Dev Module, Flash 16 MB, PSRAM OPI; libraries OneWire, DallasTemperature, RTClib. `partitions.csv` in the sketch folder sets the flash layout.
+5. **Flash.** Erase all flash first (essential on any board that ever held keys), upload the firmware, then upload `data/` with the LittleFS uploader.
+6. **Set up on site.** Join the panel's Wi-Fi, open `http://192.168.4.1/admin.html`, enter the key, set the clock from your phone and set the exhibition's first and last day.
+
+For desk testing on USB power, set `BENCH 1` in the firmware (skips the dawn gate); set it back to `0` before installing.
+
+## Hardware per panel
+
+PV panel (≈36 V open-circuit) · reverse-polarity diode · LM2596HV buck converter set to 5.0 V (60 V input; check its catch diode is rated 60 V) · SMAJ5.0A TVS across 5 V · ESP32-S3 N16R8 · DS18B20 temperature probe + 4.7 kΩ · DS3231 clock module · 100 kΩ / 5.6 kΩ divider + 100 nF. To add for the agreed sun rule: logic-level MOSFET (≥60 V, ≥20 A), shunt resistor, INA180 current-sense amplifier.
+
+## The dial (rules v1, draft)
+
+- **Time:** solar noon at the top; 12° per hour; Bosa's solstice day (15 h 03 m) spans 180°, shorter days proportionally less.
+- **Sun:** a ring of 15-minute solar sections, ochre for direct sun, blue for shade, from a short-circuit current reading (above a third of the panel's clear-noon current = sun).
+- **Heat:** a red line rising from the axis, the panel's warming since sunrise; +40 °C reaches the ring, with no upper limit.
+- **Presence:** one black dot per solar hour, for visitors in that hour: small 1–5, medium 6–10, large 11+.
+- **Seal:** the black horizon line; nothing after sunset enters the dial.
+- **A panel that did not wake:** the ring outline and the axis only, in black.
+- **Inks:** ochre, red, blue, black, translucent, printed in that order.
+
+*Horas non numero nisi serenas* — I count only the sunny hours.
+
+## Data and privacy
+
+Visitors are counted, never identified. Raw data stays on each panel and is downloaded only through the admin page; visitors see the exhibition days' images, nothing else.

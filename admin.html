@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PVA admin</title>
+<style>
+  :root { --bg:#f4f2ec; --fg:#1b1a17; --mute:#7f7b72; --faint:#dedad0; --ok:#3f7d3a; --bad:#b0392c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#121110; --fg:#ebe7de; --mute:#8b867c; --faint:#2b2925; --ok:#7bc070; --bad:#e0695a; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, -apple-system, sans-serif; }
+  main { max-width:520px; margin:0 auto; padding:24px 18px 48px; }
+  h1 { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); margin:0 0 20px; }
+  section { border-top:1px solid var(--faint); padding:18px 0; }
+  h2 { font-size:15px; font-weight:600; margin:0 0 10px; }
+  label { display:block; font-size:12px; color:var(--mute); margin:10px 0 4px; }
+  input { width:100%; font:inherit; padding:9px 10px; border:1px solid var(--faint); border-radius:6px;
+    background:transparent; color:var(--fg); }
+  button, a.btn { display:inline-block; font:inherit; font-size:14px; padding:9px 16px; margin-top:12px;
+    border:1px solid var(--fg); border-radius:99px; background:var(--fg); color:var(--bg); text-decoration:none; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--fg); border-color:var(--faint); }
+  table { width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+  td { padding:5px 0; border-bottom:1px solid var(--faint); }
+  td:last-child { text-align:right; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  .note { font-size:12px; color:var(--mute); margin-top:8px; }
+  #out { font-size:13px; margin-top:8px; min-height:1.5em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>PVA · panel admin</h1>
+
+  <section>
+    <h2>Key</h2>
+    <input id="key" type="password" autocomplete="current-password" placeholder="Admin key for this panel">
+    <p class="note">Remembered on this phone. Each panel has its own key.</p>
+    <button id="refresh">Check panel</button>
+  </section>
+
+  <section>
+    <h2>Status</h2>
+    <table id="status"><tr><td class="note">Enter the key and check the panel.</td></tr></table>
+  </section>
+
+  <section>
+    <h2>Raw data</h2>
+    <p class="note">Everything the panel has recorded, as one file named after the panel and today's date.
+      In iOS, open this page in Safari rather than the Wi-Fi pop-up: the pop-up can't save files.</p>
+    <a class="btn" id="download" href="#">Download all raw data</a>
+  </section>
+
+  <section>
+    <h2>Clock</h2>
+    <p class="note">Sets the panel's clock (and its clock module) from this phone.</p>
+    <button id="clock">Set clock from this phone</button>
+  </section>
+
+  <section>
+    <h2>Exhibition</h2>
+    <label for="start">First day</label><input id="start" type="date">
+    <label for="end">Last day</label><input id="end" type="date">
+    <p class="note">Days outside these dates are recorded as raw data but never become artworks.</p>
+    <button id="window">Save dates</button>
+  </section>
+
+  <div id="out"></div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const key = () => $('#key').value.trim();
+const say = (t, cls) => { $('#out').textContent = t; $('#out').className = cls || ''; };
+const fmt = e => { if (!e) return '–'; const d = new Date(e * 1000); return d.toLocaleDateString() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const mb = b => (b / 1048576).toFixed(1) + ' MB';
+
+try { $('#key').value = localStorage.getItem('pvaKey') || ''; } catch {}
+$('#key').onchange = () => { try { localStorage.setItem('pvaKey', key()); } catch {} updateLink(); };
+function updateLink() { $('#download').href = '/admin/export?key=' + encodeURIComponent(key()); }
+updateLink();
+
+async function call(path, method) {
+  const sep = path.includes('?') ? '&' : '?';
+  const r = await fetch(path + sep + 'key=' + encodeURIComponent(key()), { method: method || 'GET', cache: 'no-store' });
+  if (r.status === 403) throw new Error('Wrong key');
+  if (!r.ok) throw new Error(await r.text() || ('Error ' + r.status));
+  return r;
+}
+
+async function status() {
+  try {
+    const s = await (await call('/admin/status')).json();
+    const drift = s.epoch ? Math.round(s.epoch - Date.now() / 1000) : null;
+    const rows = [
+      ['Panel', s.panel],
+      ['Firmware / rules', s.firmware + ' / ' + s.rules],
+      ['Panel clock', s.time_known ? fmt(s.epoch) + (Math.abs(drift) > 60 ? ` <span class="bad">(${drift}s off)</span>` : '') : '<span class="bad">not set</span>'],
+      ['Clock module', s.rtc ? '<span class="ok">fitted</span>' : '<span class="bad">missing</span>'],
+      ['Exhibition', s.start ? `${s.start} → ${s.end}` : '<span class="bad">dates not set</span>'],
+      ['Sunset today', s.sunset ? fmt(s.sunset).split(' ')[1] : '–'],
+      ['Panel voltage', s.volts.toFixed(1) + ' V'],
+      ['Temperature probe', s.temp_sensor ? (s.temp == null ? '–' : s.temp.toFixed(1) + '°') : '<span class="bad">not found</span>'],
+      ['Art days recorded', s.art_days],
+      ['Raw days (power-ons)', s.raw_sessions + ' + today'],
+      ['Awake since', Math.floor(s.uptime / 3600) + 'h ' + pad(Math.floor(s.uptime % 3600 / 60)) + 'm'],
+      ['Storage', mb(s.used) + ' of ' + mb(s.total)],
+    ];
+    $('#status').innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+    if (s.start) { $('#start').value = s.start; $('#end').value = s.end; }
+    say('');
+    try { localStorage.setItem('pvaKey', key()); } catch {}
+  } catch (e) { say(e.message, 'bad'); }
+}
+
+$('#refresh').onclick = status;
+
+$('#clock').onclick = async () => {
+  try { await call('/admin/clock?t=' + Date.now(), 'POST'); say('Clock set.', 'ok'); status(); }
+  catch (e) { say(e.message, 'bad'); }
+};
+
+$('#window').onclick = async () => {
+  const a = $('#start').value, b = $('#end').value;
+  if (!a || !b || b < a) { say('Choose a first and last day.', 'bad'); return; }
+  // local midnight at the start of the first day, and after the last day
+  const start = new Date(a + 'T00:00:00').valueOf() / 1000;
+  const endD = new Date(b + 'T00:00:00'); endD.setDate(endD.getDate() + 1);
+  const end = endD.valueOf() / 1000;
+  try { await call(`/admin/window?start=${start}&end=${end}`, 'POST'); say('Dates saved.', 'ok'); status(); }
+  catch (e) { say(e.message, 'bad'); }
+};
+
+if (key()) status();
+</script>
+</body>
+</html>
