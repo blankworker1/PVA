@@ -1,0 +1,13 @@
+# per-panel settings with real admin keys: never commit
+firmware/**/panel_config.h
+
+# raw data downloaded from the panels
+*.csv
+!firmware/**/partitions.csv
+
+# generated output
+tools/*.pdf
+tools/*.png
+tools/*.svg
+__pycache__/
+.DS_Store
