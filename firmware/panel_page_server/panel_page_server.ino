@@ -1,7 +1,14 @@
 /*
   PVA — panel firmware
-  Draft 4 · Oct 2026 · untested
-  Board: ESP32-S3 with 16 MB flash (N16R8); prototype on Waveshare ESP32-S3-Touch-LCD-1.47
+  Draft 5 · Oct 2026 · untested
+  Boards: ELEGOO ESP32 30-pin (original ESP32, 4 MB flash) — the current build;
+          ESP32-S3 with 16 MB flash also supported (set the pins below).
+
+  Build stages (set the switches below)
+  - Stage 1, bench:   USB power, probe only.             BENCH 1, PANEL_SENSE 0, USE_RTC 0
+  - Stage 1, panel:   panel + buck + supercap, probe.    BENCH 0, PANEL_SENSE 0, USE_RTC 0
+  - Stage 2, full:    + voltage divider, DS3231 clock.   BENCH 0, PANEL_SENSE 1, USE_RTC 1
+  - Stage 2+:         + sun sensor (MOSFET, shunt, INA180) — not in this firmware yet.
 
   The rhythm
   - The panel wakes with the light, records all day, and goes dark at dusk.
@@ -34,19 +41,25 @@
   - status, set clock, set exhibition dates, download all raw data. Every call needs ADMIN_KEY.
   - The key travels as plain HTTP on an open network: fine for this data, not a secret vault.
 
-  Wiring
-  - Panel +  -> 100k -> ADC pin -> 5.6k -> GND (+ 100 nF ADC to GND). Calibrate DIVIDER.
-  - DS18B20: 3.3 V, GND, data -> TEMP pin with 4.7k pull-up to 3.3 V.
-  - DS3231: 3.3 V, GND, SDA, SCL.
-  - Panel -> reverse-polarity diode -> buck converter (LM2596HV, 60 V in; check its
-    catch diode is 60 V, e.g. SS56) -> board 5 V.
-  - TVS diode SMAJ5.0A across the 5 V output: clamps a spike, and if the converter
-    ever fails short it sacrifices itself instead of the board.
-  - Optional: extra 470 µF / 63 V across the converter input if dawn stutter persists.
+  Wiring (ELEGOO 30-pin on the screw-terminal breakout)
+  - Panel -> fuse -> reverse-polarity diode -> buck converter (8–60 V in), set to 5.0 V
+    BEFORE anything else is connected -> 5V/VIN and GND terminals.
+  - 5.5 V 4 F supercapacitor across the 5 V output: rides through Wi-Fi spikes and the
+    dawn stutter (about 15–25 s of running: the board's regulator needs ~4.3 V).
+    Keep it in the shaded box; it ages fast in heat. Set 5.0 V exactly, not 5.2 V.
+  - TVS diode SMAJ5.0A across the 5 V output (stage 2): protects the board if the
+    converter ever fails short.
+  - DS18B20 on the panel back: red 3.3 V, black GND, yellow GPIO 4, 4.7k from GPIO 4 to 3.3 V.
+  - Panel voltage (stage 2): Panel + -> 100k -> GPIO 34 -> 5.6k -> GND (+ 100 nF GPIO 34
+    to GND). Calibrate DIVIDER with a multimeter. Must be GPIO 32–39 on the original
+    ESP32: the other analog pins stop working while Wi-Fi is on.
+  - DS3231 (stage 2): 3.3 V, GND, SDA GPIO 21, SCL GPIO 22.
 
-  Build (Arduino IDE, core 3.x)
+  Build (Arduino IDE, ESP32 core 3.x)
   - Libraries: OneWire, DallasTemperature, RTClib
-  - Board: ESP32S3 Dev Module · Flash 16MB · PSRAM: OPI PSRAM · partitions.csv in sketch folder
+  - ELEGOO: board "ESP32 Dev Module" · Flash 4MB · Partition Scheme: Custom
+    (partitions.csv, ~2 MB LittleFS). For a 16 MB S3, use partitions_16mb.csv instead
+    (rename it to partitions.csv) and board "ESP32S3 Dev Module", PSRAM OPI.
   - data/ folder: index.html, admin.html, media/   (upload with the LittleFS uploader)
   - panel_config.h: copy from panel_config.example.h; panel name and admin key per panel
 */
@@ -67,16 +80,27 @@
 #include <vector>
 #include <algorithm>
 
-// ---------------- pins: set from the board pinout ----------------
-#define PIN_PANEL_ADC  -1      // ADC1 pin (GPIO1–10 on the S3), free of display/touch/SD
-#define PIN_TEMP       -1      // any free GPIO
-#define USE_RTC        1       // 1 = DS3231 fitted
-#define PIN_SDA        -1      // -1 = board default I2C pins
-#define PIN_SCL        -1
-#define BENCH          0       // 1 = on USB power at the desk: skip the dawn gate
-#if (PIN_PANEL_ADC < 0) || (PIN_TEMP < 0)
-#error "Set PIN_PANEL_ADC and PIN_TEMP to free GPIOs from the board pinout"
+// ---------------- build stage ----------------
+#define BENCH          1       // 1 = USB power at the desk: no dawn gate, no dusk close
+#define PANEL_SENSE    0       // 1 = voltage divider fitted (needed for dawn gate and dusk)
+#define USE_RTC        0       // 1 = DS3231 clock module fitted
+
+// ---------------- pins ----------------
+#if CONFIG_IDF_TARGET_ESP32
+  #define PIN_TEMP       4     // ELEGOO 30-pin: DS18B20 data
+  #define PIN_PANEL_ADC  34    // ADC1 only (GPIO 32–39); input-only pin, fine for a divider
+  #define PIN_SDA        21
+  #define PIN_SCL        22
+#else
+  #define PIN_TEMP       -1    // S3: set free GPIOs from the board pinout
+  #define PIN_PANEL_ADC  -1    // S3: ADC1 is GPIO 1–10
+  #define PIN_SDA        -1
+  #define PIN_SCL        -1
+  #if (PIN_TEMP < 0) || (PIN_PANEL_ADC < 0)
+  #error "Set PIN_TEMP and PIN_PANEL_ADC for this board"
+  #endif
 #endif
+#define DAWN_GATE      (PANEL_SENSE && !BENCH)   // gate and dusk logic need a real panel reading
 
 // ---------------- identity ----------------
 // Per-panel settings live in panel_config.h (not in the repo): copy
@@ -85,7 +109,7 @@
 const char* PANEL_ID      = PVA_PANEL_ID;           // also the Wi-Fi name
 const char* AP_PASS       = PVA_AP_PASS;            // "" = open network
 const char* ADMIN_KEY     = PVA_ADMIN_KEY;          // a different key per panel
-const char* FW_VERSION    = "pva-fw-4";
+const char* FW_VERSION    = "pva-fw-5";
 const char* RULES_VERSION = "rules-0-placeholder";  // keep in step with index.html
 
 // ---------------- place ----------------
@@ -177,6 +201,9 @@ bool inExhibition(time_t t) { return exStart && t >= exStart && t < exEnd; }
 
 // ================= sensors =================
 float readPanelV() {
+#if !PANEL_SENSE
+  return 0;                        // no divider fitted: volts are logged as 0
+#endif
   uint32_t mv = 0;
   for (int k = 0; k < 8; k++) mv += analogReadMilliVolts(PIN_PANEL_ADC);
   return (mv / 8.0f) / 1000.0f * DIVIDER;
@@ -249,12 +276,14 @@ void sample() {
   time_t now = nowEpoch();
   if (now && !twilight && now >= sunsetFor(now)) enterTwilight();
 
+#if DAWN_GATE                        // dusk close needs a real panel reading
   if (!closed && nowV < DUSK_V) {
     if (++lowCount >= DUSK_SAMPLES) { writeRecord(); closed = true; }
   } else if (nowV >= DUSK_V) {
     lowCount = 0;
   }
   if (closed && nowV > DAWN_V) { closed = false; lowCount = 0; lastRecord = millis(); }
+#endif
 }
 
 // ================= raw archive (once, at boot) =================
@@ -511,10 +540,12 @@ void setup() {
   }
 #endif
 
+#if PANEL_SENSE
   analogSetPinAttenuation(PIN_PANEL_ADC, ADC_11db);
-#if !BENCH
-  dawnGate();                          // radio stays off until the panel can carry it
 #endif
+#if DAWN_GATE
+  dawnGate();                          // radio stays off until the panel can carry it
+#endif                                 // (without the divider, the supercap smooths the start instead)
 
   // same day, short gap: a stutter or a cloud, not a new day -> continue the session
   uint32_t prev = prefs.getUInt("session", 0);

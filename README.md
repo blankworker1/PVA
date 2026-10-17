@@ -26,7 +26,8 @@ docs/
   index.html                  the map — the only part published on the website
 firmware/panel_page_server/
   panel_page_server.ino       ESP32 firmware
-  partitions.csv              16 MB flash layout (~9.9 MB for pages and data)
+  partitions.csv              4 MB flash layout for the ELEGOO ESP32 (~2 MB for pages and data)
+  partitions_16mb.csv         16 MB layout for an ESP32-S3 (~9.9 MB)
   panel_config.example.h      template for per-panel settings
   data/                       copied into each panel's flash
     index.html                the panel page: today's dial, gallery of past days, live data
@@ -48,17 +49,28 @@ Pins are placed on site: open the map with `?edit` after the address, drag the p
 ## Preparing a panel
 
 1. **Settings.** Copy `panel_config.example.h` to `panel_config.h` and set the panel's Wi-Fi name (`panel-01` … `panel-09`) and a long, unique admin key. `panel_config.h` is ignored by git; keep the keys somewhere safe.
-2. **Pins.** Set `PIN_PANEL_ADC` and `PIN_TEMP` in the firmware from the board's pinout (it will not compile until you do).
+2. **Build stage.** Set the three switches at the top of the firmware (see the table below). Pins are preset for the ELEGOO 30-pin board; on an ESP32-S3, set them by hand.
 3. **Media.** Edit `data/media/title.txt` (panel name) and `data/media/map.txt` (map address).
-4. **Build.** Arduino IDE, ESP32 core 3.x; board ESP32S3 Dev Module, Flash 16 MB, PSRAM OPI; libraries OneWire, DallasTemperature, RTClib. `partitions.csv` in the sketch folder sets the flash layout.
+4. **Build.** Arduino IDE, ESP32 core 3.x; libraries OneWire, DallasTemperature, RTClib. ELEGOO: board *ESP32 Dev Module*, Flash 4 MB, Partition Scheme *Custom* (uses `partitions.csv` in the sketch folder). ESP32-S3: board *ESP32S3 Dev Module*, Flash 16 MB, PSRAM OPI, and rename `partitions_16mb.csv` to `partitions.csv`.
 5. **Flash.** Erase all flash first (essential on any board that ever held keys), upload the firmware, then upload `data/` with the LittleFS uploader.
 6. **Set up on site.** Join the panel's Wi-Fi, open `http://192.168.4.1/admin.html`, enter the key, set the clock from your phone and set the exhibition's first and last day.
 
-For desk testing on USB power, set `BENCH 1` in the firmware (skips the dawn gate); set it back to `0` before installing.
+| Stage | Hardware | `BENCH` | `PANEL_SENSE` | `USE_RTC` |
+| --- | --- | --- | --- | --- |
+| 1, bench | ESP32 on USB, temperature probe | 1 | 0 | 0 |
+| 1, panel | + panel, buck converter, supercapacitor | 0 | 0 | 0 |
+| 2, full | + voltage divider, DS3231 clock, protection | 0 | 1 | 1 |
+| 2+ | + sun sensor (MOSFET, shunt, INA180) | firmware support still to come | | |
+
+Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the supercapacitor smooths the start, and the board simply runs until the light fails. Without the clock (`USE_RTC 0`), the first visitor's phone sets the time each day.
 
 ## Hardware per panel
 
-PV panel (≈36 V open-circuit) · reverse-polarity diode · LM2596HV buck converter set to 5.0 V (60 V input; check its catch diode is rated 60 V) · SMAJ5.0A TVS across 5 V · ESP32-S3 N16R8 · DS18B20 temperature probe + 4.7 kΩ · DS3231 clock module · 100 kΩ / 5.6 kΩ divider + 100 nF. To add for the agreed sun rule: logic-level MOSFET (≥60 V, ≥20 A), shunt resistor, INA180 current-sense amplifier.
+**Stage 1:** 36 V 180 W PV panel · DC-DC buck converter (8–60 V in), set to exactly 5.0 V with a multimeter **before** connecting anything · 5.5 V 4 F supercapacitor across the 5 V output (in the shaded box: it ages fast in heat) · ELEGOO ESP32 30-pin on a screw-terminal breakout · DS18B20 waterproof probe on the panel back, data on GPIO 4, 4.7 kΩ from GPIO 4 to 3.3 V.
+
+**Stage 2 adds:** fuse and reverse-polarity diode on the panel side · SMAJ5.0A TVS diode across 5 V · panel-voltage divider 100 kΩ / 5.6 kΩ + 100 nF into GPIO 34 (must be GPIO 32–39: the other analog pins stop working with Wi-Fi on) · DS3231 clock module on GPIO 21/22.
+
+**For the sun rule:** logic-level MOSFET (≥60 V, ≥20 A), shunt resistor, INA180 current-sense amplifier.
 
 ## The dial (rules v1, draft)
 
