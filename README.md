@@ -34,6 +34,8 @@ firmware/panel_page_server/
     admin.html                admin page: status, clock, exhibition dates, raw data download
     media/title.txt           this panel's name
     media/map.txt             the map's web address
+hardware/
+  SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations)
   sample_a4.py                A4 sample sheet, invented data
@@ -65,6 +67,8 @@ Pins are placed on site: open the map with `?edit` after the address, drag the p
 Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the supercapacitor smooths the start, and the board simply runs until the light fails. Without the clock (`USE_RTC 0`), the first visitor's phone sets the time each day.
 
 ## Hardware per panel
+
+Each panel is also a vertical sundial, mounted vertical and facing due south: see [hardware/SUNDIAL.md](hardware/SUNDIAL.md) for the gnomon, the drilling template, the installation and the noon-shadow wall test.
 
 **Stage 1:** 36 V 180 W PV panel · DC-DC buck converter (8–60 V in), set to exactly 5.0 V with a multimeter **before** connecting anything · 5.5 V 4 F supercapacitor across the 5 V output (in the shaded box: it ages fast in heat) · ELEGOO ESP32 30-pin on a screw-terminal breakout · DS18B20 waterproof probe on the panel back, data on GPIO 4, 4.7 kΩ from GPIO 4 to 3.3 V.
 
