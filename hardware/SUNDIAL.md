@@ -135,7 +135,7 @@ Between these dates it changes by at most a minute or two per week. For any othe
 
 ## What vertical mounting means for the data
 
-- **The sun reaches a vertical south face for fewer hours in summer.** From 6:00 to 18:00 solar time only at the equinoxes. On 21 June the sun reaches the face only from about 8:00 to 16:00 solar time (about 9:30 to 17:30 by the clock); before and after, it is behind the panel. So in June each ring's first and last three and a half hours can never be sunny. Whether those sections print blue like shade, or as bare paper, is an open question for the dial rules.
+- **The sun reaches a vertical south face for fewer hours in summer.** From 6:00 to 18:00 solar time only at the equinoxes. On 21 June the sun reaches the face only from about 8:00 to 16:00 solar time (about 9:30 to 17:30 by the clock); before and after, it is behind the panel. So in June each ring's first and last three and a half hours can never be sunny, and print blue: in the dial, blue simply means this panel was not in the sun, for whatever reason.
 - **Because every panel faces exactly south,** this is the same on all nine, and any difference between their dials comes purely from place.
 - **Summer noon sun strikes the glass steeply,** so a vertical panel gives roughly a third of its rated power at noon: still far more than the board needs. The sun rule is calibrated against each panel's own clear-noon current, so it is unaffected.
 - **The gnomon's shadow crosses the cells** and causes a small, regular dip in the panel's current each day, too small to change a section's colour.

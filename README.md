@@ -79,7 +79,7 @@ Each panel is also a vertical sundial, mounted vertical and facing due south: se
 ## The dial (rules v1, draft)
 
 - **Time:** solar noon at the top; 12° per hour; Bosa's solstice day (15 h 03 m) spans 180°, shorter days proportionally less.
-- **Sun:** a ring of 15-minute solar sections, ochre for direct sun, blue for shade, from a short-circuit current reading (above a third of the panel's clear-noon current = sun).
+- **Sun:** a ring of 15-minute solar sections, ochre when this panel is in direct sun, blue when it is not (shade, cloud, or the sun behind the panel), from a short-circuit current reading (above a third of the panel's clear-noon current = sun).
 - **Heat:** a red line rising from the axis, the panel's warming since sunrise; +40 °C reaches the ring, with no upper limit.
 - **Presence:** one black dot per solar hour, for visitors in that hour: small 1–5, medium 6–10, large 11+.
 - **Seal:** the black horizon line; nothing after sunset enters the dial.
