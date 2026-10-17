@@ -11,3 +11,6 @@ tools/*.png
 tools/*.svg
 __pycache__/
 .DS_Store
+
+# keep the reference sample sheet
+!tools/pva_sample_a4.pdf
