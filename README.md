@@ -47,6 +47,7 @@ texts/
   pva_poster_pv_mockup.pdf    the wall version: 63 dials cut as solar cells on black (and .it.pdf)
   slow-art-sun-record.md      Slow Art: Sun Record, a year of Campbell–Stokes sunshine cards in 14 frames, plus sun-drawing workshops
 hardware/
+  CARRIER.md                  the carrier board: everything factory-fitted except the ESP32 and buck converter
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations)
@@ -160,9 +161,9 @@ Each panel is also a vertical sundial, mounted vertical and facing due south: se
 
 **Stage 1:** 36 V 180 W PV panel · DC-DC buck converter (8–60 V in), set to exactly 5.0 V with a multimeter **before** connecting anything · 5.5 V 4 F supercapacitor across the 5 V output (in the shaded box: it ages fast in heat) · ELEGOO ESP32 30-pin on a screw-terminal breakout · DS18B20 waterproof probe on the panel back, data on GPIO 4, 4.7 kΩ from GPIO 4 to 3.3 V.
 
-**Stage 2 adds:** fuse and reverse-polarity diode on the panel side · SMAJ5.0A TVS diode across 5 V · panel-voltage divider 100 kΩ / 5.6 kΩ + 100 nF into GPIO 34 (must be GPIO 32–39: the other analog pins stop working with Wi-Fi on) · DS3231 clock module on GPIO 21/22.
+**Stage 2 adds** (or the carrier board in `hardware/CARRIER.md`, which fits all of this): fuse and reverse-polarity diode on the panel side · SMAJ5.0A TVS diode across 5 V · panel-voltage divider 100 kΩ / 5.6 kΩ + 100 nF into GPIO 34 (must be GPIO 32–39: the other analog pins stop working with Wi-Fi on) · DS3231 clock module on GPIO 21/22.
 
-**Sun sensor:** logic-level N-MOSFET (≥60 V, ≥20 A) across the panel, on the panel side of the diode, gate on GPIO 25 (100 Ω series, 10 kΩ pull-down) · 5 mΩ shunt in its source leg · INA180A1 (gain 20) across the shunt, on 3.3 V, output to GPIO 35. Every 10 s the panel is shorted for about a millisecond and its short-circuit current read; the supercapacitor carries the board through the pulse. If the shunt or gain differ, change `SHUNT_OHM` and `SENSE_GAIN`.
+**Sun sensor:** logic-level N-MOSFET (≥60 V, ≥20 A) directly across the panel terminals, before the fuse and the diode (the short-circuit current must not run through the fuse), gate on GPIO 25 (100 Ω series, 10 kΩ pull-down) · 5 mΩ shunt in its source leg · INA180A1 (gain 20) across the shunt, on 3.3 V, output to GPIO 35. Every 10 s the panel is shorted for about a millisecond and its short-circuit current read; the supercapacitor carries the board through the pulse. If the shunt or gain differ, change `SHUNT_OHM` and `SENSE_GAIN`.
 
 ## The dial (rules v1, draft)
 

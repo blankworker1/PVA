@@ -1,0 +1,161 @@
+# PVA carrier board — specification v1
+
+One small board per panel. It carries everything except the ESP32 and the buck converter, which plug in or wire on.
+Every part on the board is fitted by the board maker; the builder only plugs in, screws down and fits a coin cell.
+
+> Status: specification for the board designer, not yet drawn. v1 is also the bench test of the sun sensor,
+> so it carries test points and options. Order 5 for v1; fix, then order 10 of v2.
+
+## Decisions
+
+| Decision | Choice |
+| --- | --- |
+| Board drawn by | A freelancer in KiCad, from this document |
+| ESP32 | ELEGOO ESP32 30-pin (USB-C) dev board, **plugged into two 1 × 15 female header sockets** (removable) |
+| Buck converter | ANGEEK 8–60 V module, **beside the board**, joined by 4 short wires (screw terminal to screw terminal) |
+| Clock | DS3231 chip **on the board**, CR2032 holder, **no charging circuit** |
+| Supercapacitors | Two 2.7 V 10 F radial cells (10 × 25 mm, 5 mm lead pitch), **in screw terminals**, fitted by the builder |
+| Enclosure | Standard IP65 junction box, about 150 × 110 × 70 mm, cable glands for panel and probe |
+| Board | 2 layers, **2 oz copper**, about 100 × 80 mm, 4 × M3 mounting holes, black solder mask, white silkscreen |
+| Maker | JLCPCB or PCBWay, standard assembly (SMD) + through-hole assembly for the terminals |
+
+## Block diagram
+
+```
+ panel + ──┬────────────── F1 1 A ──┬── D1 ──► J2 BUCK IN +      J3 BUCK OUT + ──► 5V rail ──► ESP32 VIN
+           │                         │                                              │
+           Q1 sun MOSFET             R1/R2 divider ─► GPIO 34               C1+C2 supercaps (series)
+           │                         │                                       TVS, 470 µF, LED
+           R_SH 5 mΩ ─► INA180 ─► GPIO 35
+           │
+ panel − ──┴──────────── GND ──────────────────────► J2 BUCK IN −      J3 BUCK OUT − ──► GND
+
+ ESP32 3V3 ──► 3V3 rail ──► DS3231 + CR2032, DS18B20 terminals (GPIO 4), INA180 supply, I2C header
+ GPIO 25 ──► jumper JP1 ──► gate driver U3 (from 5 V) ──► Q1 gate
+```
+
+**Important: the sun MOSFET sits directly across the panel terminals, before the fuse.** The panel is a current source:
+its short-circuit current (about 5–6 A, check the label) is safe to short for a millisecond, but it must not flow
+through a small fuse every 10 seconds. The fuse protects only the board side, so it can be small.
+
+## Circuit, section by section
+
+### 1. Panel input and sun sensor
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| J1 | Screw terminal, 2-way, high current | ≥ 15 A, accepts 4–6 mm² (or ferrules), 7.62–10 mm pitch | Board edge; labelled `PANEL +` `PANEL −` |
+| Q1 | N-MOSFET | V_DS ≥ 60 V, I_D ≥ 20 A, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, DPAK/D2PAK or PowerPAK | Drain on `PANEL +`, source on R_SH top |
+| R_SH | Shunt resistor | 5 mΩ, 1 %, 2512, ≥ 2 W | Between Q1 source and GND |
+| R_SH2 | Footprint only | 2512, parallel to R_SH | Option: two 10 mΩ in parallel instead of one 5 mΩ |
+| U2 | Current-sense amplifier INA180A1 | Gain 20 V/V, SOT-23-5 | Supply 3V3 (output then can never exceed 3.3 V); IN+ to R_SH top, IN− to R_SH bottom by **Kelvin traces** |
+| C6 | Capacitor | 100 nF, 0603 | U2 supply decoupling |
+| R6, C7 | RC on U2 output | 1 kΩ + 10 nF | Light filter into GPIO 35; time constant 10 µs, well inside the 400 µs settle |
+| U3 | Low-side gate driver, non-inverting | Supply 4.5–18 V, input threshold works from 3.3 V (TC4427A / MCP1416 class), SOT-23-5 or SOIC-8 | Powered from 5V rail, so Q1 gets 5 V gate drive |
+| R4 | Gate resistor | 10 Ω, 0603 | U3 output to Q1 gate |
+| R5 | Pull-down | 10 kΩ, 0603 | U3 input to GND: Q1 stays off while the ESP32 boots |
+| JP1 | 2-pin header + jumper | | GPIO 25 to U3 input. **Remove the jumper to disable the sun sensor** |
+
+Scale: 6 A × 5 mΩ = 30 mV × 20 = 0.6 V at GPIO 35, i.e. 0.1 V per amp, as the firmware expects (`SHUNT_OHM 0.005`, `SENSE_GAIN 20`).
+
+### 2. Board side of the panel: fuse, diode, divider
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| F1 | Fuse | 1 A slow-blow, 1206/1812 SMD or 5 × 20 mm holder | After the Q1 node, before D1 |
+| D1 | Rectifier diode | 1000 V 3 A, SMC (S3M class) | Reverse-polarity protection; stops Q1 pulses draining the buck's input capacitor |
+| J2 | Screw terminal, 2-way | 5.0 mm pitch, ≥ 5 A | `BUCK IN +` (after D1), `BUCK IN −` (GND) |
+| R1 | Resistor | 100 kΩ, 1 %, 0805 | From F1/D1 node |
+| R2 | Resistor | 5.6 kΩ, 1 %, 0603 | To GND |
+| C5 | Capacitor | 100 nF, 0603 | Across R2; divider to GPIO 34 (45 V → 2.4 V, 60 V → 3.2 V) |
+
+### 3. 5 V rail
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| J3 | Screw terminal, 2-way | 5.0 mm pitch | `BUCK OUT +` `BUCK OUT −`, from the buck set to 5.0 V |
+| J6, J7 | Screw terminals, 2-way | 5.0 mm pitch | One per supercap cell, in series: J6 from 5V to MID, J7 from MID to GND. Silkscreen the **−** side (stripe) |
+| R7, R8 | Balancing resistors | 10 kΩ, 0805 | One across each cell |
+| D2 | TVS | 5.0 V standoff (SMAJ5.0A) | Across 5V rail |
+| C3 | Electrolytic or polymer | 470 µF, 10 V, low ESR | Across 5V rail, close to ESP32 VIN |
+| C4 | Capacitor | 100 nF, 0603 | Across 5V rail |
+| LED1, R9 | Green LED + resistor | 10 kΩ (about 0.3 mA) | "5 V present"; dim on purpose |
+
+### 4. ESP32 socket
+
+Two 1 × 15 female headers, 2.54 mm pitch. **Row spacing: measure the actual ELEGOO board** (30-pin boards come in
+two widths) and send the measurement to the designer. Pin positions from the ELEGOO 30-pin pinout.
+
+| ESP32 pin | Net |
+| --- | --- |
+| VIN (5V) | 5V rail |
+| GND (both) | GND |
+| 3V3 | 3V3 rail (the dev board's own regulator feeds the board's 3.3 V parts) |
+| GPIO 4 | DS18B20 data |
+| GPIO 21 / 22 | I2C SDA / SCL (DS3231, expansion header) |
+| GPIO 25 | Sun MOSFET gate (via JP1 and U3) |
+| GPIO 34 | Panel voltage divider |
+| GPIO 35 | Sun current (INA180 output) |
+
+Keep copper and parts away from under the ESP32's antenna end; place the antenna at the board edge.
+The USB-C socket must stay reachable for programming with the board in the box.
+
+### 5. Clock
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| U1 | RTC DS3231SN (SOIC-16W) | | V_CC 3V3; INT/SQW and 32K to test pads only |
+| BT1 | CR2032 holder, SMD | | V_BAT. **No charging resistor or diode** |
+| C1x | Capacitor | 100 nF, 0603 | U1 decoupling |
+| R10, R11 | I2C pull-ups | 4.7 kΩ, 0603 | SDA, SCL to 3V3 |
+
+If the DS3231SN is not in stock at the maker, an RV-3028-C7 is a drop-in alternative in function (needs a firmware library change).
+
+### 6. Temperature probes
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| J4, J5 | Screw terminals, 3-way | 3.5 mm pitch | Wired in parallel: `3V3` `DATA` `GND` (red, yellow, black). J5 is for an optional second probe |
+| R12 | Pull-up | 4.7 kΩ, 0603 | DATA to 3V3, next to J4 |
+| R12b | Footprint only | 0603 | Second pull-up value, if a longer cable needs a stronger pull-up |
+| R13 | Series resistor | 100 Ω, 0603 | DATA to GPIO 4 |
+| D3 | ESD diode | 3.3 V, SOD-323 | DATA to GND, at the terminal |
+
+### 7. Expansion and test
+
+- **I2C header:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL.
+- **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
+- **Silkscreen:** "PVA carrier v1", the net name at every terminal, the supercap polarity, and "JP1: remove = sun sensor off".
+
+## Layout rules for the designer
+
+1. **The sun loop is the only high-current path:** `PANEL +` → Q1 → R_SH → `PANEL −`. Keep it short and wide (copper pour, ≥ 3 mm on 2 oz), on one side, with J1, Q1 and R_SH close together.
+2. **Kelvin connections:** U2's inputs run as two thin, parallel traces from the inner ends of R_SH's pads; U2 sits right next to R_SH.
+3. **Star ground** at R_SH's ground end: the sun loop returns there; signal ground joins there, not through the loop.
+4. **Gate:** U3 next to Q1, gate trace short.
+5. **Edges:** J1 (panel) and J4/J5 (probe) on one edge, towards the cable glands; J2/J3 towards the buck module; ESP32 antenna at the opposite edge, USB-C reachable.
+6. **Spacing:** panel voltage up to 60 V; normal 0.5 mm clearances are plenty.
+7. **Mounting:** 4 × M3 holes for standoffs in the box; keep 3 mm clear round them.
+
+## Parts the builder fits (no soldering)
+
+| Part | Per board |
+| --- | --- |
+| ELEGOO ESP32 30-pin | 1, plugged into the sockets |
+| ANGEEK buck converter, set to exactly 5.0 V first | 1, wired to J2 and J3 |
+| 2.7 V 10 F supercap | 2, into J6 and J7, stripe to **−** |
+| CR2032 | 1 |
+| DS18B20 probe | 1 (2 optional), into J4 (J5) |
+| Jumper on JP1 | 1, once the sun sensor is to be used |
+
+## Firmware
+
+No change needed: the pins and scale match firmware draft 6 (`SHUNT_OHM 0.005`, `SENSE_GAIN 20`, GPIO 4/21/22/25/34/35).
+The gate driver is non-inverting, so GPIO 25 high still means "short the panel".
+
+## v1 bench test, before ordering v2
+
+1. Power the board from a bench supply into `BUCK IN` (no panel): check 5V and 3V3, the LED, the clock (set from the admin page, unplug, plug back in) and the probe.
+2. Connect a real panel, jumper JP1 off: check `VDIV` against a multimeter on the panel voltage.
+3. Jumper on, clear sun near noon: check `ISENSE` on an oscilloscope or by the firmware's `isc` reading against a multimeter's short-circuit current reading of the same panel.
+4. Run a full day with `BENCH 0`, then fix anything in v2.
