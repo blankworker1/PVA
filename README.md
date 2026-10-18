@@ -35,6 +35,9 @@ firmware/panel_page_server/
     admin.html                admin page: status, clock, exhibition dates, sun-sensor calibration, raw data download
     media/title.txt           this panel's name
     media/map.txt             the map's web address
+texts/
+  introduction.en.md          the exhibition introduction and the Heliotropism back story (draft)
+  introduction.it.md          the same in Italian
 hardware/
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
