@@ -67,6 +67,64 @@ Pins are placed on site: open the map with `?edit` after the address, drag the p
 
 Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the supercapacitor smooths the start, and the board simply runs until the light fails. Without the clock (`USE_RTC 0`), the first visitor's phone sets the time each day.
 
+## Installation: the admin checklist (per panel)
+
+**In the workshop**
+
+1. **Settings.** `panel_config.h` from the example: Wi-Fi name (`panel-01` … `panel-09`) and a long, unique admin key, recorded somewhere safe.
+2. **Media.** `title.txt` (panel name) and `map.txt` (map address).
+3. **Stage switches** to match the hardware fitted. `BENCH` back to `0` before installing.
+4. **Flash.** Arduino IDE, ESP32 Dev Module, Custom partitions: erase all flash, upload the firmware, upload `data/` with the LittleFS uploader.
+5. **Power chain.** Buck converter set to exactly 5.0 V before anything is connected; then fuse, diode, supercapacitor, TVS.
+6. **Sensors.** Probe on GPIO 4 · divider on GPIO 34 · DS3231 on GPIO 21/22 · sun sensor gate on GPIO 25, amplifier on GPIO 35.
+7. **Bench test.** On USB: set the clock, set the exhibition dates to today, check status (clock module fitted, probe found, voltage plausible), watch a dial form.
+8. **Frame.** Drill from the template; fit the gnomon at 50°, the 13 numbered hour brackets and the stand-off brackets ([hardware/SUNDIAL.md](hardware/SUNDIAL.md)).
+
+**On site**
+
+9. **Permission** from the wall owner or the Comune.
+10. **Wall test.** Compass for a first reading, then the noon-shadow test: which edge packs out, and by how much.
+11. **Mount.** Cut the stand-offs, hang, spirit level against the glass; box on the deep side, probe on the panel back.
+12. **Wall plate** beside the panel: its number and the QR code.
+13. **Solar-noon check.** The shadow falls on the 12 bracket; adjust the stand-offs if not.
+14. **Admin page.** Join the panel's Wi-Fi, open `http://192.168.4.1/admin.html`, enter the key, set the clock and the exhibition dates.
+15. **Calibrate the sun sensor** on a clear day near solar noon, before the run starts. Uncalibrated, every section draws as an outline.
+16. **Map pin.** Map with `?edit`, drag the pin, copy the positions into `docs/index.html`, push.
+
+**During the run**
+
+17. **Daily round.** Each panel's status and a raw-data download. On an iPhone use Safari, not the Wi-Fi pop-up, which cannot save files.
+18. **Upkeep.** Clean the glass; replace a failed board or panel. A day lost shows in the gallery as the black outline.
+
+**After the run**
+
+19. Final download from every panel → canonical sheet and separations → print → panels down.
+
+## The visitor's experience
+
+1. A flyer or a wall plate: scan the QR code.
+2. The map opens on mobile data: the route, nine pins, the visitor's own position, which panels are likely awake now.
+3. At a pin: a panel, which is also a sundial telling solar time.
+4. Join the open Wi-Fi `panel-0N`; the page opens by itself. No internet is involved.
+5. Today's dial forming live, or sealed after sunset. Tap it for the day's facts.
+6. Below: the gallery of earlier days; a day the panel did not wake is the black outline.
+7. A strip at the bottom: panel temperature, time awake, sunset.
+8. Leave the Wi-Fi, back to the map, on to the next panel.
+
+The visitor's phone counts once per solar hour as a dot on the dial, never identified.
+
+## To do
+
+- [ ] **Import script:** turn an admin download into tile data for `pva_rules.py`, the canonical sheet and the website page.
+- [ ] **Separations script:** one file per ink for the screen print.
+- [ ] **Website page** for the canonical sheet, filled after each day's round.
+- [ ] **Calibration** of every panel before the run; prove the step on the pilot.
+- [ ] **"How to read the dial" key** in the panel page's info overlay, as well as on the flyer and website.
+- [ ] **Italian and English** on the panel page, info overlay and map.
+- [ ] **"Stay connected"** wording on the flyer or wall plate: some phones warn about or drop a network with no internet.
+- [ ] **After the last day:** decide whether the panel page closes or changes once the run ends.
+- [ ] **First compile and bench test** of firmware draft 6.
+
 ## Hardware per panel
 
 Each panel is also a vertical sundial, mounted vertical and facing due south: see [hardware/SUNDIAL.md](hardware/SUNDIAL.md) for the gnomon, the drilling template, the installation and the noon-shadow wall test.
