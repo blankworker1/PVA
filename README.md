@@ -44,6 +44,7 @@ texts/
   pva_sample_a4.it.pdf        the same in Italian
   pva_poster_mockup.pdf       A4 mock-up of the full print, 63 tiles (invented data), made by tools/poster_mockup.py
   pva_poster_mockup.it.pdf    the same in Italian
+  pva_poster_pv_mockup.pdf    the wall version: 63 dials cut as solar cells on black (and .it.pdf)
 hardware/
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
