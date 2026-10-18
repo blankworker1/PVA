@@ -106,7 +106,10 @@ the design is sent for manufacture. Pin positions from the ELEGOO 30-pin pinout.
 | GPIO 16 / 17 | UART header J10 (RX2 / TX2) |
 | Not brought out | GPIO 1 / 3 (USB serial), 2 / 12 / 15 (boot strapping pins; 2 also drives the dev board's LED) |
 
-Keep copper and parts away from under the ESP32's antenna end; place the antenna at the board edge.
+**Antenna keep-out (important: Wi-Fi is the whole visitor experience).** The ESP32 module's printed antenna sits at the
+end of the dev board, past the last pins. Under that area, on **both layers**: no copper pour, no traces, no parts.
+Best: place the socket so the antenna end **overhangs the board edge**, or cut a slot in the board outline under it.
+The dev board sits about 8–10 mm above the carrier on its sockets, which helps, but the rule still applies.
 The USB-C socket must stay reachable for programming with the board in the box.
 
 ### 5. Clock
@@ -192,7 +195,8 @@ add-on use that spare power through its own converter, switched by the relay out
 2. **Kelvin connections:** U2's inputs run as two thin, parallel traces from the inner ends of R_SH's pads; U2 sits right next to R_SH.
 3. **Star ground** at R_SH's ground end: the sun loop returns there; signal ground joins there, not through the loop.
 4. **Gate:** U3 next to Q1, gate trace short.
-5. **Edges:** J1 (panel) and J4/J5 (probe) on one edge, towards the cable glands; J2/J3 towards the buck module; ESP32 antenna at the opposite edge, USB-C reachable.
+5. **Edges:** J1 (panel) and J4/J5 (probe) on one edge, towards the cable glands; J2/J3 towards the buck module; ESP32 antenna at the opposite edge, overhanging or over a cut-out, USB-C reachable.
+8. **In the box:** mount the box at the panel's edge with the antenna end pointing away from the panel (the aluminium frame and the cells shield the signal), and keep the buck module and cables away from the antenna end. Check the Wi-Fi range on the pilot from where visitors will stand.
 6. **Spacing:** panel voltage up to 60 V; normal 0.5 mm clearances are plenty.
 7. **Mounting:** 4 × M3 holes for standoffs in the box; keep 3 mm clear round them.
 
