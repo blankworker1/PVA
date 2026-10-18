@@ -38,6 +38,7 @@ firmware/panel_page_server/
 texts/
   introduction.en.md          the exhibition introduction and the Heliotropism back story (draft)
   introduction.it.md          the same in Italian
+  print-enquiry.md            the one-page enquiry for the print shop: the print, the proposal, ten questions
 hardware/
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
