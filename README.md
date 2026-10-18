@@ -144,6 +144,11 @@ The visitor's phone counts once per solar hour as a dot on the dial, never ident
 - [ ] **First compile and bench test** of firmware draft 6.
 - [ ] **The girasole:** sunflower variety and sowing in May; a moveable chalkboard and its stand; where it stands on the route.
 
+**Optional**
+
+- [ ] **The wall version** (a second artwork, only if time allows): the 63 dials as solar cells, 210 mm squares with 30 mm corner cuts, 2 mm gaps between columns and 4 mm between rows, on a black board, about 1.95 × 1.96 m. Print on Dispa (3.8 mm all-paper board, UV print and machine cut, Pixartprinting) or on laminated card from a copier; proof first. Mock-up: `texts/pva_poster_pv_mockup.pdf`.
+- [ ] **Exhibition catalogue:** a bound book of the images, about 70 pages, printed on demand (Pixartprinting): the introduction, the 63 dials one per page, the canonical sheet, how to read a dial, the Heliotropist legend. Check the page count fits their binding (often a multiple of 4).
+
 ## Hardware per panel
 
 Each panel is also a vertical sundial, mounted vertical and facing due south: see [hardware/SUNDIAL.md](hardware/SUNDIAL.md) for the gnomon, the drilling template, the installation and the noon-shadow wall test.
