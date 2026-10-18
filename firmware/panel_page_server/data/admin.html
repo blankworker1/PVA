@@ -57,6 +57,14 @@
   </section>
 
   <section>
+    <h2>Sun sensor</h2>
+    <p class="note">Once per panel, after installing: on a clear day, within about half an hour of solar noon,
+      with the gnomon's shadow off the cells if you can. The highest reading of the last minute becomes this
+      panel's clear-noon current; a 15-minute section is sun when most of its readings are above a third of it.</p>
+    <button id="calibrate">Calibrate now</button>
+  </section>
+
+  <section>
     <h2>Exhibition</h2>
     <label for="start">First day</label><input id="start" type="date">
     <label for="end">Last day</label><input id="end" type="date">
@@ -100,6 +108,9 @@ async function status() {
       ['Exhibition', s.start ? `${s.start} → ${s.end}` : '<span class="bad">dates not set</span>'],
       ['Sunset today', s.sunset ? fmt(s.sunset).split(' ')[1] : '–'],
       ['Panel voltage', s.volts.toFixed(1) + ' V'],
+      ['Sun current', s.sun_sensor ? (s.isc == null ? '–' : s.isc.toFixed(2) + ' A') : '<span class="note">not fitted</span>'],
+      ['Clear-noon reference', !s.sun_sensor ? '–' : s.iref > 0 ? s.iref.toFixed(2) + ' A (sun above ' + (s.iref / 3).toFixed(2) + ' A)' : '<span class="bad">not calibrated</span>'],
+      ['Phones this solar hour', s.visitors_hour],
       ['Temperature probe', s.temp_sensor ? (s.temp == null ? '–' : s.temp.toFixed(1) + '°') : '<span class="bad">not found</span>'],
       ['Art days recorded', s.art_days],
       ['Raw days (power-ons)', s.raw_sessions + ' + today'],
@@ -117,6 +128,12 @@ $('#refresh').onclick = status;
 
 $('#clock').onclick = async () => {
   try { await call('/admin/clock?t=' + Date.now(), 'POST'); say('Clock set.', 'ok'); status(); }
+  catch (e) { say(e.message, 'bad'); }
+};
+
+$('#calibrate').onclick = async () => {
+  if (!confirm('Calibrate the sun sensor now? Only on a clear day, near solar noon.')) return;
+  try { const r = await call('/admin/calibrate', 'POST'); say('Clear-noon current set to ' + (await r.text()) + ' A.', 'ok'); status(); }
   catch (e) { say(e.message, 'bad'); }
 };
 

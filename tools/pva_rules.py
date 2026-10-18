@@ -63,7 +63,7 @@ def local(ts):
 def tile_svg(d: date, data, x0, y0, size, uid):
     """
     data = None for a failed day, otherwise:
-      sun:      dict {section k: True/False}, 15-minute solar sections from solar noon
+      sun:      dict {section k: True/False (or 1/0; -1/missing = unknown)}, 15-minute solar sections from solar noon
       temps:    list of (ts, °C) panel readings
       visitors: dict {solar hour offset k: visitors in the hour ending there}
     """
@@ -95,7 +95,8 @@ def tile_svg(d: date, data, x0, y0, size, uid):
     # 1. sun ring: 15-minute sections in solar time, counted from solar noon.
     #    data["sun"][k] is True if most short-circuit readings in section k were above
     #    a third of the panel's clear-noon current. Section k runs noon+k·15 min to noon+(k+1)·15 min.
-    #    Missing sections count as shade. Neighbours of the same colour are merged.
+    #    Unknown sections (no reading, sensor not calibrated) are left as a thin black outline,
+    #    as on the panel page. Neighbours of the same colour are merged.
     SEC = 15 * 60
     k_first = math.floor((rise - noon) / SEC)
     k_last = math.ceil((sset - noon) / SEC) - 1
@@ -103,14 +104,19 @@ def tile_svg(d: date, data, x0, y0, size, uid):
     for k in range(k_first, k_last + 1):
         t0 = max(rise, noon + k * SEC)
         t1 = min(sset, noon + (k + 1) * SEC)
-        col = OCHRE if data["sun"].get(k) else BLUE
+        v = data["sun"].get(k)
+        col = OCHRE if v in (True, 1) else BLUE if v in (False, 0) else None
         if runs and runs[-1][2] == col:
             runs[-1] = (runs[-1][0], t1, col)
         else:
             runs.append((t0, t1, col))
-    segs = [(band(ang(t0), ang(t1), Ri, Ro), col) for t0, t1, col in runs]
+    segs = [(band(ang(t0), ang(t1), Ri, Ro), col) for t0, t1, col in runs if col]
     for path, col in segs:
         out.append(f'<path d="{path}" fill="{col}"/>')
+    for t0, t1, col in runs:
+        if not col:
+            out.append(f'<path d="{band(ang(t0), ang(t1), Ri, Ro)}" fill="none" stroke="{BLACK}" '
+                       f'stroke-width="{G["outline"] * s / 2:.2f}"/>')
 
     # 2. heat: rise since the first reading, time projected onto the axis, no upper limit
     temps = [(t, c) for t, c in data["temps"] if rise <= t <= sset]

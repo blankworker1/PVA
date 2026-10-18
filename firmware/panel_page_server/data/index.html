@@ -16,7 +16,7 @@
   #title { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--mute); margin:0 0 18px; }
 
   /* the day's image */
-  #frame { position:relative; width:100%; aspect-ratio:1; background:#0b0a08; border-radius:2px; overflow:hidden; }
+  #frame { position:relative; width:100%; aspect-ratio:1; background:#F4EFE4; border-radius:2px; overflow:hidden; }
   #big { width:100%; height:100%; display:block; }
   #label { display:flex; align-items:center; gap:8px; margin:12px 0 0; font-size:13px; color:var(--mute);
     font-variant-numeric:tabular-nums; }
@@ -27,7 +27,7 @@
   #infoBtn { margin-left:auto; width:28px; height:28px; border-radius:50%; border:1px solid var(--faint);
     background:transparent; color:var(--fg); font:italic 600 14px/1 Georgia, serif; cursor:pointer; }
   #info { position:absolute; inset:0; display:none; flex-direction:column; justify-content:flex-end; gap:2px;
-    padding:20px; background:linear-gradient(to top, rgba(10,9,7,.92) 55%, rgba(10,9,7,.2));
+    padding:20px; background:rgba(15,14,12,.94);
     font-size:13px; font-variant-numeric:tabular-nums; }
   #info.on { display:flex; }
   #info h2 { margin:0 0 8px; font:400 20px/1.3 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
@@ -43,7 +43,7 @@
   .day { background:none; border:0; padding:0; cursor:pointer; color:var(--mute);
     font:11px/1.3 system-ui, sans-serif; text-align:left; font-variant-numeric:tabular-nums; }
   .day canvas { width:100%; aspect-ratio:1; display:block; border-radius:2px; outline:1px solid transparent;
-    outline-offset:2px; background:#0b0a08; margin-bottom:6px; }
+    outline-offset:2px; background:#F4EFE4; margin-bottom:6px; }
   .day.sel canvas { outline-color:var(--fg); }
   .day.sel { color:var(--fg); }
 
@@ -80,56 +80,103 @@
 <div id="strip">
   <span class="disc" id="disc"></span>
   <span><b id="temp">–</b></span>
-  <span>light <b id="light">–</b></span>
+  <span>awake <b id="light">–</b></span>
   <span id="sunset"></span>
 </div>
 
 <script>
 /* ======================================================================
-   THE RULES — how a day's data becomes its image.
-   PLACEHOLDER: a solargraph-like trace to test the system. To be designed.
-   Fixed scales (not per-day) so days can be compared across the series.
+   THE RULES, version 1 — how a day's data becomes its dial.
+   The same rules as tools/pva_rules.py, which draws the canonical print.
+   All geometry in tile units (tile side = 1). Time is solar time from solar noon.
    ====================================================================== */
-const RULES = 'rules-0-placeholder';      // keep in step with the firmware
-const SCALE = { tMin: 0, tMax: 60, vMax: 45 };
+const RULES = 'rules-1';                   // keep in step with the firmware
+const INK = { paper:'#F4EFE4', ochre:'#E8B33A', red:'#B5452F', blue:'#2E5A78', black:'#1E1D1B' };
+const DEG_PER_MIN = 180 / 903;             // Bosa's solstice day (15 h 03 m) spans 180°
+const HEAT_FULL = 40;                      // °C rise since sunrise that reaches the ring's inner edge
+const VIS_BANDS = [[1, 5, 1], [6, 10, 2], [11, Infinity, 3]];
+const G = { cx:.5, cy:.70, Ri:.30, Ro:.38, Rd:.44, axis:.014, heat:.016, dot_min:.0235, outline:.012 };
+const SEC = 15 * 60;
 
-function render(ctx, S, day, liveNow) {
-  const { rows, rise, set } = day;
-  ctx.fillStyle = '#0b0a08'; ctx.fillRect(0, 0, S, S);
-  const cx = S / 2, cy = S * 0.8, R = S * 0.44;
+function multiply(a, b) {                  // a translucent ink printed over another
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const [x, y] = [p(a), p(b)];
+  return '#' + x.map((v, i) => (v * y[i] / 255 | 0).toString(16).padStart(2, '0')).join('');
+}
 
-  // faint rings: the sky's frame
-  ctx.lineWidth = Math.max(1, S / 400);
-  ctx.strokeStyle = 'rgba(255,236,200,.05)';
-  for (let k = 1; k <= 4; k++) { ctx.beginPath(); ctx.arc(cx, cy, R * k / 4, Math.PI, 2 * Math.PI); ctx.stroke(); }
-  if (!rows.length) return;
+// day = { rise, noon, set, failed, temps:[{e,t}], sun:{k:1|0|-1}, vis:{k:n} }
+function render(ctx, S, day, nowE) {
+  const { rise, noon, set } = day;
+  const cx = G.cx * S, cy = G.cy * S, Ri = G.Ri * S, Ro = G.Ro * S, Rd = G.Rd * S;
+  const ang = t => (t - noon) / 60 * DEG_PER_MIN * Math.PI / 180;      // radians from the top
+  const pol = (r, a) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+  const band = (a0, a1) => {
+    const p = new Path2D(), n = 48;
+    for (let i = 0; i <= n; i++) { const [x, y] = pol(Ro, a0 + (a1 - a0) * i / n); i ? p.lineTo(x, y) : p.moveTo(x, y); }
+    for (let i = 0; i <= n; i++) { const [x, y] = pol(Ri, a1 - (a1 - a0) * i / n); p.lineTo(x, y); }
+    p.closePath(); return p;
+  };
+  const axis = () => { ctx.fillStyle = INK.black; ctx.fillRect(cx - Ro, cy, 2 * Ro, G.axis * S); };
 
-  const t0 = Math.min(rise, rows[0].e), span = Math.max(3600, set - t0);
-  const ang  = e => Math.PI + Math.PI * Math.max(0, Math.min(1, (e - t0) / span));
-  const tn   = t => isFinite(t) ? Math.max(0, Math.min(1, (t - SCALE.tMin) / (SCALE.tMax - SCALE.tMin))) : .4;
-  const vn   = v => Math.max(0, Math.min(1, v / SCALE.vMax));
-  const pt   = r => { const a = ang(r.e), rr = R * (.28 + .72 * tn(r.t)); return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; };
-
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.lineCap = 'round';
-  for (let i = 1; i < rows.length; i++) {
-    const a = rows[i - 1], b = rows[i];
-    if (b.e - a.e > 1800) continue;                     // a gap (cloud, power loss): leave it open
-    const [x1, y1] = pt(a), [x2, y2] = pt(b), f = tn(b.t), v = vn(b.v);
-    ctx.strokeStyle = `rgba(255,${Math.round(150 + 80 * (1 - f))},${Math.round(60 + 90 * (1 - f))},${(.18 + .5 * v).toFixed(3)})`;
-    for (const w of [9, 4, 1.4]) {                     // a soft trace, like light on paper
-      ctx.lineWidth = w * S / 400 * (.5 + v);
-      ctx.globalAlpha = w > 5 ? .18 : w > 2 ? .4 : 1;
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-    }
-  }
-  ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = INK.paper; ctx.fillRect(0, 0, S, S);
+  ctx.lineJoin = 'miter';
 
-  if (liveNow) {                                         // today: where the light is now
-    const [x, y] = pt(liveNow);
-    ctx.fillStyle = 'rgba(255,214,150,.95)';
-    ctx.beginPath(); ctx.arc(x, y, S / 90, 0, 7); ctx.fill();
+  if (day.failed) {                        // a panel that did not wake: bare bones, black only
+    ctx.strokeStyle = INK.black; ctx.lineWidth = G.outline * S;
+    ctx.stroke(band(ang(rise), ang(set))); axis(); return;
+  }
+
+  // 1. sun ring: 15-minute solar sections; ochre in sun, blue not; outline where unknown or still to come
+  const end = nowE && nowE < set ? Math.max(rise, nowE) : set;
+  const kFirst = Math.floor((rise - noon) / SEC), kLast = Math.ceil((set - noon) / SEC) - 1;
+  const runs = [];
+  for (let k = kFirst; k <= kLast; k++) {
+    const t0 = Math.max(rise, noon + k * SEC), t1 = Math.min(set, noon + (k + 1) * SEC);
+    const v = day.sun[k];
+    const col = v === 1 ? INK.ochre : v === 0 ? INK.blue : null;
+    const last = runs[runs.length - 1];
+    if (last && last.col === col) last.t1 = t1; else runs.push({ t0, t1, col });
+  }
+  const segs = runs.filter(r => r.col).map(r => ({ path: band(ang(r.t0), ang(r.t1)), col: r.col }));
+  for (const s of segs) { ctx.fillStyle = s.col; ctx.fill(s.path); }
+  ctx.strokeStyle = INK.black; ctx.lineWidth = G.outline * S * .5;
+  for (const r of runs) if (!r.col && r.t0 < set) ctx.stroke(band(ang(r.t0), ang(r.t1)));
+
+  // 2. heat: the rise since the first reading after sunrise, time projected onto the axis, no upper limit
+  const temps = day.temps.filter(r => r.e >= rise && r.e <= set && isFinite(r.t));
+  if (temps.length) {
+    const base = temps[0].t, line = new Path2D();
+    temps.forEach((r, i) => {
+      const x = cx + Ri * Math.sin(ang(r.e)), y = cy - (r.t - base) / HEAT_FULL * Ri;
+      i ? line.lineTo(x, y) : line.moveTo(x, y);
+    });
+    ctx.lineWidth = G.heat * S; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = INK.red; ctx.stroke(line);
+    for (const s of segs) {                // overprint: where the red crosses the ring, the inks mix
+      ctx.save(); ctx.clip(s.path); ctx.strokeStyle = multiply(s.col, INK.red); ctx.stroke(line); ctx.restore();
+    }
+    ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+  }
+
+  // 3. the axis: the horizon and the seal
+  axis();
+
+  // 4. presence: one dot per solar hour, three sizes by band, none if nobody came
+  ctx.fillStyle = INK.black;
+  for (const [k, n] of Object.entries(day.vis)) {
+    const a = k * 60 * DEG_PER_MIN * Math.PI / 180;
+    if (!n || a < ang(rise) || a > ang(set)) continue;
+    const step = VIS_BANDS.find(([lo, hi]) => n >= lo && n <= hi)[2];
+    const [x, y] = pol(Rd, a);
+    ctx.beginPath(); ctx.arc(x, y, G.dot_min * S * step / 2, 0, 2 * Math.PI); ctx.fill();
+  }
+
+  // today only: a faint mark where the sun is now (not part of the dial)
+  if (nowE && nowE >= rise && nowE < set) {
+    const a = ang(nowE), [x1, y1] = pol(Ro + S * .012, a), [x2, y2] = pol(Rd - S * .02, a);
+    ctx.strokeStyle = 'rgba(30,29,27,.45)'; ctx.lineWidth = Math.max(1, S / 300);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
   }
 }
 /* ====================================================================== */
@@ -145,10 +192,14 @@ const shortDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { day: '
 
 async function getJSON(u) { try { const r = await fetch(u, { cache: 'no-store' }); return r.ok ? r.json() : null; } catch { return null; } }
 async function getText(u) { try { const r = await fetch(u, { cache: 'no-store' }); return r.ok ? (await r.text()).trim() : ''; } catch { return ''; } }
-async function getRows(d) {
-  const t = await getText('/art/' + d + '.csv');
-  return t.split('\n').slice(1).map(l => { const [e, v, tc] = l.split(',').map(parseFloat); return { e, v, t: tc }; })
-          .filter(r => isFinite(r.e) && isFinite(r.v));
+const csv = t => t.split('\n').slice(1).filter(l => l.trim()).map(l => l.split(',').map(parseFloat));
+async function getDay(d) {
+  const [a, b, c] = await Promise.all(['.csv', '.sun.csv', '.vis.csv'].map(x => getText('/art/' + d + x)));
+  const temps = csv(a).filter(r => isFinite(r[0])).map(([e, v, t]) => ({ e, v, t }));
+  const sun = {}, sunRaw = [], vis = {};
+  for (const [k, v, n, above, i] of csv(b)) if (isFinite(k)) { sun[k] = v; sunRaw.push({ k, v }); }
+  for (const [k, n] of csv(c)) if (isFinite(k)) vis[k] = n;
+  return { temps, sun, sunRaw, vis, failed: !temps.length && !sunRaw.length };
 }
 
 // lend the panel this phone's clock, only used if it has none
@@ -170,19 +221,21 @@ function sunTimes(dateStr, lat, lng) {
   const Jnoon = J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
   const w = Math.acos((Math.sin(-0.833 * rad) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
   const Jset = J2000 + 0.0009 + (w + lw) / (2 * Math.PI) + n + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
-  return { rise: fromJ(2 * Jnoon - Jset), set: fromJ(Jset) };
+  return { rise: fromJ(2 * Jnoon - Jset), noon: fromJ(Jnoon), set: fromJ(Jset) };
 }
 
 /* ---------- state ---------- */
 let list = null, now = null, sel = null;
-const cache = {};          // date -> { rows, rise, set }
+const cache = {};          // date -> { rise, noon, set, temps, sun, vis, failed }
 
 function isToday(d) { return list && d === list.today && now && now.epoch < now.sunset; }
 
 async function dayData(d, fresh) {
   if (!cache[d] || fresh) {
     const st = sunTimes(d, list.lat, list.lng);
-    cache[d] = { rows: await getRows(d), rise: st.rise, set: st.set };
+    const known = list.days.includes(d);
+    cache[d] = Object.assign(st, known ? await getDay(d) : { temps: [], sun: {}, sunRaw: [], vis: {}, failed: true });
+    if (isToday(d)) cache[d].failed = false;           // still forming
   }
   return cache[d];
 }
@@ -200,8 +253,7 @@ async function show(d, fresh) {
   const day = await dayData(d, fresh);
   const cv = $('#big'), S = sizeCanvas(cv, cv.clientWidth);
   const live = isToday(d);
-  const liveNow = live && now.epoch ? { e: now.epoch, v: now.v, t: now.t } : null;
-  render(cv.getContext('2d'), S, day, liveNow);
+  render(cv.getContext('2d'), S, day, live ? now.epoch : 0);
 
   const n = dayDiff(list.start, d) + 1, of = dayDiff(list.start, list.end) + 1;
   $('#dot').className = live ? 'live' : '';
@@ -211,27 +263,44 @@ async function show(d, fresh) {
 }
 
 function writeInfo(d, day, n, of, live) {
-  const r = day.rows, ts = r.map(x => x.t).filter(isFinite);
-  const first = r.length ? r[0].e : null, last = r.length ? r[r.length - 1].e : null;
+  const ts = day.temps.map(x => x.t).filter(isFinite);
+  const sunny = day.sunRaw.filter(x => x.v === 1).map(x => x.k);
+  const known = day.sunRaw.some(x => x.v !== -1);
+  const secT = k => Math.max(day.rise, day.noon + k * SEC);
+  const visits = Object.values(day.vis).reduce((a, b) => a + b, 0);
   const row = (k, v) => `<div class="row"><span>${k}</span><b>${v}</b></div>`;
   $('#info').innerHTML =
     `<h2>Day ${n} of ${of}<br>${longDate(d)}</h2>` +
-    row('First light on the panel', first ? hhmm(first) : '–') +
-    row(live ? 'Still forming' : 'Last light on the panel', last ? hhmm(last) : '–') +
-    row('Hours of light', first ? hm(last - first) : '–') +
-    row('Panel temperature', ts.length ? `${Math.min(...ts).toFixed(0)}° – ${Math.max(...ts).toFixed(0)}°` : '–') +
-    row(live ? 'Sealed at sunset' : 'Sealed at sunset', hhmm(day.set)) +
+    (day.failed && !live ? row('The panel did not wake', '–') :
+      row('First sun on the panel', sunny.length ? hhmm(secT(Math.min(...sunny))) : known ? 'none' : '–') +
+      row('Last sun on the panel', sunny.length ? hhmm(Math.min(day.set, day.noon + (Math.max(...sunny) + 1) * SEC)) : '–') +
+      row('Hours of sun', known ? hm(sunny.length * SEC) : '–') +
+      row('Panel temperature', ts.length ? `${Math.min(...ts).toFixed(0)}° – ${Math.max(...ts).toFixed(0)}°` : '–') +
+      row('Visitors (per hour, added up)', visits || '–')) +
+    row(live ? 'Seals at sunset' : 'Sealed at sunset', hhmm(day.set)) +
     row('Rules', RULES);
 }
 
 $('#infoBtn').onclick = () => $('#info').classList.toggle('on');
 $('#frame').onclick = () => $('#info').classList.toggle('on');
 
+// every exhibition day so far, including any on which the panel did not wake
+function allDays() {
+  const out = [...list.days];
+  if (list.today && list.start) {
+    const last = list.end && list.end < list.today ? list.end : list.today;
+    for (let d = list.start; d <= last; d = nextDay(d))
+      if (!out.includes(d) && (d < list.today || isToday(d))) out.push(d);
+  }
+  return out.sort();
+}
+function nextDay(d) { const t = new Date(d + 'T12:00:00Z'); t.setUTCDate(t.getUTCDate() + 1); return t.toISOString().slice(0, 10); }
+
 /* ---------- gallery of past days (today first while it forms, so there is a way back) ---------- */
 async function buildDays() {
   const box = $('#days');
   box.innerHTML = '';
-  const days = [...list.days].reverse();                     // newest first
+  const days = allDays().reverse();                          // newest first
   if (days.length < 2 && !(days.length === 1 && !isToday(days[0]))) return;   // nothing past yet
   $('#daysTitle').textContent = 'Past days';
   for (const d of days) {
@@ -246,7 +315,7 @@ async function buildDays() {
   // draw one at a time: the panel serves slowly
   for (const d of days) {
     const cv = box.querySelector(`[data-d="${d}"] canvas`);
-    render(cv.getContext('2d'), sizeCanvas(cv, cv.clientWidth), await dayData(d), null);
+    render(cv.getContext('2d'), sizeCanvas(cv, cv.clientWidth), await dayData(d), isToday(d) ? now.epoch : 0);
   }
 }
 
@@ -268,13 +337,14 @@ async function start() {
   list = await getJSON('/art/list');
   const msg = $('#msg');
   if (!list || !list.start) { msg.hidden = false; msg.textContent = 'This panel is waiting for its exhibition to begin.'; return; }
-  if (!list.days.length) {
+  if (!allDays().length) {
     msg.hidden = false;
     msg.textContent = list.today && list.today < list.start
       ? `The exhibition begins on ${longDate(list.start)}.` : 'The first image begins at first light.';
     return;
   }
-  await show(list.days[list.days.length - 1]);
+  const ds = allDays();
+  await show(ds[ds.length - 1]);
   buildDays();
 }
 start();

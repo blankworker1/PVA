@@ -6,7 +6,7 @@ First exhibition: **SUNDIAL · La Meridiana**, Bosa, summer 2027.
 
 This is a proof of concept: a bare-bones trial of the technology and the dial. There is no story or media layer; site-specific layers will come later.
 
-> Status: drafts, not yet tested on hardware. The drawing rules on the panel page are still a placeholder; the agreed rules (v1) are in `tools/pva_rules.py`.
+> Status: drafts, not yet compiled or tested on hardware. Firmware draft 6 records everything the dial needs (sun sections, heat, presence); the panel page and `tools/pva_rules.py` both draw rules v1.
 
 ## How it fits together
 
@@ -31,7 +31,7 @@ firmware/panel_page_server/
   panel_config.example.h      template for per-panel settings
   data/                       copied into each panel's flash
     index.html                the panel page: today's dial, gallery of past days, live data
-    admin.html                admin page: status, clock, exhibition dates, raw data download
+    admin.html                admin page: status, clock, exhibition dates, sun-sensor calibration, raw data download
     media/title.txt           this panel's name
     media/map.txt             the map's web address
 hardware/
@@ -51,18 +51,19 @@ Pins are placed on site: open the map with `?edit` after the address, drag the p
 ## Preparing a panel
 
 1. **Settings.** Copy `panel_config.example.h` to `panel_config.h` and set the panel's Wi-Fi name (`panel-01` … `panel-09`) and a long, unique admin key. `panel_config.h` is ignored by git; keep the keys somewhere safe.
-2. **Build stage.** Set the three switches at the top of the firmware (see the table below). Pins are preset for the ELEGOO 30-pin board; on an ESP32-S3, set them by hand.
+2. **Build stage.** Set the four switches at the top of the firmware (see the table below). Pins are preset for the ELEGOO 30-pin board; on an ESP32-S3, set them by hand.
 3. **Media.** Edit `data/media/title.txt` (panel name) and `data/media/map.txt` (map address).
 4. **Build.** Arduino IDE, ESP32 core 3.x; libraries OneWire, DallasTemperature, RTClib. ELEGOO: board *ESP32 Dev Module*, Flash 4 MB, Partition Scheme *Custom* (uses `partitions.csv` in the sketch folder). ESP32-S3: board *ESP32S3 Dev Module*, Flash 16 MB, PSRAM OPI, and rename `partitions_16mb.csv` to `partitions.csv`.
 5. **Flash.** Erase all flash first (essential on any board that ever held keys), upload the firmware, then upload `data/` with the LittleFS uploader.
 6. **Set up on site.** Join the panel's Wi-Fi, open `http://192.168.4.1/admin.html`, enter the key, set the clock from your phone and set the exhibition's first and last day.
+7. **Calibrate the sun sensor** (once, if fitted): on a clear day near solar noon, tap **Calibrate now**. Until then the panel still logs the raw current, and the dial's sun sections are drawn as outline.
 
-| Stage | Hardware | `BENCH` | `PANEL_SENSE` | `USE_RTC` |
-| --- | --- | --- | --- | --- |
-| 1, bench | ESP32 on USB, temperature probe | 1 | 0 | 0 |
-| 1, panel | + panel, buck converter, supercapacitor | 0 | 0 | 0 |
-| 2, full | + voltage divider, DS3231 clock, protection | 0 | 1 | 1 |
-| 2+ | + sun sensor (MOSFET, shunt, INA180) | firmware support still to come | | |
+| Stage | Hardware | `BENCH` | `PANEL_SENSE` | `USE_RTC` | `SUN_SENSE` |
+| --- | --- | --- | --- | --- | --- |
+| 1, bench | ESP32 on USB, temperature probe | 1 | 0 | 0 | 0 |
+| 1, panel | + panel, buck converter, supercapacitor | 0 | 0 | 0 | 0 |
+| 2, full | + voltage divider, DS3231 clock, protection | 0 | 1 | 1 | 0 |
+| 2, sun | + sun sensor (MOSFET, shunt, INA180) | 0 | 1 | 1 | 1 |
 
 Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the supercapacitor smooths the start, and the board simply runs until the light fails. Without the clock (`USE_RTC 0`), the first visitor's phone sets the time each day.
 
@@ -74,7 +75,7 @@ Each panel is also a vertical sundial, mounted vertical and facing due south: se
 
 **Stage 2 adds:** fuse and reverse-polarity diode on the panel side · SMAJ5.0A TVS diode across 5 V · panel-voltage divider 100 kΩ / 5.6 kΩ + 100 nF into GPIO 34 (must be GPIO 32–39: the other analog pins stop working with Wi-Fi on) · DS3231 clock module on GPIO 21/22.
 
-**For the sun rule:** logic-level MOSFET (≥60 V, ≥20 A), shunt resistor, INA180 current-sense amplifier.
+**Sun sensor:** logic-level N-MOSFET (≥60 V, ≥20 A) across the panel, on the panel side of the diode, gate on GPIO 25 (100 Ω series, 10 kΩ pull-down) · 5 mΩ shunt in its source leg · INA180A1 (gain 20) across the shunt, on 3.3 V, output to GPIO 35. Every 10 s the panel is shorted for about a millisecond and its short-circuit current read; the supercapacitor carries the board through the pulse. If the shunt or gain differ, change `SHUNT_OHM` and `SENSE_GAIN`.
 
 ## The dial (rules v1, draft)
 
@@ -88,6 +89,15 @@ Each panel is also a vertical sundial, mounted vertical and facing due south: se
 
 *Horas non numero nisi serenas* — I count only the sunny hours.
 
+## What a panel records
+
+| File | Contents | Who sees it |
+| --- | --- | --- |
+| `/art/DATE.csv` | every 5 min: volts, temperature, sun current | visitors (exhibition days, sealed at sunset) |
+| `/art/DATE.sun.csv` | each 15-minute solar section: sun 1 / 0 / −1 unknown, readings, readings above, mean current | visitors |
+| `/art/DATE.vis.csv` | each solar hour: distinct phones | visitors |
+| `/log/…`, `/archive/…` | every 5 min record, sun current every minute, visitors per hour, every day | admin only, as one CSV |
+
 ## Data and privacy
 
-Visitors are counted, never identified. Raw data stays on each panel and is downloaded only through the admin page; visitors see the exhibition days' images, nothing else.
+Visitors are counted, never identified: a phone is told apart only by a salted hash kept in memory for one hour; the salt changes at every power-on and is never stored. Raw data stays on each panel and is downloaded only through the admin page; visitors see the exhibition days' images, nothing else.
