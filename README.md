@@ -38,8 +38,10 @@ firmware/panel_page_server/
 texts/
   introduction.en.md          the exhibition introduction and the Heliotropism back story (draft)
   introduction.it.md          the same in Italian
-  print-enquiry.md            the one-page enquiry for the print shop: the print, the proposal, ten questions
+  print-enquiry.md            for the print shop: the project, the print, the proposal, eleven questions
+  print-enquiry.it.md         the same in Italian
   pva_sample_a4.pdf           A4 sample sheet of the dial (invented data), made by tools/sample_a4.py
+  pva_sample_a4.it.pdf        the same in Italian
 hardware/
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
