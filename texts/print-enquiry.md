@@ -1,6 +1,6 @@
 <!-- Draft, October 2026. Working copy: the "PVA Bosa – Print Enquiry" doc. For the print shop owner; the A4 sample is tools/pva_sample_a4.pdf. -->
 
-# PVA Bosa – Print Enquiry
+# SUNDIAL · La Meridiana – Print Enquiry
 
 PVA (Photovoltaic Art) is a solar-powered art trail in Bosa: nine old solar panels around the town each record a day of sun and turn it into an image. After the exhibition, all of it becomes one four-colour screen print, and we would like your shop to print and sell it. This page outlines the print and lists what we need to agree. An A4 sample of the images is attached.
 
@@ -8,7 +8,7 @@ PVA (Photovoltaic Art) is a solar-powered art trail in Bosa: nine old solar pane
 
 | Item | Specification |
 | --- | --- |
-| Layout | Square, 9 × 9 grid: 63 image tiles (9 panels × 7 days); "PVA Bosa" centred in the top row, the dates centred in the bottom row |
+| Layout | Square, 9 × 9 grid: 63 image tiles (9 panels × 7 days); "SUNDIAL · La Meridiana" centred in the top row, the dates centred in the bottom row |
 | Colours | 4 spot inks, printed light to dark: ochre, red, blue, black |
 | Overprint | Inks translucent, so red over ochre or blue makes a third colour |
 | Artwork | Flat vector shapes, no gradients or halftones; smallest detail about 1–1.5 mm |

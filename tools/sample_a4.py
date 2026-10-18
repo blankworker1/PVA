@@ -87,8 +87,8 @@ legend = [
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297"
  font-family="Helvetica, Arial, sans-serif">
 <rect width="210" height="297" fill="#FFFFFF"/>
-<text x="{X0}" y="22" font-size="6" letter-spacing="0.6" fill="{BLACK}">PVA Bosa</text>
-<text x="{X0}" y="28.5" font-size="3.2" fill="#6f6a60">Sample sheet · rules v1 (draft) · two days, two locations</text>
+<text x="{X0}" y="22" font-size="6" letter-spacing="0.6" fill="{BLACK}">SUNDIAL · La Meridiana</text>
+<text x="{X0}" y="28.5" font-size="3.2" fill="#6f6a60">PVA Bosa · sample sheet · rules v1 (draft) · two days, two locations</text>
 {"".join(body)}
 {"".join(legend)}
 </svg>'''
