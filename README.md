@@ -15,6 +15,7 @@ This is a proof of concept: a bare-bones trial of the technology and the dial. T
 | The panel | PV panel + ESP32 + temperature probe + clock module, no battery, no internet | On a wall in Bosa |
 | The dial | Each day's image, drawn on the visitor's phone from the panel's data | The panel's own Wi-Fi |
 | The map | Route, pins, which panels are likely awake, the visitor's position | The PVA website (this repo's `docs/`) |
+| The girasole | A sunflower and a chalkboard: the Heliotropist legend re-enacted, drawn by visitors | First stop of the route, moveable |
 | The print | The whole exhibition as one 9 × 9 four-colour screen print | Made after the run from the collected data |
 
 A visit: the flyer's QR code opens the map → at a pin, join that panel's Wi-Fi → the dial opens on its own → leave the Wi-Fi and return to the map.
@@ -91,25 +92,31 @@ Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the s
 15. **Calibrate the sun sensor** on a clear day near solar noon, before the run starts. Uncalibrated, every section draws as an outline.
 16. **Map pin.** Map with `?edit`, drag the pin, copy the positions into `docs/index.html`, push.
 
+**The girasole (once, for the whole trail)**
+
+- **Sow** two or three dwarf sunflowers in large pots in early to mid May, so one is still in bud, and turning with the sun, in the solstice week. Keep the best.
+- **Set up** the pot and a chalkboard, with ochre and blue chalk, in front of a south-facing wall: the first stop of the route. It is moveable; place its pin (the flower) with `?edit` like the panels.
+
 **During the run**
 
-17. **Daily round.** Each panel's status and a raw-data download. On an iPhone use Safari, not the Wi-Fi pop-up, which cannot save files.
+17. **Daily round, at sunset.** Each panel's status and a raw-data download (on an iPhone use Safari, not the Wi-Fi pop-up, which cannot save files). At the girasole: photograph the chalkboard, then wipe it for the next day; water the plant.
 18. **Upkeep.** Clean the glass; replace a failed board or panel. A day lost shows in the gallery as the black outline.
 
 **After the run**
 
-19. Final download from every panel → canonical sheet and separations → print → panels down.
+19. Final download from every panel, and the seven chalkboard photographs → canonical sheet and separations → print → panels down.
 
 ## The visitor's experience
 
 1. A flyer or a wall plate: scan the QR code.
-2. The map opens on mobile data: the route, nine pins, the visitor's own position, which panels are likely awake now.
-3. At a pin: a panel, which is also a sundial telling solar time.
-4. Join the open Wi-Fi `panel-0N`; the page opens by itself. No internet is involved.
-5. Today's dial forming live, or sealed after sunset. Tap it for the day's facts.
-6. Below: the gallery of earlier days; a day the panel did not wake is the black outline.
-7. A strip at the bottom: panel temperature, time awake, sunset.
-8. Leave the Wi-Fi, back to the map, on to the next panel.
+2. The map opens on mobile data: the route, the girasole and nine pins, the visitor's own position, which panels are likely awake now.
+3. The first stop, the girasole: the legend re-enacted. A young sunflower turning with the sun, and a chalkboard. The visitor adds a mark, ochre for sun or blue for shade, and writes the time beside it.
+4. At a pin: a panel, which is also a sundial telling solar time.
+5. Join the open Wi-Fi `panel-0N`; the page opens by itself. No internet is involved.
+6. Today's dial forming live, or sealed after sunset: the same rule as the chalkboard, drawn by the panel. Tap it for the day's facts.
+7. Below: the gallery of earlier days; a day the panel did not wake is the black outline.
+8. A strip at the bottom: panel temperature, time awake, sunset.
+9. Leave the Wi-Fi, back to the map, on to the next panel.
 
 The visitor's phone counts once per solar hour as a dot on the dial, never identified.
 
@@ -124,6 +131,7 @@ The visitor's phone counts once per solar hour as a dot on the dial, never ident
 - [ ] **"Stay connected"** wording on the flyer or wall plate: some phones warn about or drop a network with no internet.
 - [ ] **After the last day:** decide whether the panel page closes or changes once the run ends.
 - [ ] **First compile and bench test** of firmware draft 6.
+- [ ] **The girasole:** sunflower variety and sowing in May; a moveable chalkboard and its stand; where it stands on the route.
 
 ## Hardware per panel
 

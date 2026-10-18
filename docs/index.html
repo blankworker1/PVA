@@ -45,6 +45,8 @@
   .pin { width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
     font:600 13px/1 system-ui, sans-serif; font-variant-numeric:tabular-nums;
     background:#fffdf8; color:#1b1a17; border:2px solid #1b1a17; box-shadow:0 1px 4px rgba(0,0,0,.25); }
+  .pin.flower { background:#fffdf8; padding:0; }
+  .pin.flower svg { width:22px; height:22px; display:block; }
   .pin.awake { background:var(--sun); border-color:#1b1a17; box-shadow:0 0 0 6px var(--sun-soft), 0 1px 4px rgba(0,0,0,.25); }
   body.editing .pin { cursor:grab; outline:2px dashed #1b1a17; outline-offset:3px; }
 
@@ -109,6 +111,10 @@ const PANELS = [
   { n: 8, name: 'Panel eight', ssid: 'panel-08', ll: [40.2970, 8.4925], window: null },
   { n: 9, name: 'Panel nine',  ssid: 'panel-09', ll: [40.2960, 8.4945], window: null },
 ];
+
+// The girasole: the Heliotropist legend re-enacted. A young sunflower in a pot and a chalkboard,
+// moveable, in front of a south-facing wall. First stop of the route. Not a panel: no Wi-Fi.
+const GIRASOLE = { name: 'Il Girasole', ll: [40.2982, 8.4945], show: true };
 /* ====================================================================== */
 
 const $ = s => document.querySelector(s);
@@ -121,12 +127,13 @@ const KEY = 'sameSunPins';
 
 $('#title').textContent = TOUR.title;
 document.title = TOUR.title;
-$('#count').textContent = PANELS.length + ' panels';
+$('#count').textContent = PANELS.length + ' panels' + (GIRASOLE.show ? ' · 1 girasole' : '');
 
 // pin positions placed on site (this browser only) override the config
 try {
   const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
   if (saved) PANELS.forEach(p => { if (saved[p.n]) p.ll = saved[p.n]; });
+  if (saved && saved.g) GIRASOLE.ll = saved.g;
 } catch {}
 
 /* ---------- sunrise / sunset (after SunCalc, Agafonkin; no library) ---------- */
@@ -155,7 +162,8 @@ L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
   attribution: 'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM · Style © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
 }).addTo(map);
 
-const route = L.polyline(PANELS.map(p => p.ll), {
+const routeLL = () => (GIRASOLE.show ? [GIRASOLE.ll] : []).concat(PANELS.map(p => p.ll));
+const route = L.polyline(routeLL(), {
   color: css('--sun'), weight: 3, opacity: .9, dashArray: '2 8', lineCap: 'round',
 }).addTo(map);
 
@@ -194,10 +202,37 @@ const markers = PANELS.map(p => {
     icon: L.divIcon({ className: '', html: `<div class="pin">${p.n}</div>`, iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16] }),
   }).addTo(map);
   m.bindPopup(() => popupHtml(p));
-  m.on('drag', () => { p.ll = [m.getLatLng().lat, m.getLatLng().lng]; route.setLatLngs(PANELS.map(q => q.ll)); });
+  m.on('drag', () => { p.ll = [m.getLatLng().lat, m.getLatLng().lng]; route.setLatLngs(routeLL()); });
   m.on('dragend', savePins);
   return m;
 });
+
+/* ---------- the girasole ---------- */
+const FLOWER = `<svg viewBox="0 0 24 24" aria-hidden="true">${[0,45,90,135,180,225,270,315].map(a =>
+  `<ellipse cx="12" cy="4.6" rx="2.3" ry="3.6" fill="#e8b33a" transform="rotate(${a} 12 12)"/>`).join('')}
+  <circle cx="12" cy="12" r="4.4" fill="#5a3b1e"/></svg>`;
+let flower = null;
+function flowerHtml() {
+  const t = sunTimes(new Date(), GIRASOLE.ll[0], GIRASOLE.ll[1]);
+  return `<div class="pop">
+    <h2>${GIRASOLE.name}</h2>
+    <div>The legend, re-enacted: a young sunflower turning with the sun, and a chalkboard.</div>
+    <div class="k">Make a mark for the sun now (ochre for sun, blue for shade) and write the time beside it.
+      The board is photographed and wiped at sunset, ${fmt(hourOfDate(t.set))} today.</div>
+    ${you ? `<div class="k">${distanceText(GIRASOLE)}</div>` : ''}
+    <div class="wifi">No Wi-Fi here: this one is drawn by hand.</div>
+  </div>`;
+}
+if (GIRASOLE.show) {
+  flower = L.marker(GIRASOLE.ll, {
+    draggable: false,
+    icon: L.divIcon({ className: '', html: `<div class="pin flower">${FLOWER}</div>`, iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -16] }),
+  }).addTo(map);
+  flower.bindPopup(flowerHtml);
+  flower.on('drag', () => { GIRASOLE.ll = [flower.getLatLng().lat, flower.getLatLng().lng]; route.setLatLngs(routeLL()); });
+  flower.on('dragend', savePins);
+}
+const draggables = () => markers.concat(flower ? [flower] : []);
 
 function refresh() {
   const now = new Date();
@@ -235,18 +270,20 @@ $('#locate').onclick = () => { you ? map.setView(you, Math.max(map.getZoom(), 16
 /* ---------- placing pins on site: open with ?edit ---------- */
 function savePins() {
   const o = {}; PANELS.forEach(p => o[p.n] = p.ll.map(v => +v.toFixed(6)));
+  if (GIRASOLE.show) o.g = GIRASOLE.ll.map(v => +v.toFixed(6));
   try { localStorage.setItem(KEY, JSON.stringify(o)); } catch {}
 }
 if (EDIT) {
   $('#editToggle').hidden = false;
   $('#editToggle').onclick = () => {
     const on = document.body.classList.toggle('editing');
-    markers.forEach(m => on ? m.dragging.enable() : m.dragging.disable());
+    draggables().forEach(m => on ? m.dragging.enable() : m.dragging.disable());
     $('#editToggle').textContent = on ? 'Done' : 'Edit pins';
     if (on) map.closePopup();
   };
   $('#copy').onclick = async () => {
-    const txt = PANELS.map(p => `n: ${p.n}  ll: [${p.ll.map(v => v.toFixed(6)).join(', ')}]`).join('\n');
+    const txt = (GIRASOLE.show ? [`girasole  ll: [${GIRASOLE.ll.map(v => v.toFixed(6)).join(', ')}]`] : [])
+      .concat(PANELS.map(p => `n: ${p.n}  ll: [${p.ll.map(v => v.toFixed(6)).join(', ')}]`)).join('\n');
     try { await navigator.clipboard.writeText(txt); $('#copy').textContent = 'Copied'; }
     catch { prompt('Copy these positions:', txt); }
     setTimeout(() => $('#copy').textContent = 'Copy positions', 1500);
