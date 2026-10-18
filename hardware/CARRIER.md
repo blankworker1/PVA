@@ -143,9 +143,24 @@ Place J8 at a board edge where a card can be inserted with the board in the box.
 - **I2C header:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL (for future I2C sensors, e.g. a BME280).
 - **Spare-pins header J9:** 9-pin, 2.54 mm: 3V3, GND, GPIO 32, 33, 36, 26, 27, 13, 14. Silkscreen each pin; note "32/33/36 analog, 36 input only".
 - **UART header J10:** 4-pin, 2.54 mm: 3V3, GND, GPIO 16 (RX), GPIO 17 (TX), for a future serial device.
+- **Power take-off J11:** 4-way screw terminal, 3.5 mm pitch: `5V`, `5V SW`, `3V3`, `GND`, for future add-ons (see section 9).
 - Every usable ESP32 pin is then either in use or on a header. The ones left off are reserved for programming (1, 3) or decide how the chip starts (2, 12, 15), and connecting things to them can stop the board booting.
 - **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
 - **Silkscreen:** "PVA carrier v1", the net name at every terminal, the supercap polarity, and "JP1: remove = sun sensor off".
+
+### 9. Power take-off for future add-ons
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| F2 | Resettable fuse (PTC) | 0.5 A hold, 1206 | 5V rail to J11 `5V`: a faulty add-on cannot drag down the panel's own board |
+| F3 | Resettable fuse (PTC) | 0.2 A hold, 0805 | 3V3 rail to J11 `3V3` and to the header 3V3 pins |
+| U4 | Load switch, 5 V, ≥ 1 A, active-high enable, with soft start (TPS22918 / AP22802 class) | | 5V rail to J11 `5V SW` |
+| R18 | Pull-down | 100 kΩ, 0603 | U4 enable to GND: switched output off at boot |
+| R19 | 0 Ω link | 0603 | GPIO 27 to U4 enable. Fitted by default; remove to free GPIO 27 |
+
+- `5V SW` lets a future firmware power an add-on only when wanted (after the dawn gate, or only during the day), so it never competes with the board at the weak ends of the day.
+- The 3.3 V comes from the ESP32 dev board's own regulator, which has only about 200 mA to spare: keep 3.3 V add-ons to small sensors. Anything bigger runs from `5V` or `5V SW`.
+- Every milliamp taken shortens the supercaps' ride-through in the same proportion. A load of more than about 1 A belongs on its own supply, not on this board.
 
 ## Layout rules for the designer
 
