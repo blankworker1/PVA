@@ -59,41 +59,75 @@ tiles = [
          {-5: 1, -4: 2, -3: 4, -2: 3, -1: 5, 0: 2, 1: 4, 2: 6, 3: 14, 4: 9, 5: 6})),
 ]
 
-TILE, GAP_X, GAP_Y = 85, 12, 24
-X0 = (210 - 2 * TILE - GAP_X) / 2
-Y0 = 38
+import sys
 
-body = []
-for i, (d, where, data) in enumerate(tiles):
-    col, row = i % 2, i // 2
-    x, y = X0 + col * (TILE + GAP_X), Y0 + row * (TILE + GAP_Y)
-    body.append(tile_svg(d, data, x, y, TILE, i))
-    rise, noon, sset = sun_times(d)
-    fmt = lambda t: datetime.fromtimestamp(t, TZ).strftime("%H:%M")
-    body.append(f'<text x="{x:.2f}" y="{y + TILE + 6:.2f}" font-size="3.4" fill="{BLACK}">{where}</text>')
-    body.append(f'<text x="{x:.2f}" y="{y + TILE + 10.5:.2f}" font-size="2.8" fill="#6f6a60">'
-                f'{d.strftime("%-d %B %Y")} · sunrise {fmt(rise)} · solar noon {fmt(noon)} · sunset {fmt(sset)}</text>')
+T = {
+    "en": dict(sub="PVA Bosa · sample sheet · rules v1 (draft) · two days, two locations",
+               where=["Panel 3 · narrow street", "Panel 9 · facing the sea"],
+               line="{d} · sunrise {r} · solar noon {n} · sunset {s}",
+               months="January February March April May June July August September October November December",
+               failed="A day the panel did not wake: the outline of the ring and the axis, in black only.",
+               failed2="These are the thinnest lines on the sheet.",
+               sun="in sun", notsun="not in sun", heat="heat: rise since sunrise, +40 °C at the ring",
+               vis="visitors per solar hour: 1–5 · 6–10 · 11+",
+               note="Invented data for illustration. Arc angle = day length against Bosa's solstice day (180°). Solar noon at the top."),
+    "it": dict(sub="PVA Bosa · foglio di prova · regole v1 (bozza) · due giorni, due luoghi",
+               where=["Pannello 3 · vicolo stretto", "Pannello 9 · di fronte al mare"],
+               line="{d} · alba {r} · mezzodì solare {n} · tramonto {s}",
+               months="gennaio febbraio marzo aprile maggio giugno luglio agosto settembre ottobre novembre dicembre",
+               failed="Un giorno in cui il pannello non si è acceso: il contorno dell'anello e l'asse, solo in nero.",
+               failed2="Sono le linee più sottili del foglio.",
+               sun="al sole", notsun="non al sole", heat="calore: aumento dall'alba, +40 °C all'anello",
+               vis="visitatori per ora solare: 1–5 · 6–10 · 11+",
+               note="Dati inventati, a scopo illustrativo. Ampiezza dell'arco = durata del giorno rispetto al solstizio di Bosa (180°). Mezzogiorno solare in alto."),
+}
 
-legend_y = Y0 + 2 * TILE + GAP_Y + 24
-sw = lambda x, col: f'<rect x="{x}" y="{legend_y - 2.6}" width="3.2" height="3.2" fill="{col}"/>'
-legend = [
-    sw(X0, OCHRE), f'<text x="{X0 + 5}" y="{legend_y}" font-size="2.8" fill="{BLACK}">direct sun</text>',
-    sw(X0 + 28, BLUE), f'<text x="{X0 + 33}" y="{legend_y}" font-size="2.8" fill="{BLACK}">shade</text>',
-    sw(X0 + 50, RED), f'<text x="{X0 + 55}" y="{legend_y}" font-size="2.8" fill="{BLACK}">heat: rise since sunrise, +40 °C at the ring</text>',
-    sw(X0 + 128, BLACK), f'<text x="{X0 + 133}" y="{legend_y}" font-size="2.8" fill="{BLACK}">presence per solar hour: 1–5 · 6–10 · 11+</text>',
-    f'<text x="{X0}" y="{legend_y + 7}" font-size="2.6" fill="#6f6a60">Invented data for illustration. Arc angle = day length against Bosa\'s solstice day (180°). Solar noon at the top.</text>',
-]
+def build(lang):
+    L = T[lang]
+    months = L["months"].split()
+    dstr = lambda d: f"{d.day} {months[d.month - 1]} {d.year}"
+    TILE, GAP_X, GAP_Y = 80, 12, 22
+    X0 = (210 - 2 * TILE - GAP_X) / 2
+    Y0 = 36
+    body = []
+    for i, (d, where, data) in enumerate(tiles):
+        col, row = i % 2, i // 2
+        x, y = X0 + col * (TILE + GAP_X), Y0 + row * (TILE + GAP_Y)
+        body.append(tile_svg(d, data, x, y, TILE, f"{lang}{i}"))
+        rise, noon, sset = sun_times(d)
+        fmt = lambda t: datetime.fromtimestamp(t, TZ).strftime("%H:%M")
+        body.append(f'<text x="{x:.2f}" y="{y + TILE + 6:.2f}" font-size="3.4" fill="{BLACK}">{L["where"][col]}</text>')
+        body.append(f'<text x="{x:.2f}" y="{y + TILE + 10.5:.2f}" font-size="2.6" fill="#6f6a60">'
+                    + L["line"].format(d=dstr(d), r=fmt(rise), n=fmt(noon), s=fmt(sset)) + '</text>')
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297"
+    # a failed day, small
+    fy, FT = Y0 + 2 * TILE + GAP_Y + 16, 34
+    body.append(tile_svg(OCT, None, X0, fy, FT, f"{lang}f"))
+    body.append(f'<text x="{X0 + FT + 6:.2f}" y="{fy + 16:.2f}" font-size="3.0" fill="{BLACK}">{L["failed"]}</text>')
+    body.append(f'<text x="{X0 + FT + 6:.2f}" y="{fy + 21:.2f}" font-size="2.8" fill="#6f6a60">{L["failed2"]}</text>')
+
+    ly = fy + FT + 10
+    sw = lambda x, col: f'<rect x="{x}" y="{ly - 2.6}" width="3.2" height="3.2" fill="{col}"/>'
+    legend = [
+        sw(X0, OCHRE), f'<text x="{X0 + 5}" y="{ly}" font-size="2.8" fill="{BLACK}">{L["sun"]}</text>',
+        sw(X0 + 22, BLUE), f'<text x="{X0 + 27}" y="{ly}" font-size="2.8" fill="{BLACK}">{L["notsun"]}</text>',
+        sw(X0 + 50, RED), f'<text x="{X0 + 55}" y="{ly}" font-size="2.8" fill="{BLACK}">{L["heat"]}</text>',
+        sw(X0 + 126, BLACK), f'<text x="{X0 + 131}" y="{ly}" font-size="2.8" fill="{BLACK}">{L["vis"]}</text>',
+        f'<text x="{X0}" y="{ly + 7}" font-size="2.6" fill="#6f6a60">{L["note"]}</text>',
+    ]
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297"
  font-family="Helvetica, Arial, sans-serif">
 <rect width="210" height="297" fill="#FFFFFF"/>
 <text x="{X0}" y="22" font-size="6" letter-spacing="0.6" fill="{BLACK}">SUNDIAL · La Meridiana</text>
-<text x="{X0}" y="28.5" font-size="3.2" fill="#6f6a60">PVA Bosa · sample sheet · rules v1 (draft) · two days, two locations</text>
+<text x="{X0}" y="28.5" font-size="3.2" fill="#6f6a60">{L["sub"]}</text>
 {"".join(body)}
 {"".join(legend)}
 </svg>'''
+    suffix = "" if lang == "en" else "." + lang
+    open(f"pva_sample_a4{suffix}.svg", "w").write(svg)
+    cairosvg.svg2pdf(bytestring=svg.encode(), write_to=f"../texts/pva_sample_a4{suffix}.pdf")
+    cairosvg.svg2png(bytestring=svg.encode(), write_to=f"pva_sample_a4{suffix}_preview.png", output_width=1240)
 
-open("pva_sample_a4.svg", "w").write(svg)
-cairosvg.svg2pdf(bytestring=svg.encode(), write_to="../texts/pva_sample_a4.pdf")
-cairosvg.svg2png(bytestring=svg.encode(), write_to="pva_sample_a4_preview.png", output_width=1240)
+for lang in (sys.argv[1:] or ["en", "it"]):
+    build(lang)
 print("done")
