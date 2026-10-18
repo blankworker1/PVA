@@ -66,8 +66,8 @@
   - Panel voltage (stage 2): Panel + -> 100k -> GPIO 34 -> 5.6k -> GND (+ 100 nF).
     Must be GPIO 32–39 on the original ESP32 (ADC1): the others stop working with Wi-Fi.
   - DS3231 (stage 2): 3.3 V, GND, SDA GPIO 21, SCL GPIO 22.
-  - Sun sensor (stage 2): logic-level N-MOSFET (>=60 V, >=20 A) directly across the panel
-    terminals, BEFORE the fuse and the diode (the short-circuit current must not run through
+  - Sun sensor (stage 2): logic-level N-MOSFET (>=60 V, >=20 A) across the panel,
+    after an input Schottky (>=100 V, >=15 A) and BEFORE the fuse and the 1N5408 (the short-circuit current must not run through
     the fuse), drain to panel +, source through the shunt to panel −; gate on GPIO 25 with a 100 Ω series
     resistor and a 10k pull-down. Shunt SHUNT_OHM in the MOSFET's source leg; INA180A1
     (gain 20) across the shunt, powered from 3.3 V, output to GPIO 35. Check SHUNT_OHM
