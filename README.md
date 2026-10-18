@@ -42,11 +42,14 @@ texts/
   print-enquiry.it.md         the same in Italian
   pva_sample_a4.pdf           A4 sample sheet of the dial (invented data), made by tools/sample_a4.py
   pva_sample_a4.it.pdf        the same in Italian
+  pva_poster_mockup.pdf       A4 mock-up of the full print, 63 tiles (invented data), made by tools/poster_mockup.py
+  pva_poster_mockup.it.pdf    the same in Italian
 hardware/
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations)
   sample_a4.py                A4 sample sheet, invented data
+  poster_mockup.py            A4 mock-up of the canonical print, invented data
   requirements.txt
 ```
 
