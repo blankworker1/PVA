@@ -96,6 +96,9 @@ two widths) and send the measurement to the designer. Pin positions from the ELE
 | GPIO 25 | Sun MOSFET gate (via JP1 and U3) |
 | GPIO 34 | Panel voltage divider |
 | GPIO 35 | Sun current (INA180 output) |
+| GPIO 5 / 18 / 19 / 23 | microSD: CS / SCK / MISO / MOSI (VSPI) |
+| GPIO 39 | microSD card-detect (input only) |
+| GPIO 26 / 27 / 32 / 33 | Spare-pins header (32 and 33 are ADC1, usable with Wi-Fi on) |
 
 Keep copper and parts away from under the ESP32's antenna end; place the antenna at the board edge.
 The USB-C socket must stay reachable for programming with the board in the box.
@@ -121,9 +124,22 @@ If the DS3231SN is not in stock at the maker, an RV-3028-C7 is a drop-in alterna
 | R13 | Series resistor | 100 Ω, 0603 | DATA to GPIO 4 |
 | D3 | ESD diode | 3.3 V, SOD-323 | DATA to GND, at the terminal |
 
-### 7. Expansion and test
+### 7. microSD card (future-proofing)
 
-- **I2C header:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL.
+Not used by firmware draft 6; fitted now so that raw data and future media layers can outgrow the ESP32's 2 MB.
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| J8 | microSD socket, push-push, with card-detect switch | | SPI mode on the VSPI pins |
+| R14–R17 | Pull-ups | 10 kΩ, 0603 | On CS (GPIO 5), MOSI, MISO and card-detect (GPIO 39), to 3V3. The CS pull-up also keeps GPIO 5 high at boot, as a strapping pin should be |
+| C8, C9 | Capacitors | 10 µF + 100 nF | At the socket's 3V3 pin |
+
+Place J8 at a board edge where a card can be inserted with the board in the box. Any card from 1 to 32 GB, FAT32.
+
+### 8. Expansion and test
+
+- **I2C header:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL (for future I2C sensors, e.g. a BME280).
+- **Spare-pins header J9:** 6-pin, 2.54 mm: 3V3, GND, GPIO 32, GPIO 33, GPIO 26, GPIO 27. Silkscreen each pin; note "32/33 analog".
 - **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
 - **Silkscreen:** "PVA carrier v1", the net name at every terminal, the supercap polarity, and "JP1: remove = sun sensor off".
 
@@ -147,11 +163,15 @@ If the DS3231SN is not in stock at the maker, an RV-3028-C7 is a drop-in alterna
 | CR2032 | 1 |
 | DS18B20 probe | 1 (2 optional), into J4 (J5) |
 | Jumper on JP1 | 1, once the sun sensor is to be used |
+| microSD card | optional, 1–32 GB, FAT32 |
 
 ## Firmware
 
-No change needed: the pins and scale match firmware draft 6 (`SHUNT_OHM 0.005`, `SENSE_GAIN 20`, GPIO 4/21/22/25/34/35).
+No change needed for v1: the pins and scale match firmware draft 6 (`SHUNT_OHM 0.005`, `SENSE_GAIN 20`, GPIO 4/21/22/25/34/35).
 The gate driver is non-inverting, so GPIO 25 high still means "short the panel".
+The microSD socket and the spare pins are unused until a later firmware adds them; nothing on them affects boot.
+
+**Expansion is limited by power, not pins:** there is no battery, so any future sensor should draw no more than a few milliamps.
 
 ## v1 bench test, before ordering v2
 
