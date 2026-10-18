@@ -72,43 +72,69 @@ SIDE = 186                                 # poster side on the A4 page, mm
 X0, Y0 = (210 - SIDE) / 2, 30
 S = SIDE / 9
 
-CHAMFER, GAP = 0.09, 0.025               # PV-cell corners (share of a tile) and the gap between cells
+# The wall version, in real millimetres: each dial printed on an A4 sheet, trimmed to a 210 mm
+# "cell" with its corners cut like silicon (30 mm cut edge), on a black board. Gaps as measured
+# on the panels, slightly over-accentuated: 2 mm between columns (places), 4 mm between rows (days).
+WALL = dict(cell=210.0, gap_x=2.0, gap_y=4.0, chamfer=30.0 / math.sqrt(2), dial=0.9, margin=20.0)
 
-def cell(x, y, s):
-    """A monocrystalline cell: a square with its corners cut off, inset by half the gap."""
-    g, c = GAP * s / 2, CHAMFER * s
-    x0, y0, x1, y1 = x + g, y + g, x + s - g, y + s - g
-    pts = [(x0 + c, y0), (x1 - c, y0), (x1, y0 + c), (x1, y1 - c), (x1 - c, y1), (x0 + c, y1), (x0, y1 - c), (x0, y0 + c)]
+def cell_path(x, y, s, c):
+    pts = [(x + c, y), (x + s - c, y), (x + s, y + c), (x + s, y + s - c), (x + s - c, y + s),
+           (x + c, y + s), (x, y + s - c), (x, y + c)]
     return "M" + " L".join(f"{a:.3f},{b:.3f}" for a, b in pts) + "Z"
+
+def wall_size():
+    W = WALL
+    w = 9 * W["cell"] + 8 * W["gap_x"] + 2 * W["margin"]
+    h = 9 * W["cell"] + 8 * W["gap_y"] + 2 * W["margin"]
+    return w, h
 
 def build(lang, pv=False):
     months = ("June", "giugno")[lang == "it"]
-    ink = PAPER if pv else BLACK
-    body = [f'<rect x="{X0}" y="{Y0}" width="{SIDE}" height="{SIDE}" fill="{BLACK if pv else PAPER}"/>']
-    for i in range(7):
-        for p in range(1, 10):
-            data = None if (p, i) in FAILED else day_data(p, i)
-            x, y, uid = X0 + (p - 1) * S, Y0 + (i + 1) * S, f"{lang}{p}_{i}"
-            if pv:
-                body.append(f'<clipPath id="cell{uid}"><path d="{cell(x, y, S)}"/></clipPath><g clip-path="url(#cell{uid})">')
-            body.append(tile_svg(DAYS[i], data, x, y, S, uid))
-            if pv:
-                body.append('</g>')
-    cx = X0 + SIDE / 2
-    body.append(f'<text x="{cx:.2f}" y="{Y0 + S * .62:.2f}" text-anchor="middle" font-size="7" letter-spacing="1.4" fill="{ink}">SUNDIAL · La Meridiana</text>')
-    body.append(f'<text x="{cx:.2f}" y="{Y0 + S * 8.55:.2f}" text-anchor="middle" font-size="4.2" letter-spacing="0.8" fill="{ink}">'
+    body = []
+    if not pv:
+        body.append(f'<rect x="{X0}" y="{Y0}" width="{SIDE}" height="{SIDE}" fill="{PAPER}"/>')
+        for i in range(7):
+            for p in range(1, 10):
+                data = None if (p, i) in FAILED else day_data(p, i)
+                body.append(tile_svg(DAYS[i], data, X0 + (p - 1) * S, Y0 + (i + 1) * S, S, f"{lang}{p}_{i}"))
+        cx, ink, top, bot, sc = X0 + SIDE / 2, BLACK, Y0 + S * .62, Y0 + S * 8.55, 1
+        box_w = box_h = SIDE
+    else:
+        W = WALL
+        ww, wh = wall_size()
+        sc = SIDE / max(ww, wh)                       # mm on the wall -> mm on the A4 page
+        box_w, box_h = ww * sc, wh * sc
+        ox = (210 - box_w) / 2
+        body.append(f'<rect x="{ox:.3f}" y="{Y0}" width="{box_w:.3f}" height="{box_h:.3f}" fill="{BLACK}"/>')
+        c, d = W["cell"] * sc, W["cell"] * W["dial"] * sc
+        pos = lambda col, row: (ox + (W["margin"] + col * (W["cell"] + W["gap_x"])) * sc,
+                                Y0 + (W["margin"] + row * (W["cell"] + W["gap_y"])) * sc)
+        for i in range(7):
+            for p in range(1, 10):
+                data = None if (p, i) in FAILED else day_data(p, i)
+                x, y = pos(p - 1, i + 1)
+                body.append(f'<path d="{cell_path(x, y, c, W["chamfer"] * sc)}" fill="{PAPER}"/>')
+                body.append(tile_svg(DAYS[i], data, x + (c - d) / 2, y + (c - d) / 2, d, f"{lang}{p}_{i}"))
+        cx, ink = ox + box_w / 2, PAPER
+        top = pos(0, 0)[1] + c * .62
+        bot = pos(0, 8)[1] + c * .55
+    body.append(f'<text x="{cx:.2f}" y="{top:.2f}" text-anchor="middle" font-size="7" letter-spacing="1.4" fill="{ink}">SUNDIAL · La Meridiana</text>')
+    body.append(f'<text x="{cx:.2f}" y="{bot:.2f}" text-anchor="middle" font-size="4.2" letter-spacing="0.8" fill="{ink}">'
                 f'Bosa · 18 – 24 {months} 2027</text>')
+    Xc = (210 - box_w) / 2
     cap = ("Mock-up of the canonical print · 9 panels (columns) × 7 days (rows) · invented data · rules v1 (draft)",
            "Bozza della stampa · 9 pannelli (colonne) × 7 giorni (righe) · dati inventati · regole v1 (bozza)")[lang == "it"]
-    cap2 = ("Same sky for all nine: clouds on the 20th, overcast on the 22nd, a cloudy morning on the 23rd. Panel 6 did not wake on the 20th.",
-            "Lo stesso cielo per tutti e nove: nuvole il 20, coperto il 22, mattina nuvolosa il 23. Il pannello 6 non si è acceso il 20.")[lang == "it"]
-    body.append(f'<text x="{X0}" y="{Y0 + SIDE + 9:.2f}" font-size="3" fill="#6f6a60">{cap}</text>')
-    body.append(f'<text x="{X0}" y="{Y0 + SIDE + 14:.2f}" font-size="3" fill="#6f6a60">{cap2}</text>')
     if pv:
         cap = cap.replace("of the canonical print", "of the wall version").replace("Bozza della stampa", "Bozza della versione a parete")
-        cap3 = ("63 dials cut as solar cells, corners chamfered, on black: the reverse of a real panel.",
-                "63 quadranti tagliati come celle solari, angoli smussati, su nero: il rovescio di un pannello vero.")[lang == "it"]
-        body.append(f'<text x="{X0}" y="{Y0 + SIDE + 19:.2f}" font-size="3" fill="#6f6a60">{cap3}</text>')
+    cap2 = ("Same sky for all nine: clouds on the 20th, overcast on the 22nd, a cloudy morning on the 23rd. Panel 6 did not wake on the 20th.",
+            "Lo stesso cielo per tutti e nove: nuvole il 20, coperto il 22, mattina nuvolosa il 23. Il pannello 6 non si è acceso il 20.")[lang == "it"]
+    body.append(f'<text x="{Xc}" y="{Y0 + box_h + 9:.2f}" font-size="3" fill="#6f6a60">{cap}</text>')
+    body.append(f'<text x="{Xc}" y="{Y0 + box_h + 14:.2f}" font-size="3" fill="#6f6a60">{cap2}</text>')
+    if pv:
+        ww, wh = wall_size()
+        cap3 = (f"63 A4 sheets cut to 210 mm cells, 30 mm corner cuts, on black: the reverse of a real panel. Gaps 2 mm (places), 4 mm (days). Wall size {ww/1000:.2f} × {wh/1000:.2f} m.",
+                f"63 fogli A4 tagliati a celle di 210 mm, angoli smussati di 30 mm, su nero: il rovescio di un pannello vero. Fughe 2 mm (luoghi), 4 mm (giorni). Misura {ww/1000:.2f} × {wh/1000:.2f} m.".replace("1.", "1,"))[lang == "it"]
+        body.append(f'<text x="{Xc}" y="{Y0 + box_h + 19:.2f}" font-size="2.6" fill="#6f6a60">{cap3}</text>')
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297"
  font-family="Helvetica, Arial, sans-serif"><rect width="210" height="297" fill="#FFFFFF"/>{"".join(body)}</svg>'''
     name = "pva_poster_pv_mockup" if pv else "pva_poster_mockup"
