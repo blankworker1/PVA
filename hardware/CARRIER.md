@@ -143,6 +143,7 @@ Place J8 at a board edge where a card can be inserted with the board in the box.
 - **I2C header:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL (for future I2C sensors, e.g. a BME280).
 - **Spare-pins header J9:** 9-pin, 2.54 mm: 3V3, GND, GPIO 32, 33, 36, 26, 27, 13, 14. Silkscreen each pin; note "32/33/36 analog, 36 input only".
 - **UART header J10:** 4-pin, 2.54 mm: 3V3, GND, GPIO 16 (RX), GPIO 17 (TX), for a future serial device.
+- **AUX power out J12:** spare panel power for future add-ons (see section 10).
 - **Power take-off J11:** 4-way screw terminal, 3.5 mm pitch: `5V`, `5V SW`, `3V3`, `GND`, for future add-ons (see section 9).
 - Every usable ESP32 pin is then either in use or on a header. The ones left off are reserved for programming (1, 3) or decide how the chip starts (2, 12, 15), and connecting things to them can stop the board booting.
 - **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
@@ -164,6 +165,22 @@ Place J8 at a board edge where a card can be inserted with the board in the box.
 - The 3.3 V comes from the ESP32 dev board's own regulator, which has only about 200 mA to spare: keep 3.3 V add-ons to small sensors. Anything bigger runs from `5V` or `5V SW`.
 - Every milliamp taken shortens the supercaps' ride-through in the same proportion. A load of more than about 1 A belongs on its own supply, not on this board.
 
+### 10. AUX power out, for spare panel capacity
+
+The board itself uses well under 1 W; a vertical panel in June gives roughly 50–60 W at noon. AUX lets a future
+add-on use that spare power through its own converter, switched by the relay output, without touching the board's supply.
+
+| Ref | Part | Value / rating | Notes |
+| --- | --- | --- | --- |
+| J12 | Screw terminal, 2-way, high current | ≥ 15 A, 4–6 mm² | `AUX +`, `AUX −`. Board edge, beside J1 |
+| F4 | Fuse holder, blade (ATO) or 5 × 20 mm | up to 10 A | **Fuse not fitted**: the builder fits one sized to the add-on. Empty holder = AUX dead |
+| D5 | Schottky diode | ≥ 100 V, ≥ 10 A (TO-220 or D2PAK, e.g. MBR10100 class) | In `AUX +`, cathode towards J12 |
+
+- `AUX +` is taken from `PANEL +` **before F1** (the same node as Q1's drain), then through F4 and D5. `AUX −` is `PANEL −`, so AUX current never passes through the shunt.
+- **D5 is essential:** every 10 s Q1 shorts the panel for about 1 ms. Without D5, the add-on converter's input capacitors would discharge into Q1, spoiling the sun reading and stressing Q1. With D5, the add-on simply rides through the pulse on its own capacitors.
+- The add-on's converter is switched by the relay on `5V SW` (its input or its enable pin). The firmware is to switch it on only in strong sun and shed it the moment the panel voltage sags, so the artwork always has priority.
+- Copper: treat `PANEL +` → F4 → D5 → J12 as a high-current path, like the sun loop.
+
 ## Layout rules for the designer
 
 1. **The sun loop is the only high-current path:** `PANEL +` → Q1 → R_SH → `PANEL −`. Keep it short and wide (copper pour, ≥ 3 mm on 2 oz), on one side, with J1, Q1 and R_SH close together.
@@ -184,6 +201,7 @@ Place J8 at a board edge where a card can be inserted with the board in the box.
 | CR2032 | 1 |
 | DS18B20 probe | 1 (2 optional), into J4 (J5) |
 | Jumper on JP1 | 1, once the sun sensor is to be used |
+| AUX fuse in F4 | only when an add-on is connected, sized to it |
 | microSD card | optional, 1–32 GB, FAT32 |
 
 ## Firmware
