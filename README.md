@@ -77,6 +77,9 @@ Pins are placed on site: open the map with `?edit` after the address, drag the p
 | 1, panel | + panel, buck converter, supercapacitor | 0 | 0 | 0 | 0 |
 | 2, full | + voltage divider, DS3231 clock, protection | 0 | 1 | 1 | 0 |
 | 2, sun | + sun sensor (MOSFET, shunt, INA180) | 0 | 1 | 1 | 1 |
+| Desk test | any ESP32 on USB, no sensors at all | 1 | 0 | 0 | 0, plus `BENCH_FAKE 1` |
+
+`BENCH_FAKE 1` invents a temperature curve and a sun with passing clouds, so the dial shows every layer on the desk. It refuses to compile unless `BENCH` is 1.
 
 Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the supercapacitor smooths the start, and the board simply runs until the light fails. Without the clock (`USE_RTC 0`), the first visitor's phone sets the time each day.
 

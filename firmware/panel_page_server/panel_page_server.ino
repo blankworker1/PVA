@@ -9,6 +9,7 @@
   - Stage 1, panel:   panel + buck + supercap, probe.     BENCH 0, PANEL_SENSE 0, USE_RTC 0, SUN_SENSE 0
   - Stage 2, full:    + voltage divider, DS3231 clock.    BENCH 0, PANEL_SENSE 1, USE_RTC 1, SUN_SENSE 0
   - Stage 2, sun:     + sun sensor (MOSFET, shunt, INA180) BENCH 0, PANEL_SENSE 1, USE_RTC 1, SUN_SENSE 1
+  - Desk test, any board, no sensors:                     BENCH 1, BENCH_FAKE 1 (invented temperature and sun)
 
   The rhythm
   - The panel wakes with the light, records all day, and goes dark at dusk.
@@ -104,6 +105,8 @@
 #define PANEL_SENSE    0       // 1 = voltage divider fitted (needed for dawn gate and dusk)
 #define USE_RTC        0       // 1 = DS3231 clock module fitted
 #define SUN_SENSE      0       // 1 = sun sensor fitted (MOSFET, shunt, INA180)
+#define BENCH_FAKE     0       // 1 = desk test with no sensors: invents temperature and sun current
+                               //     so the dial shows every layer. Never on a real panel.
 
 // ---------------- pins ----------------
 #if CONFIG_IDF_TARGET_ESP32
@@ -114,17 +117,21 @@
   #define PIN_SDA        21
   #define PIN_SCL        22
 #else
-  #define PIN_TEMP       -1    // S3: set free GPIOs from the board pinout
+  #define PIN_TEMP       -1    // S3: a free GPIO from the board pinout; -1 = no probe fitted
   #define PIN_PANEL_ADC  -1    // S3: ADC1 is GPIO 1–10
   #define PIN_SUN_ADC    -1
   #define PIN_SUN_GATE   -1
-  #define PIN_SDA        -1
+  #define PIN_SDA        -1    // -1 = the board's default I2C pins
   #define PIN_SCL        -1
-  #if (PIN_TEMP < 0) || (PIN_PANEL_ADC < 0) || (SUN_SENSE && (PIN_SUN_ADC < 0 || PIN_SUN_GATE < 0))
+  #if (PANEL_SENSE && PIN_PANEL_ADC < 0) || (SUN_SENSE && (PIN_SUN_ADC < 0 || PIN_SUN_GATE < 0))
   #error "Set the pins for this board"
   #endif
 #endif
 #define DAWN_GATE      (PANEL_SENSE && !BENCH)   // gate and dusk logic need a real panel reading
+#define SUN_DATA       (SUN_SENSE || BENCH_FAKE) // sun sections are recorded
+#if BENCH_FAKE && !BENCH
+#error "BENCH_FAKE is for the desk only: set BENCH 1"
+#endif
 
 // ---------------- identity ----------------
 // Per-panel settings live in panel_config.h (not in the repo): copy
@@ -133,7 +140,7 @@
 const char* PANEL_ID      = PVA_PANEL_ID;           // also the Wi-Fi name
 const char* AP_PASS       = PVA_AP_PASS;            // "" = open network
 const char* ADMIN_KEY     = PVA_ADMIN_KEY;          // a different key per panel
-const char* FW_VERSION    = "pva-fw-6";
+const char* FW_VERSION    = "pva-fw-6.1";
 const char* RULES_VERSION = "rules-1";              // keep in step with index.html
 
 // ---------------- place ----------------
@@ -178,8 +185,10 @@ IPAddress         apIP(192, 168, 4, 1);
 DNSServer         dns;
 WebServer         server(80);
 Preferences       prefs;
+#if PIN_TEMP >= 0
 OneWire           ow(PIN_TEMP);
 DallasTemperature ds(&ow);
+#endif
 RTC_DS3231        rtc;
 
 uint32_t session = 0;
@@ -261,8 +270,20 @@ float readPanelV() {
 }
 
 // Short the panel for about a millisecond and read the current: proportional to sunlight.
+// desk test: a clear day with a few passing clouds, from the clock (or uptime if no clock yet)
+float fakeHour() {
+  time_t t = nowEpoch();
+  if (!t) return 8 + (millis() / 1000.0f) / 60.0f;          // no clock: one "hour" per real minute
+  struct tm lt; localtime_r(&t, &lt);
+  return lt.tm_hour + lt.tm_min / 60.0f + lt.tm_sec / 3600.0f;
+}
+
 float readSunI() {
-#if !SUN_SENSE
+#if BENCH_FAKE
+  float h = fakeHour(), s = sinf(M_PI * (h - 6.0f) / 15.0f);
+  bool cloud = sinf(h * 7.3f) + sinf(h * 2.1f) > 1.3f;
+  return s > 0 ? 3.0f * s * (cloud ? 0.15f : 1.0f) : 0;
+#elif !SUN_SENSE
   return NAN;
 #else
   digitalWrite(PIN_SUN_GATE, HIGH);
@@ -276,10 +297,18 @@ float readSunI() {
 }
 
 float readTempC() {               // non-blocking: read last conversion, request the next
+#if BENCH_FAKE
+  float h = fakeHour(), s = sinf(M_PI * (h - 7.0f) / 14.0f);
+  return 21.0f + (s > 0 ? 26.0f * s : 0) + (esp_random() % 100) / 100.0f;
+#endif
+#if PIN_TEMP < 0
+  return NAN;
+#else
   if (!tempOk) return NAN;
   float t = ds.getTempCByIndex(0);
   ds.requestTemperatures();
   return (t > -100 && t < 125) ? t : NAN;
+#endif
 }
 
 // ================= files =================
@@ -326,7 +355,7 @@ void flushHour(time_t now) {
 void flushSection() {
   if (secK == INT_MIN) return;
   if (secDay.length() && secN) {
-    int verdict = (SUN_SENSE && iref > 0) ? (secAbove * 2 > secN ? 1 : 0) : -1;
+    int verdict = (SUN_DATA && iref > 0) ? (secAbove * 2 > secN ? 1 : 0) : -1;
     char buf[64];
     snprintf(buf, sizeof buf, "%d,%d,%u,%u,%.3f\n", secK, verdict, secN, secAbove, secSum / secN);
     appendLine("/art/" + secDay + ".sun.csv", ARTS_HDR, buf);
@@ -347,7 +376,7 @@ void trackDial(time_t now) {
   else if (art && !hourDay.length()) hourDay = day;   // the hour that sunrise falls in
   notePhones();
 
-#if SUN_SENSE
+#if SUN_DATA
   if (now < rise || now >= set || isnan(nowI)) return;
   int k = floorDiv((long long)(now - noon), SEC_S);
   if (k != secK) { flushSection(); secK = k; secDay = day; }
@@ -576,7 +605,7 @@ void handleArtList() {
   j += ",\"end\":\"" + (exEnd ? dateStr(exEnd - 1) : String("")) + "\"";
   j += ",\"today\":\"" + (now ? dateStr(now) : String("")) + "\"";
   j += ",\"epoch\":" + String((long long)now) + ",\"sunset\":" + String((long long)(now ? sunsetFor(now) : 0));
-  j += ",\"sun_sensor\":"; j += (SUN_SENSE && iref > 0) ? "true" : "false";
+  j += ",\"sun_sensor\":"; j += (SUN_DATA && iref > 0) ? "true" : "false";
   j += ",\"days\":[";
   auto days = artDays();
   for (size_t i = 0; i < days.size(); i++) { if (i) j += ','; j += "\"" + days[i] + "\""; }
@@ -610,7 +639,8 @@ void handleAdminStatus() {
   j += ",\"session\":" + String(session) + ",\"uptime\":" + String(millis() / 1000);
   j += ",\"volts\":" + String(nowV, 2) + ",\"temp\":" + numOrNull(nowT, 1);
   j += ",\"temp_sensor\":"; j += tempOk ? "true" : "false";
-  j += ",\"sun_sensor\":";  j += SUN_SENSE ? "true" : "false";
+  j += ",\"sun_sensor\":";  j += SUN_DATA ? "true" : "false";
+  j += ",\"bench_fake\":";  j += BENCH_FAKE ? "true" : "false";
   j += ",\"isc\":" + numOrNull(nowI, 3) + ",\"iref\":" + String(iref, 3);
   j += ",\"visitors_hour\":" + String(nPhones);
   j += ",\"art_days\":" + String(artDays().size());
@@ -642,7 +672,7 @@ void handleAdminWindow() {  // start / end as epoch seconds computed on the admi
 // becomes this panel's clear-noon current.
 void handleAdminCalibrate() {
   if (!checkKey()) return;
-  if (!SUN_SENSE) { server.send(400, "text/plain", "sun sensor not fitted"); return; }
+  if (!SUN_DATA) { server.send(400, "text/plain", "sun sensor not fitted"); return; }
   float best = 0;
   for (float v : recentI) if (v > best) best = v;
   if (best < 0.05) { server.send(400, "text/plain", "no reading yet, or no light"); return; }
@@ -718,6 +748,9 @@ void setup() {
   exStart = prefs.getLong64("exStart", 0);
   exEnd   = prefs.getLong64("exEnd", 0);
   iref    = prefs.getFloat("iref", 0);
+#if BENCH_FAKE
+  if (iref <= 0) iref = 3.0f;      // the invented sun's clear-noon current
+#endif
 
 #if USE_RTC
   if (PIN_SDA >= 0) Wire.begin(PIN_SDA, PIN_SCL); else Wire.begin();
@@ -750,9 +783,14 @@ void setup() {
     prefs.putUInt("session", session);
   }
 
+#if PIN_TEMP >= 0
   ds.begin();
   tempOk = ds.getDeviceCount() > 0;
   if (tempOk) { ds.setWaitForConversion(false); ds.requestTemperatures(); }
+#endif
+#if BENCH_FAKE
+  tempOk = true;
+#endif
 
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
@@ -785,5 +823,5 @@ void loop() {
   uint32_t now = millis();
   if (now - lastSample >= SAMPLE_MS) sample();
   if (!closed && now - lastRecord >= RECORD_MS) { writeRecord(); lastRecord = now; }
-  if (SUN_SENSE && now - lastSunLog >= SUNLOG_MS) writeSunLog();
+  if (SUN_DATA && now - lastSunLog >= SUNLOG_MS) writeSunLog();
 }
