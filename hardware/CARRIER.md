@@ -86,8 +86,9 @@ Scale: 6 A × 5 mΩ = 30 mV × 20 = 0.6 V at GPIO 35, i.e. 0.1 V per amp, as the
 
 ### 4. ESP32 socket
 
-Two 1 × 15 female headers, 2.54 mm pitch. **Row spacing: measure the actual ELEGOO board** (30-pin boards come in
-two widths) and send the measurement to the designer. Pin positions from the ELEGOO 30-pin pinout.
+Two 1 × 15 female headers, 2.54 mm pitch. **Row spacing: 25.4 mm (1.0 in) centre to centre, provisional.** The listing
+gives 25.64 mm, which on a 2.54 mm grid is the 1.0 in (10-pitch) wide variant. Confirm on a delivered board before
+the design is sent for manufacture. Pin positions from the ELEGOO 30-pin pinout.
 
 | ESP32 pin | Net |
 | --- | --- |
