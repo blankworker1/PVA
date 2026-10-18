@@ -213,6 +213,10 @@ Hands-on sessions where participants make their own sun drawings. These use ligh
 - Does the work enter the SUNDIAL catalogue, or stay entirely separate?
 - Workshops: which formats, how many sessions, and for whom (schools, visitors, local groups)?
 
+## 14. Planned additions (not part of the core work)
+
+- **Site-survey solargraphs:** nine pinhole cans, one beside each candidate panel wall, 21 Dec 2026 – 21 Jun 2027, to record each wall's sun before SUNDIAL. Same cans and paper as Workshop B. Only if time allows.
+
 ---
 
 ## Appendix A — D-box recorder (for workshops)
