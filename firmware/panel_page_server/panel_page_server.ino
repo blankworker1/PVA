@@ -795,7 +795,8 @@ void setup() {
 
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP(PANEL_ID, strlen(AP_PASS) ? AP_PASS : nullptr);
+  // channel 1, visible, up to 10 phones at once (the default is only 4)
+  WiFi.softAP(PANEL_ID, strlen(AP_PASS) ? AP_PASS : nullptr, 1, 0, 10);
   dns.start(53, "*", apIP);
 
   // public
