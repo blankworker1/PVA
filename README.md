@@ -147,6 +147,7 @@ The visitor's phone counts once per solar hour as a dot on the dial, never ident
 - [ ] **After the last day:** decide whether the panel page closes or changes once the run ends.
 - [ ] **First compile and bench test** of firmware draft 6.
 - [ ] **The girasole:** sunflower variety and sowing in May; a moveable chalkboard and its stand; where it stands on the route.
+- [ ] **Hour lines on the glass** (test on the pilot panel): thin or dotted lines radiating from the gnomon root at the hour-line angles in `hardware/SUNDIAL.md`, in removable UV-stable pinstripe tape first. Measure short-circuit current near solar noon with and without the lines. If the loss is negligible and the dial reads well, keep the lines and shorten the gnomon (safer, less reach from the wall), since the shadow is then read along the line, not at the brackets.
 
 **Optional**
 
