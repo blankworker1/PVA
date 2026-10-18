@@ -94,6 +94,6 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" v
 </svg>'''
 
 open("pva_sample_a4.svg", "w").write(svg)
-cairosvg.svg2pdf(bytestring=svg.encode(), write_to="pva_sample_a4.pdf")
+cairosvg.svg2pdf(bytestring=svg.encode(), write_to="../texts/pva_sample_a4.pdf")
 cairosvg.svg2png(bytestring=svg.encode(), write_to="pva_sample_a4_preview.png", output_width=1240)
 print("done")

@@ -1,4 +1,4 @@
-<!-- Draft, October 2026. Working copy: the "PVA Bosa – Print Enquiry" doc. For the print shop owner; the A4 sample is tools/pva_sample_a4.pdf. -->
+<!-- Draft, October 2026. Working copy: the "PVA Bosa – Print Enquiry" doc. For the print shop owner; the A4 sample is texts/pva_sample_a4.pdf. -->
 
 # SUNDIAL · La Meridiana – Print Enquiry
 
