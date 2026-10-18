@@ -1,4 +1,4 @@
-# Sun Record — 14 Framed Sunshine Recorder Cards
+# Slow Art: Sun Record — 14 Framed Sunshine Recorder Cards
 
 **Production plan · v0.2 · 18 October 2026**
 A slow-art production in Bosa, Sardinia: one year of sunshine burnt by the sun itself into 365 daily cards, framed as two septychs of 7 frames (14 frames in all) plus a single solstice card.
