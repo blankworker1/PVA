@@ -98,7 +98,9 @@ two widths) and send the measurement to the designer. Pin positions from the ELE
 | GPIO 35 | Sun current (INA180 output) |
 | GPIO 5 / 18 / 19 / 23 | microSD: CS / SCK / MISO / MOSI (VSPI) |
 | GPIO 39 | microSD card-detect (input only) |
-| GPIO 26 / 27 / 32 / 33 | Spare-pins header (32 and 33 are ADC1, usable with Wi-Fi on) |
+| GPIO 26 / 27 / 32 / 33 / 36 / 13 / 14 | Spare-pins header J9 (32, 33 and 36 are ADC1, usable with Wi-Fi on; 36 is input only) |
+| GPIO 16 / 17 | UART header J10 (RX2 / TX2) |
+| Not brought out | GPIO 1 / 3 (USB serial), 2 / 12 / 15 (boot strapping pins; 2 also drives the dev board's LED) |
 
 Keep copper and parts away from under the ESP32's antenna end; place the antenna at the board edge.
 The USB-C socket must stay reachable for programming with the board in the box.
@@ -139,7 +141,9 @@ Place J8 at a board edge where a card can be inserted with the board in the box.
 ### 8. Expansion and test
 
 - **I2C header:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL (for future I2C sensors, e.g. a BME280).
-- **Spare-pins header J9:** 6-pin, 2.54 mm: 3V3, GND, GPIO 32, GPIO 33, GPIO 26, GPIO 27. Silkscreen each pin; note "32/33 analog".
+- **Spare-pins header J9:** 9-pin, 2.54 mm: 3V3, GND, GPIO 32, 33, 36, 26, 27, 13, 14. Silkscreen each pin; note "32/33/36 analog, 36 input only".
+- **UART header J10:** 4-pin, 2.54 mm: 3V3, GND, GPIO 16 (RX), GPIO 17 (TX), for a future serial device.
+- Every usable ESP32 pin is then either in use or on a header. The ones left off are reserved for programming (1, 3) or decide how the chip starts (2, 12, 15), and connecting things to them can stop the board booting.
 - **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
 - **Silkscreen:** "PVA carrier v1", the net name at every terminal, the supercap polarity, and "JP1: remove = sun sensor off".
 
