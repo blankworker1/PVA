@@ -157,7 +157,9 @@ Place J8 at a board edge where a card can be inserted with the board in the box.
 | U4 | Load switch, 5 V, ≥ 1 A, active-high enable, with soft start (TPS22918 / AP22802 class) | | 5V rail to J11 `5V SW` |
 | R18 | Pull-down | 100 kΩ, 0603 | U4 enable to GND: switched output off at boot |
 | R19 | 0 Ω link | 0603 | GPIO 27 to U4 enable. Fitted by default; remove to free GPIO 27 |
+| D4 | Schottky diode, 1 A (SS14 class), SMA | | Cathode to `5V SW`, anode to GND: flyback clamp, so a bare 5 V relay coil can be driven straight from `5V SW` |
 
+- **A 5 V relay:** either wire a bare 5 V relay coil to `5V SW` and `GND` (D4 absorbs the coil's switch-off kick), or use a relay module powered from `5V` with its input on a spare GPIO (choose a module that triggers from a 3.3 V signal). A typical coil draws 70–90 mA while on; a latching relay draws only during its switching pulse.
 - `5V SW` lets a future firmware power an add-on only when wanted (after the dawn gate, or only during the day), so it never competes with the board at the weak ends of the day.
 - The 3.3 V comes from the ESP32 dev board's own regulator, which has only about 200 mA to spare: keep 3.3 V add-ons to small sensors. Anything bigger runs from `5V` or `5V SW`.
 - Every milliamp taken shortens the supercaps' ride-through in the same proportion. A load of more than about 1 A belongs on its own supply, not on this board.
