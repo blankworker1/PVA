@@ -15,26 +15,28 @@ Every part on the board is fitted by the board maker; the builder only plugs in,
 | Buck converter | ANGEEK 8–60 V module, **beside the board**, joined by 4 short wires (screw terminal to screw terminal) |
 | Clock | DS3231 chip **on the board**, CR2032 holder, **no charging circuit** |
 | Supercapacitors | Two 2.7 V 10 F radial cells (10 × 25 mm, 5 mm lead pitch), **in screw terminals**, fitted by the builder |
-| Enclosure | Standard IP65 junction box, about 150 × 110 × 70 mm, cable glands for panel and probe |
+| Enclosure | Standard IP65 plastic junction box, about 150 × 110 × 70 mm: 2 glands for the panel leads, 1 for the probe, a breather vent; 2 more glands later if AUX is used |
 | Board | 2 layers, **2 oz copper**, about 100 × 80 mm, 4 × M3 mounting holes, black solder mask, white silkscreen |
 | Maker | JLCPCB or PCBWay, standard assembly (SMD) + through-hole assembly for the terminals |
 
 ## Block diagram
 
 ```
- panel + ──┬────────────── F1 1 A ──┬── D1 ──► J2 BUCK IN +      J3 BUCK OUT + ──► 5V rail ──► ESP32 VIN
-           │                         │                                              │
-           Q1 sun MOSFET             R1/R2 divider ─► GPIO 34               C1+C2 supercaps (series)
+ panel + ── D0 ──┬──────── F1 2 A ──┬── D1 ──► J2 BUCK IN +      J3 BUCK OUT + ──► 5V rail ──► ESP32 VIN
+                 │                   │                                              │
+                 ├─ F4 ─ D5 ─► AUX   R1/R2 divider ─► GPIO 34               J6+J7 supercaps (series)
+                 │
+                 Q1 sun MOSFET
            │                         │                                       TVS, 470 µF, LED
-           R_SH 5 mΩ ─► INA180 ─► GPIO 35
-           │
- panel − ──┴──────────── GND ──────────────────────► J2 BUCK IN −      J3 BUCK OUT − ──► GND
+                 R_SH 5 mΩ ─► INA180 ─► GPIO 35
+                 │
+ panel − ────────┴────── GND ──────────────────────► J2 BUCK IN −      J3 BUCK OUT − ──► GND
 
  ESP32 3V3 ──► 3V3 rail ──► DS3231 + CR2032, DS18B20 terminals (GPIO 4), INA180 supply, I2C header
  GPIO 25 ──► jumper JP1 ──► gate driver U3 (from 5 V) ──► Q1 gate
 ```
 
-**Important: the sun MOSFET sits directly across the panel terminals, before the fuse.** The panel is a current source:
+**Important: the sun MOSFET sits across the panel, after the input diode D0 but before the fuse.** The panel is a current source:
 its short-circuit current (about 5–6 A, check the label) is safe to short for a millisecond, but it must not flow
 through a small fuse every 10 seconds. The fuse protects only the board side, so it can be small.
 
@@ -45,7 +47,8 @@ through a small fuse every 10 seconds. The fuse protects only the board side, so
 | Ref | Part | Value / rating | Notes |
 | --- | --- | --- | --- |
 | J1 | Screw terminal, 2-way, high current | ≥ 15 A, accepts 4–6 mm² (or ferrules), 7.62–10 mm pitch | Board edge; labelled `PANEL +` `PANEL −` |
-| Q1 | N-MOSFET | V_DS ≥ 60 V, I_D ≥ 20 A, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, DPAK/D2PAK or PowerPAK | Drain on `PANEL +`, source on R_SH top |
+| D0 | Schottky diode, input protection | ≥ 100 V, ≥ 15 A, TO-220 or D2PAK (e.g. dual 20 A 100 V) | In `PANEL +`, straight after J1. **Protects Q1:** without it, a panel connected backwards would push its full short-circuit current through Q1's internal diode continuously and overheat it. Its ~0.5 V drop does not change the short-circuit reading. With AUX in use, D0 carries the AUX current too: size its cooling to that load |
+| Q1 | N-MOSFET | V_DS ≥ 60 V, I_D ≥ 20 A, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, DPAK/D2PAK or PowerPAK | Drain on the D0 cathode node (`PV+`), source on R_SH top |
 | R_SH | Shunt resistor | 5 mΩ, 1 %, 2512, ≥ 2 W | Between Q1 source and GND |
 | R_SH2 | Footprint only | 2512, parallel to R_SH | Option: two 10 mΩ in parallel instead of one 5 mΩ |
 | U2 | Current-sense amplifier INA180A1 | Gain 20 V/V, SOT-23-5 | Supply 3V3 (output then can never exceed 3.3 V); IN+ to R_SH top, IN− to R_SH bottom by **Kelvin traces** |
@@ -62,7 +65,7 @@ Scale: 6 A × 5 mΩ = 30 mV × 20 = 0.6 V at GPIO 35, i.e. 0.1 V per amp, as the
 
 | Ref | Part | Value / rating | Notes |
 | --- | --- | --- | --- |
-| F1 | Fuse | 1 A slow-blow, 1206/1812 SMD or 5 × 20 mm holder | After the Q1 node, before D1 |
+| F1 | Fuse | 2 A slow-blow, 1812 SMD or 5 × 20 mm holder | After the Q1 node, before D1. 2 A, not 1 A: on the first morning the empty supercaps make the buck draw a brief surge |
 | D1 | Rectifier diode | 1000 V 3 A, SMC (S3M class) | Reverse-polarity protection; stops Q1 pulses draining the buck's input capacitor |
 | J2 | Screw terminal, 2-way | 5.0 mm pitch, ≥ 5 A | `BUCK IN +` (after D1), `BUCK IN −` (GND) |
 | R1 | Resistor | 100 kΩ, 1 %, 0805 | From F1/D1 node |
@@ -111,7 +114,7 @@ The USB-C socket must stay reachable for programming with the board in the box.
 | --- | --- | --- | --- |
 | U1 | RTC DS3231SN (SOIC-16W) | | V_CC 3V3; INT/SQW and 32K to test pads only |
 | BT1 | CR2032 holder, SMD | | V_BAT. **No charging resistor or diode** |
-| C1x | Capacitor | 100 nF, 0603 | U1 decoupling |
+| C10 | Capacitor | 100 nF, 0603 | U1 decoupling |
 | R10, R11 | I2C pull-ups | 4.7 kΩ, 0603 | SDA, SCL to 3V3 |
 
 If the DS3231SN is not in stock at the maker, an RV-3028-C7 is a drop-in alternative in function (needs a firmware library change).
@@ -137,16 +140,17 @@ Not used by firmware draft 6; fitted now so that raw data and future media layer
 | C8, C9 | Capacitors | 10 µF + 100 nF | At the socket's 3V3 pin |
 
 Place J8 at a board edge where a card can be inserted with the board in the box. Any card from 1 to 32 GB, FAT32.
+A card draws up to about 100 mA from 3V3 while writing; together with the ESP32's own peaks this is within the dev board's regulator, but leaves less for 3.3 V add-ons.
 
 ### 8. Expansion and test
 
-- **I2C header:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL (for future I2C sensors, e.g. a BME280).
+- **I2C header J13:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL (for future I2C sensors, e.g. a BME280).
 - **Spare-pins header J9:** 9-pin, 2.54 mm: 3V3, GND, GPIO 32, 33, 36, 26, 27, 13, 14. Silkscreen each pin; note "32/33/36 analog, 36 input only".
 - **UART header J10:** 4-pin, 2.54 mm: 3V3, GND, GPIO 16 (RX), GPIO 17 (TX), for a future serial device.
 - **AUX power out J12:** spare panel power for future add-ons (see section 10).
 - **Power take-off J11:** 4-way screw terminal, 3.5 mm pitch: `5V`, `5V SW`, `3V3`, `GND`, for future add-ons (see section 9).
 - Every usable ESP32 pin is then either in use or on a header. The ones left off are reserved for programming (1, 3) or decide how the chip starts (2, 12, 15), and connecting things to them can stop the board booting.
-- **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
+- **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `MID` (between the supercaps), `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
 - **Silkscreen:** "PVA carrier v1", the net name at every terminal, the supercap polarity, and "JP1: remove = sun sensor off".
 
 ### 9. Power take-off for future add-ons
@@ -176,14 +180,14 @@ add-on use that spare power through its own converter, switched by the relay out
 | F4 | Fuse holder, blade (ATO) or 5 × 20 mm | up to 10 A | **Fuse not fitted**: the builder fits one sized to the add-on. Empty holder = AUX dead |
 | D5 | Schottky diode | ≥ 100 V, ≥ 10 A (TO-220 or D2PAK, e.g. MBR10100 class) | In `AUX +`, cathode towards J12 |
 
-- `AUX +` is taken from `PANEL +` **before F1** (the same node as Q1's drain), then through F4 and D5. `AUX −` is `PANEL −`, so AUX current never passes through the shunt.
+- `AUX +` is taken from `PV+` (after D0, **before F1**, the same node as Q1's drain), then through F4 and D5. `AUX −` is `PANEL −`, so AUX current never passes through the shunt.
 - **D5 is essential:** every 10 s Q1 shorts the panel for about 1 ms. Without D5, the add-on converter's input capacitors would discharge into Q1, spoiling the sun reading and stressing Q1. With D5, the add-on simply rides through the pulse on its own capacitors.
 - The add-on's converter is switched by the relay on `5V SW` (its input or its enable pin). The firmware is to switch it on only in strong sun and shed it the moment the panel voltage sags, so the artwork always has priority.
-- Copper: treat `PANEL +` → F4 → D5 → J12 as a high-current path, like the sun loop.
+- Copper: treat J1 → D0 → F4 → D5 → J12 as a high-current path, like the sun loop.
 
 ## Layout rules for the designer
 
-1. **The sun loop is the only high-current path:** `PANEL +` → Q1 → R_SH → `PANEL −`. Keep it short and wide (copper pour, ≥ 3 mm on 2 oz), on one side, with J1, Q1 and R_SH close together.
+1. **Two high-current paths:** the sun loop J1 → D0 → Q1 → R_SH → `PANEL −`, and the AUX path D0 → F4 → D5 → J12. Keep both short and wide (copper pour, ≥ 3 mm on 2 oz), with J1, D0, Q1 and R_SH close together. Give D0 copper area for cooling.
 2. **Kelvin connections:** U2's inputs run as two thin, parallel traces from the inner ends of R_SH's pads; U2 sits right next to R_SH.
 3. **Star ground** at R_SH's ground end: the sun loop returns there; signal ground joins there, not through the loop.
 4. **Gate:** U3 next to Q1, gate trace short.
@@ -214,7 +218,7 @@ The microSD socket and the spare pins are unused until a later firmware adds the
 
 ## v1 bench test, before ordering v2
 
-1. Power the board from a bench supply into `BUCK IN` (no panel): check 5V and 3V3, the LED, the clock (set from the admin page, unplug, plug back in) and the probe.
+1. **Jumper JP1 off.** Power the board from a 12–24 V bench supply into J1, with the buck connected: check 5V, `MID` (about half of 5V), 3V3, the LED, the clock (set from the admin page, unplug, plug back in) and the probe. Reverse the supply leads briefly: nothing should happen.
 2. Connect a real panel, jumper JP1 off: check `VDIV` against a multimeter on the panel voltage.
 3. Jumper on, clear sun near noon: check `ISENSE` on an oscilloscope or by the firmware's `isc` reading against a multimeter's short-circuit current reading of the same panel.
 4. Run a full day with `BENCH 0`, then fix anything in v2.
