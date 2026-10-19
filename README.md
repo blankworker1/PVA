@@ -48,6 +48,7 @@ texts/
   slow-art-sun-record.md      Slow Art: Sun Record, a year of Campbell–Stokes sunshine cards in 14 frames, plus sun-drawing workshops
 hardware/
   CARRIER.md                  the carrier board: everything factory-fitted except the ESP32 and buck converter
+  PVA_carrier_board_spec_v1.pdf  the same as a PDF, for sending to a board designer
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations)

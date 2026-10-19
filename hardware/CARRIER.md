@@ -8,20 +8,24 @@ Every part on the board is fitted by the board maker; the builder only plugs in,
 
 ## Brief for the board designer
 
-**The job:** draw this board in KiCad (version 8 or later) for assembly by JLCPCB, from this document.
+**The job:** design this board in KiCad (version 8 or later) from this document, for manufacture and assembly by the chosen maker
+(an Italian/European assembler, or JLCPCB/PCBWay).
 It is a two-layer board of moderate density; the only demanding parts are the two high-current paths and the antenna keep-out.
 
 **Deliverables**
+
 1. KiCad project (schematic and board), in a shareable archive.
 2. Schematic as PDF.
-3. BOM with manufacturer part numbers **and JLCPCB/LCSC part numbers**, preferring "basic" parts, all confirmed in stock.
-4. Pick-and-place (CPL) file and Gerbers in JLCPCB's format, plus a 3D render of the assembled board, top and bottom.
-5. A clean design-rule check (DRC) and JLCPCB's manufacturability check passed.
+3. BOM with manufacturer part numbers (and the assembler's own stock codes where it has them), all confirmed in stock.
+4. Pick-and-place (CPL) file and Gerbers in the assembler's format, plus a 3D render of the assembled board, top and bottom.
+5. A clean design-rule check (DRC) and the assembler's manufacturability check passed.
+6. **All native design files handed over to the client**, so a v2 can be made anywhere.
 
 **Your choices:** where a part is given as a "class" (for example "S3M class", "TC4427A / MCP1416 class"), choose an equivalent
-that JLCPCB stocks, meeting the ratings in the table. List any substitution in the BOM.
+that the assembler can source, meeting the ratings in the table. List any substitution in the BOM.
 
 **Provisional, to confirm before ordering**
+
 - ESP32 socket row spacing 25.4 mm (from the listing; the client confirms on a delivered board).
 - Mounting holes: 4 × M3, 3.5 mm in from the corners, until the client confirms the box. Board outline about 100 × 80 mm; smaller is fine.
 - ESP32 pin order: from the ELEGOO 30-pin (USB-C) pinout; the client sends a photo of both sides of a delivered board.
@@ -46,8 +50,8 @@ maximum series fuse 9 A, 1581 × 809 × 40 mm, 15.6 kg. Field wiring at least 4 
 | Clock | DS3231 chip **on the board**, CR2032 holder, **no charging circuit** |
 | Supercapacitors | Two 2.7 V 10 F radial cells (10 × 25 mm, 5 mm lead pitch), **in screw terminals**, fitted by the builder |
 | Enclosure | Standard IP65 plastic junction box, about 150 × 110 × 70 mm: 2 glands for the panel leads, 1 for the probe, a breather vent; 2 more glands later if AUX is used |
-| Board | 2 layers, **2 oz copper**, about 100 × 80 mm, 4 × M3 mounting holes, black solder mask, white silkscreen |
-| Maker | JLCPCB or PCBWay, standard assembly (SMD) + through-hole assembly for the terminals |
+| Board | 2 layers, **2 oz copper** (1 oz acceptable if the designer widens the high-current paths and pours copper; say which), about 100 × 80 mm, 4 × M3 mounting holes, black solder mask, white silkscreen |
+| Maker | An Italian/European design-and-assembly house (first choice), or JLCPCB/PCBWay; SMD + through-hole assembly for the terminals |
 
 ## Block diagram
 
@@ -179,12 +183,18 @@ A card draws up to about 100 mA from 3V3 while writing; together with the ESP32'
 ### 8. Expansion and test
 
 - **I2C header J13:** 4-pin, 2.54 mm: 3V3, GND, SDA, SCL (for future I2C sensors, e.g. a BME280).
+
 - **Spare-pins header J9:** 9-pin, 2.54 mm: 3V3, GND, GPIO 32, 33, 36, 26, 27, 13, 14. Silkscreen each pin; note "32/33/36 analog, 36 input only".
+
 - **UART header J10:** 4-pin, 2.54 mm: 3V3, GND, GPIO 16 (RX), GPIO 17 (TX), for a future serial device.
+
 - **AUX power out J12:** spare panel power for future add-ons (see section 10).
+
 - **Power take-off J11:** 4-way screw terminal, 3.5 mm pitch: `5V`, `5V SW`, `3V3`, `GND`, for future add-ons (see section 9).
+
 - Every usable ESP32 pin is then either in use or on a header. The ones left off are reserved for programming (1, 3) or decide how the chip starts (2, 12, 15), and connecting things to them can stop the board booting.
 - **Test points** (loops or pads, labelled): `PV+`, `BUCK IN`, `5V`, `MID` (between the supercaps), `3V3`, `GND`, `VDIV` (GPIO 34), `ISENSE` (GPIO 35), `GATE` (Q1 gate).
+
 - **Silkscreen:** "PVA carrier v1", the net name at every terminal, the supercap polarity, and "JP1: remove = sun sensor off".
 
 ### 9. Power take-off for future add-ons
@@ -199,6 +209,7 @@ A card draws up to about 100 mA from 3V3 while writing; together with the ESP32'
 | D4 | Schottky diode, 1 A (SS14 class), SMA | | Cathode to `5V SW`, anode to GND: flyback clamp, so a bare 5 V relay coil can be driven straight from `5V SW` |
 
 - **A 5 V relay:** either wire a bare 5 V relay coil to `5V SW` and `GND` (D4 absorbs the coil's switch-off kick), or use a relay module powered from `5V` with its input on a spare GPIO (choose a module that triggers from a 3.3 V signal). A typical coil draws 70–90 mA while on; a latching relay draws only during its switching pulse.
+
 - `5V SW` lets a future firmware power an add-on only when wanted (after the dawn gate, or only during the day), so it never competes with the board at the weak ends of the day.
 - The 3.3 V comes from the ESP32 dev board's own regulator, which has only about 200 mA to spare: keep 3.3 V add-ons to small sensors. Anything bigger runs from `5V` or `5V SW`.
 - Every milliamp taken shortens the supercaps' ride-through in the same proportion. A load of more than about 1 A belongs on its own supply, not on this board.
@@ -215,7 +226,9 @@ add-on use that spare power through its own converter, switched by the relay out
 | D5 | Schottky diode | ≥ 100 V, ≥ 10 A (TO-220 or D2PAK, e.g. MBR10100 class) | In `AUX +`, cathode towards J12 |
 
 - `AUX +` is taken from `PV+` (after D0, **before F1**, the same node as Q1's drain), then through F4 and D5. `AUX −` is `PANEL −`, so AUX current never passes through the shunt.
+
 - **D5 is essential:** every 10 s Q1 shorts the panel for about 1 ms. Without D5, the add-on converter's input capacitors would discharge into Q1, spoiling the sun reading and stressing Q1. With D5, the add-on simply rides through the pulse on its own capacitors.
+
 - The add-on's converter is switched by the relay on `5V SW` (its input or its enable pin). The firmware is to switch it on only in strong sun and shed it the moment the panel voltage sags, so the artwork always has priority.
 - Copper: treat J1 → D0 → F4 → D5 → J12 as a high-current path, like the sun loop.
 
