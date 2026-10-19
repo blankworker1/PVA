@@ -15,7 +15,7 @@ Each PVA panel is also a real vertical sundial. It reads the same solar time as 
 
 | Part | Specification |
 | --- | --- |
-| Panel | 80 × 160 cm, portrait, vertical, facing due south |
+| Panel | Trina Solar TSM-185DC01: 80 × 160 cm measured (label: 1581 × 809 × 40 mm, 15.6 kg), portrait, vertical, facing due south. Frame depth 40 mm |
 | Gnomon | 15 mm OD aluminium tube, **60 cm** long, mitred and TIG-welded to an aluminium angle mount; two M6 bolts through the top frame flange |
 | Gnomon angle | **50°** from the glass, pointing down and out, exactly on the panel's vertical centre line (ideal for Bosa: 49.7°) |
 | Hour brackets | 13 short sections of aluminium angle, one M6 hole each, weatherproof vinyl numbers 6–18 |
@@ -60,6 +60,10 @@ For an 80 × 160 cm panel in portrait. Positions are measured from the point whe
 | 12 | bottom edge, centre |
 
 Drill only the frame's outer flange, well clear of the channel holding the glass, and deburr every hole.
+
+The template above is for an 800 × 1600 mm frame. The label gives 809 × 1581 mm; if a frame measures that, use:
+7/17 at 14.2 cm, 8/16 at 30.6 cm, 9/15 at 53.0 cm, 10/14 at 91.9 cm down the sides, and 11/13 on the bottom edge
+8.1 cm in from each corner. The angles do not change; only where each line meets the frame edge.
 
 ## Gnomon length
 

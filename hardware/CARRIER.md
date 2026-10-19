@@ -6,6 +6,11 @@ Every part on the board is fitted by the board maker; the builder only plugs in,
 > Status: specification for the board designer, not yet drawn. v1 is also the bench test of the sun sensor,
 > so it carries test points and options. Order 5 for v1; fix, then order 10 of v2.
 
+## The panel (from its label)
+
+Trina Solar TSM-185DC01: P_max 185 W, V_mp 37.5 V, I_mp 4.95 A, **V_oc 44.5 V, I_sc 5.40 A**, NOCT 47 ± 2 °C,
+maximum series fuse 9 A, 1581 × 809 × 40 mm, 15.6 kg. Field wiring at least 4 mm² copper.
+
 ## Decisions
 
 | Decision | Choice |
@@ -37,7 +42,7 @@ Every part on the board is fitted by the board maker; the builder only plugs in,
 ```
 
 **Important: the sun MOSFET sits across the panel, after the input diode D0 but before the fuse.** The panel is a current source:
-its short-circuit current (about 5–6 A, check the label) is safe to short for a millisecond, but it must not flow
+its short-circuit current (5.40 A on the label; up to about 6 A in strong cold sun) is safe to short for a millisecond, but it must not flow
 through a small fuse every 10 seconds. The fuse protects only the board side, so it can be small.
 
 ## Circuit, section by section
@@ -51,7 +56,7 @@ through a small fuse every 10 seconds. The fuse protects only the board side, so
 | Q1 | N-MOSFET | V_DS ≥ 60 V, I_D ≥ 20 A, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, DPAK/D2PAK or PowerPAK | Drain on the D0 cathode node (`PV+`), source on R_SH top |
 | R_SH | Shunt resistor | 5 mΩ, 1 %, 2512, ≥ 2 W | Between Q1 source and GND |
 | R_SH2 | Footprint only | 2512, parallel to R_SH | Option: two 10 mΩ in parallel instead of one 5 mΩ |
-| U2 | Current-sense amplifier INA180A1 | Gain 20 V/V, SOT-23-5 | Supply 3V3 (output then can never exceed 3.3 V); IN+ to R_SH top, IN− to R_SH bottom by **Kelvin traces** |
+| U2 | Current-sense amplifier **INA180A3** | Gain 100 V/V, SOT-23-5 | Supply 3V3 (output then can never exceed 3.3 V); IN+ to R_SH top, IN− to R_SH bottom by **Kelvin traces** |
 | C6 | Capacitor | 100 nF, 0603 | U2 supply decoupling |
 | R6, C7 | RC on U2 output | 1 kΩ + 10 nF | Light filter into GPIO 35; time constant 10 µs, well inside the 400 µs settle |
 | U3 | Low-side gate driver, non-inverting | Supply 4.5–18 V, input threshold works from 3.3 V (TC4427A / MCP1416 class), SOT-23-5 or SOIC-8 | Powered from 5V rail, so Q1 gets 5 V gate drive |
@@ -59,7 +64,7 @@ through a small fuse every 10 seconds. The fuse protects only the board side, so
 | R5 | Pull-down | 10 kΩ, 0603 | U3 input to GND: Q1 stays off while the ESP32 boots |
 | JP1 | 2-pin header + jumper | | GPIO 25 to U3 input. **Remove the jumper to disable the sun sensor** |
 
-Scale: 6 A × 5 mΩ = 30 mV × 20 = 0.6 V at GPIO 35, i.e. 0.1 V per amp, as the firmware expects (`SHUNT_OHM 0.005`, `SENSE_GAIN 20`).
+Scale: 0.5 V per amp at GPIO 35 (`SHUNT_OHM 0.005`, `SENSE_GAIN 100`). The panel (Trina TSM-185DC01) has I_sc 5.40 A, so full sun on a tilted panel would give 2.7 V, inside the ESP32's range. **Why gain 100, not 20:** mounted vertically, the clear-noon current is only about a third of I_sc (≈ 1.8 A → 0.9 V), and the sun threshold is a third of that (≈ 0.6 A → 0.3 V). With gain 20 these would sit at 0.04–0.2 V, where the ESP32's analog input reads poorly or not at all.
 
 ### 2. Board side of the panel: fuse, diode, divider
 
@@ -181,7 +186,7 @@ add-on use that spare power through its own converter, switched by the relay out
 | Ref | Part | Value / rating | Notes |
 | --- | --- | --- | --- |
 | J12 | Screw terminal, 2-way, high current | ≥ 15 A, 4–6 mm² | `AUX +`, `AUX −`. Board edge, beside J1 |
-| F4 | Fuse holder, blade (ATO) or 5 × 20 mm | up to 10 A | **Fuse not fitted**: the builder fits one sized to the add-on. Empty holder = AUX dead |
+| F4 | Fuse holder, blade (ATO) or 5 × 20 mm | fuse up to **9 A** (the panel's maximum series fuse) | **Fuse not fitted**: the builder fits one sized to the add-on. Empty holder = AUX dead |
 | D5 | Schottky diode | ≥ 100 V, ≥ 10 A (TO-220 or D2PAK, e.g. MBR10100 class) | In `AUX +`, cathode towards J12 |
 
 - `AUX +` is taken from `PV+` (after D0, **before F1**, the same node as Q1's drain), then through F4 and D5. `AUX −` is `PANEL −`, so AUX current never passes through the shunt.
@@ -197,7 +202,7 @@ add-on use that spare power through its own converter, switched by the relay out
 4. **Gate:** U3 next to Q1, gate trace short.
 5. **Edges:** J1 (panel) and J4/J5 (probe) on one edge, towards the cable glands; J2/J3 towards the buck module; ESP32 antenna at the opposite edge, overhanging or over a cut-out, USB-C reachable.
 8. **In the box:** mount the box at the panel's edge with the antenna end pointing away from the panel (the aluminium frame and the cells shield the signal), and keep the buck module and cables away from the antenna end. Check the Wi-Fi range on the pilot from where visitors will stand.
-6. **Spacing:** panel voltage up to 60 V; normal 0.5 mm clearances are plenty.
+6. **Spacing:** panel V_oc 44.5 V (about 48 V on a cold morning), board rated to 60 V; normal 0.5 mm clearances are plenty.
 7. **Mounting:** 4 × M3 holes for standoffs in the box; keep 3 mm clear round them.
 
 ## Parts the builder fits (no soldering)
@@ -215,7 +220,7 @@ add-on use that spare power through its own converter, switched by the relay out
 
 ## Firmware
 
-No change needed for v1: the pins and scale match firmware draft 6 (`SHUNT_OHM 0.005`, `SENSE_GAIN 20`, GPIO 4/21/22/25/34/35).
+Firmware 6.1 matches: pins GPIO 4/21/22/25/34/35, `SHUNT_OHM 0.005`, `SENSE_GAIN 100`.
 The gate driver is non-inverting, so GPIO 25 high still means "short the panel".
 The microSD socket and the spare pins are unused until a later firmware adds them; nothing on them affects boot.
 

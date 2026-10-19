@@ -69,8 +69,8 @@
   - Sun sensor (stage 2): logic-level N-MOSFET (>=60 V, >=20 A) across the panel,
     after an input Schottky (>=100 V, >=15 A) and BEFORE the fuse and the 1N5408 (the short-circuit current must not run through
     the fuse), drain to panel +, source through the shunt to panel −; gate on GPIO 25 with a 100 Ω series
-    resistor and a 10k pull-down. Shunt SHUNT_OHM in the MOSFET's source leg; INA180A1
-    (gain 20) across the shunt, powered from 3.3 V, output to GPIO 35. Check SHUNT_OHM
+    resistor and a 10k pull-down. Shunt SHUNT_OHM in the MOSFET's source leg; INA180A3
+    (gain 100) across the shunt, powered from 3.3 V, output to GPIO 35. Check SHUNT_OHM
     and SENSE_GAIN against the parts fitted.
 
   Build (Arduino IDE, ESP32 core 3.x)
@@ -151,7 +151,7 @@ const double LAT = 40.2986, LNG = 8.4970;            // Bosa: the dial runs on t
 // ---------------- behaviour ----------------
 const float    DIVIDER        = (100.0 + 5.6) / 5.6;
 const float    SHUNT_OHM      = 0.005;              // sun sensor shunt
-const float    SENSE_GAIN     = 20.0;               // INA180A1
+const float    SENSE_GAIN     = 100.0;              // INA180A3 (gain 100: a vertical panel gives only ~1/3 of Isc)
 const float    SUN_FRACTION   = 1.0 / 3;            // sun = above this share of clear-noon current
 const uint32_t SAMPLE_MS      = 10UL * 1000;
 const uint32_t RECORD_MS      = 5UL * 60 * 1000;
