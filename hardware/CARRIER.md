@@ -6,6 +6,31 @@ Every part on the board is fitted by the board maker; the builder only plugs in,
 > Status: specification for the board designer, not yet drawn. v1 is also the bench test of the sun sensor,
 > so it carries test points and options. Order 5 for v1; fix, then order 10 of v2.
 
+## Brief for the board designer
+
+**The job:** draw this board in KiCad (version 8 or later) for assembly by JLCPCB, from this document.
+It is a two-layer board of moderate density; the only demanding parts are the two high-current paths and the antenna keep-out.
+
+**Deliverables**
+1. KiCad project (schematic and board), in a shareable archive.
+2. Schematic as PDF.
+3. BOM with manufacturer part numbers **and JLCPCB/LCSC part numbers**, preferring "basic" parts, all confirmed in stock.
+4. Pick-and-place (CPL) file and Gerbers in JLCPCB's format, plus a 3D render of the assembled board, top and bottom.
+5. A clean design-rule check (DRC) and JLCPCB's manufacturability check passed.
+
+**Your choices:** where a part is given as a "class" (for example "S3M class", "TC4427A / MCP1416 class"), choose an equivalent
+that JLCPCB stocks, meeting the ratings in the table. List any substitution in the BOM.
+
+**Provisional, to confirm before ordering**
+- ESP32 socket row spacing 25.4 mm (from the listing; the client confirms on a delivered board).
+- Mounting holes: 4 × M3, 3.5 mm in from the corners, until the client confirms the box. Board outline about 100 × 80 mm; smaller is fine.
+- ESP32 pin order: from the ELEGOO 30-pin (USB-C) pinout; the client sends a photo of both sides of a delivered board.
+
+**Review:** before anything is ordered, the client's reviewer checks the schematic PDF, BOM and 3D render against this
+document. Expect one round of corrections.
+
+**Order quantity:** v1, 5 boards, fully assembled (SMD and through-hole).
+
 ## The panel (from its label)
 
 Trina Solar TSM-185DC01: P_max 185 W, V_mp 37.5 V, I_mp 4.95 A, **V_oc 44.5 V, I_sc 5.40 A**, NOCT 47 ± 2 °C,
