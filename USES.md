@@ -1,6 +1,6 @@
-# PVA — three layers, specified against carrier v1
+# SUNDIAL — three layers, specified against carrier v1
 
-Each PVA panel is three things at once, in order of importance:
+SUNDIAL is the first work of PVA (Photovoltaic Art, [photovoltaic.art](https://photovoltaic.art)). Each SUNDIAL panel is three things at once, in order of importance:
 
 1. **A sundial.** A recycled PV panel that tells solar time with its gnomon. No visible digital layer.
 2. **A self-powered monitor.** It records its own sun every day, collected on foot and published as **Sole**.
@@ -49,7 +49,7 @@ This document takes the carrier board v1 ([hardware/CARRIER.md](hardware/CARRIER
 
 ## 3. Layer 2 — Sole, the sun monitor
 
-**Purpose:** all year, every year, the nine panels record Bosa's sun in the background. The record is collected on foot every fortnight and published on the PVA website as **weekly editions of 63 dials**: nine panels × seven days, the same grid as the SUNDIAL sheet. Over the years the editions become a continuous portrait of the sun in nine streets of Bosa. **PVA runs it.**
+**Purpose:** all year, every year, the nine panels record Bosa's sun in the background. The record is collected on foot every fortnight and published on the SUNDIAL website as **weekly editions of 63 dials**: nine panels × seven days, the same grid as the SUNDIAL sheet. Over the years the editions become a continuous portrait of the sun in nine streets of Bosa. **PVA runs it.**
 
 **The split:**
 
@@ -132,7 +132,7 @@ The raw downloads stay private with PVA. The public repo receives only the deriv
 
 **Sole** (`docs/sole/`):
 
-- **The latest edition first:** 63 dials, nine panels across (same order as the map) by seven days down (Monday to Sunday). Title "PVA Bosa · Sole", the edition number, the ISO week and its dates.
+- **The latest edition first:** 63 dials, nine panels across (same order as the map) by seven days down (Monday to Sunday). Title "SUNDIAL Bosa · Sole", the edition number, the ISO week and its dates.
 - **Tap a dial** for the day: sun hours, first and last sun, temperature minimum and peak, time awake.
 - **Under the grid:** the week's sun hours per panel, as nine figures, and the sunniest and shadiest wall of the week.
 - **Earlier editions:** a list by week, newest first, each opening the same view. Two new editions appear after each round.
@@ -160,7 +160,7 @@ The raw downloads stay private with PVA. The public repo receives only the deriv
 
 ---
 
-## 4. Layer 3 — SUNDIAL, the annual event
+## 4. Layer 3 — the annual event
 
 **Purpose:** once a year, for about seven days, each panel's day of sun becomes a dial drawn live on the visitor's phone and sealed at Bosa's sunset. The 63 dials of the week make the year's canonical four-colour screen print. Visitors can leave a line in each panel's book. **SUNDIAL · La Meridiana 2027** is the first.
 
@@ -190,7 +190,7 @@ Largely built in firmware 6.1 and `index.html`:
 
 **What the visitor sees.**
 - Under today's dial is a short form: one line for the panel (up to 140 characters) and an optional first name or town (up to 30 characters).
-- A notice under the form: *"This panel's book is read tomorrow. Chosen lines appear here beside the day's dial, and on the PVA website."*
+- A notice under the form: *"This panel's book is read tomorrow. Chosen lines appear here beside the day's dial, and on the SUNDIAL website."*
 - Past days in the gallery show their dial with that day's chosen lines. A day not yet read shows the dial alone.
 
 **The day's rhythm.** It is the same as the dial:
@@ -240,7 +240,7 @@ Largely built in firmware 6.1 and `index.html`:
 - The full book lives only in the downloads, kept by PVA for the archive and catalogue.
 - The download crosses the open Wi-Fi in clear. For a 7-day run this is an accepted risk.
 
-**Its place in PVA:** the visitors' book is the project's only way for people to talk back, and it belongs to the event. Between events the panels take no input at all.
+**Its place in SUNDIAL:** the visitors' book is the project's only way for people to talk back, and it belongs to the event. Between events the panels take no input at all.
 
 ### 4.3 Security: protecting the artwork from the admin side
 
@@ -296,7 +296,7 @@ With the key, a person could:
 
 ## 5. Permissions and upkeep
 
-PVA is now a **permanent installation**: a sundial and monitor all year, with an event once a year. That is a different request from a seven-day exhibition, and it needs settling before installation.
+SUNDIAL is a **permanent installation**: a sundial and monitor all year, with an event once a year. That is a different request from a seven-day exhibition, and it needs settling before installation.
 
 **Permissions:**
 - **Wall owners:** written consent for each site, for a permanent installation, with access for the fortnightly round and the yearly visit, and the right to remove.

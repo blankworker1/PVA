@@ -1,6 +1,6 @@
-# PVA — making the repo forkable
+# SUNDIAL — making the repo forkable
 
-**Goal:** any town can fork this repository and run its own PVA (sundial, Sole and an annual event) without asking anyone, and without hunting through the code for Bosa.
+**Goal:** any town can fork this repository and run its own SUNDIAL (sundial, Sole and an annual event) without asking anyone, and without hunting through the code for Bosa.
 
 > Status: task list, 20 Oct 2026. **State: Visible** — public but not yet licensed for reuse. **Released** when every task is done, the system has been field-tested at SUNDIAL 2027, and the licences are added (the last step). Assumes the firmware 6.2 and tools specified in [USES.md](USES.md). Bosa remains the reference instance.
 
@@ -8,7 +8,7 @@
 
 ## Summary
 
-**The one rule:** a PVA is **nine panels**. Everything else (the town, the walls, the event's name and dates, the languages, the stories) belongs to the fork.
+**The one rule:** a SUNDIAL is **nine panels**. Everything else (the town, the walls, the event's name and dates, the languages, the stories) belongs to the fork.
 
 **The one request:** a link back to this repository, wherever the fork is presented: its website, flyer and wall plates. It is a request, not a licence condition.
 
@@ -140,10 +140,10 @@ Only when every item above is ticked and the field test (§9) is done.
 - [ ] `hardware/LICENSE` — **hardware** (carrier board, sundial drawings): **CERN-OHL-P v2** (the permissive open hardware licence).
 - [ ] `texts/LICENSE` — **texts, dial rules as artwork, images**: **CC BY 4.0**. Credit can be given by the link back.
 - [ ] README section **"Licences and the one rule"**: which licence covers what; the nine-panel rule; the link request.
-- [ ] `ACKNOWLEDGEMENT.md` — the requested link and a suggested line in Italian and English, e.g. *"Based on PVA (Photovoltaic Art), Bosa — github.com/blankworker1/PVA"*, with where to place it: website footer, flyer, wall plate text.
+- [ ] `ACKNOWLEDGEMENT.md` — the requested link and a suggested line in Italian and English, e.g. *"Based on SUNDIAL, a work of PVA (Photovoltaic Art) — photovoltaic.art · github.com/photovoltaic-art/SUNDIAL"*, with where to place it: website footer, flyer, wall plate text.
 - [ ] The acknowledgement line built into the website footer and the panel page by default, so a fork keeps it unless it removes it.
 
-**Note:** licences cannot enforce a panel count. The nine-panel rule is stated in the README as the definition of a PVA; a fork with another number is free to exist, but is not a PVA.
+**Note:** licences cannot enforce a panel count. The nine-panel rule is stated in the README as the definition of a SUNDIAL; a fork with another number is free to exist, but is not a SUNDIAL.
 
 - [ ] README: replace the work-in-progress notice with **"Licences and the one rule"** and a line saying the repo is forkable.
 - [ ] Tag **v1.0**: the field-tested version.

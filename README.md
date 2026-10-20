@@ -1,14 +1,16 @@
-# PVA — Photovoltaic Art
+# SUNDIAL — a PVA work
 
 > **Work in progress.** Not yet licensed for reuse; a forkable release is planned after field testing at SUNDIAL 2027. See [FORK-TASKS.md](FORK-TASKS.md).
 
 Nine end-of-life solar panels placed around Bosa, each powering only itself. Same sun, different data.
 
+SUNDIAL is the first work of **PVA (Photovoltaic Art)**, a manifesto for new uses of end-of-life PV panels: [photovoltaic.art](https://photovoltaic.art). It is a public art installation and the proof of concept for PVA. **A SUNDIAL is nine panels;** that is its one rule.
+
 Each panel is three things at once, in order of importance:
 
 1. **A sundial.** A recycled panel on a wall that tells solar time with its gnomon. No visible digital layer: anyone can read it, every day, with no phone.
-2. **A self-powered monitor.** Behind the panel, a small board records the panel's own sun every day. The record is collected on foot every fortnight and published on the PVA website as **Sole**: weekly editions of 63 dials, nine panels by seven days.
-3. **An annual event.** Once a year, for about a week, **SUNDIAL** turns each panel's day of sun into an image drawn live on the visitor's phone through the panel's own Wi-Fi, sealed at sunset. Visitors can leave a line in each panel's book. The week becomes one four-colour screen print.
+2. **A self-powered monitor.** Behind the panel, a small board records the panel's own sun every day. The record is collected on foot every fortnight and published on the SUNDIAL website as **Sole**: weekly editions of 63 dials, nine panels by seven days.
+3. **An annual event.** Once a year, for about a week, the **event** turns each panel's day of sun into an image drawn live on the visitor's phone through the panel's own Wi-Fi, sealed at sunset. Visitors can leave a line in each panel's book. The week becomes one four-colour screen print.
 
 First event: **SUNDIAL · La Meridiana**, Bosa, summer 2027. SUNDIAL 2027 is a bare-bones trial of the technology and the dial: there is no story or media layer.
 
@@ -21,16 +23,16 @@ The three layers are specified against the carrier board in **[USES.md](USES.md)
 | Layer | What it is | When | Where |
 | --- | --- | --- | --- |
 | **Sundial** | Gnomon, hour brackets and wall plate on the panel ([hardware/SUNDIAL.md](hardware/SUNDIAL.md)) | Always | On the wall |
-| **Sole** | The panels' daily record of sun, collected every fortnight, published as weekly editions of 63 dials | All year | The PVA website |
-| **SUNDIAL** | Each day's dial drawn live and sealed at sunset; the visitors' book; one print per event | One week a year | The panel's own Wi-Fi, then the website |
+| **Sole** | The panels' daily record of sun, collected every fortnight, published as weekly editions of 63 dials | All year | The SUNDIAL website |
+| **The annual event** | Each day's dial drawn live and sealed at sunset; the visitors' book; one print per event | One week a year | The panel's own Wi-Fi, then the website |
 
 | Part | What it is | Where it runs |
 | --- | --- | --- |
 | The panel | PV panel + ESP32 + temperature probe + clock module, no battery, no internet | On a wall in Bosa |
 | The dial | Each day's image, drawn on the visitor's phone from the panel's data | The panel's own Wi-Fi during SUNDIAL; the website for Sole |
 | The visitors' book | One line per visitor per panel per day, read and chosen the next day | The panel's own Wi-Fi, during SUNDIAL |
-| The map | Route, pins, which panels are likely awake, the visitor's position | The PVA website (this repo's `docs/`) |
-| The website pages | SUNDIAL sheets (one per event) and Sole editions (one per week) | The PVA website (planned: `docs/sundial/`, `docs/sole/`) |
+| The map | Route, pins, which panels are likely awake, the visitor's position | The SUNDIAL website (this repo's `docs/`) |
+| The website pages | SUNDIAL sheets (one per event) and Sole editions (one per week) | The SUNDIAL website (planned: `docs/sundial/`, `docs/sole/`) |
 | The girasole | A sunflower and a chalkboard: the Heliotropist legend re-enacted, drawn by visitors | First stop of the route during SUNDIAL, moveable |
 | The print | The whole event as one 9 × 9 four-colour screen print | Made after each event from the collected data |
 
@@ -41,7 +43,7 @@ A visit during SUNDIAL: the flyer's QR code opens the map → at a pin, join tha
 ## Repository
 
 ```
-USES.md                       the three layers specified against carrier v1: sundial, Sole, SUNDIAL
+USES.md                       the three layers specified against carrier v1: sundial, Sole, the annual event
 docs/
   index.html                  the map — the only part published on the website
   sundial/, sole/, data/      planned: SUNDIAL sheets and Sole editions (USES.md 3.3)
@@ -80,7 +82,7 @@ tools/
 
 ## Publishing the map
 
-In the repository's GitHub Pages settings, publish from the `docs` folder on the main branch, then point the PVA domain at it. Only `docs/` is published; the panel files stay in the repo but never appear online.
+In the repository's GitHub Pages settings, publish from the `docs` folder on the main branch, then point the instance's domain at it (Bosa: `bosa.photovoltaic.art`). Only `docs/` is published; the panel files stay in the repo but never appear online.
 
 Pins are placed on site: open the map with `?edit` after the address, drag the pins, tap **Copy positions** and paste them into the `PANELS` list at the top of `docs/index.html`.
 
