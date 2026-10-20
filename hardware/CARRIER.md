@@ -8,6 +8,33 @@ Every part on the board is fitted by the board maker; the builder only plugs in,
 > v1 is also the bench test of the sun sensor,
 > so it carries test points and options. Order 5 for v1; fix, then order 10 of v2.
 
+## What the board does
+
+The board sits in a weatherproof box behind a recycled 185 W solar panel mounted **vertically on an outdoor wall**. It is the panel's only load, and it has **no battery and no mains supply**: it lives entirely on the panel's own power. Nine identical boards are installed, one per panel.
+
+**Its job is to measure the panel and serve the results over Wi-Fi.** A plugged-in ESP32 dev board runs its own Wi-Fi access point (no internet), and visitors' phones read web pages from it. Behind those pages it records:
+
+- **Sunlight on the panel**, from the panel's **short-circuit current**. Every 10 seconds a MOSFET (Q1) shorts the panel for about 1 ms; the current through a 5 mΩ shunt is amplified by an INA180 and read by the ESP32. Short-circuit current is proportional to the light falling on the panel, so this is the board's light meter. It is why the board has a high-current path at all.
+- **Panel voltage**, through a resistor divider, used to decide when there is enough light to start Wi-Fi (dawn) and when to stop (dusk).
+- **Panel temperature**, from a DS18B20 probe on the back of the panel.
+- **The time**, kept through the night by a DS3231 clock with a coin cell, because the rest of the board loses power every evening.
+
+**A day in the life:**
+
+1. At night the board is completely off.
+2. At dawn the panel voltage rises, the buck converter starts and charges two supercapacitors on the 5 V rail, and the ESP32 boots with its radio off.
+3. Once the panel holds about 12 V for a minute, Wi-Fi starts and the board measures and logs all day.
+4. At dusk the voltage falls and the board shuts down, with the supercapacitors riding through brief dips (clouds, the 1 ms short-circuit pulses) but not the night.
+
+**What this means for the design:**
+
+- **The board browns out every evening and starts cold every morning,** on a slowly rising, current-limited supply. Start-up and shut-down must be clean, with no part left half-on (see R21, the gate pull-down on Q1).
+- **The board's own consumption is under 1 W** from a panel that can give 50–60 W, so the panel is effectively unloaded. The only large currents are the 1 ms short-circuit pulses (up to about 6 A) and, optionally, the AUX output for a future add-on.
+- **Wi-Fi is the only interface:** there is no screen or button on the installed object. Antenna placement and keep-out matter more than usual.
+- **Outdoors, in a closed box behind a panel in a Sardinian summer:** expect high box temperatures; it affects the supercapacitors most.
+- **Panel side up to 60 V** (open-circuit 44.5 V on the label, about 48 V on a cold morning).
+
+
 ## Brief for the board designer
 
 **The job:** starting from the existing schematic in [carrier/](carrier/README.md), review it against this document, choose the parts,
