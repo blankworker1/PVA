@@ -1,4 +1,4 @@
-# SUNDIAL — a PVA work
+# SUNDIAL
 
 > **Work in progress.** Not yet licensed for reuse; a forkable release is planned after field testing at SUNDIAL 2027. See [FORK-TASKS.md](FORK-TASKS.md).
 
