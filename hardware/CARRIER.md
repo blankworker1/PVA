@@ -3,21 +3,27 @@
 One small board per panel. It carries everything except the ESP32 and the buck converter, which plug in or wire on.
 Every part on the board is fitted by the board maker; the builder only plugs in, screws down and fits a coin cell.
 
-> Status: specification for the board designer. A **schematic draft** generated from this document is in [carrier/](carrier/README.md): KiCad project, PDF, netlist and BOM, not yet reviewed.
+> Status: specification for the board designer. The **schematic is already drawn**: a KiCad project generated from this document and reviewed twice is in [carrier/](carrier/README.md) (start there), with PDF, netlist and BOM. What remains is the manufacturer's review, part selection, layout and build.
 >
 > v1 is also the bench test of the sun sensor,
 > so it carries test points and options. Order 5 for v1; fix, then order 10 of v2.
 
 ## Brief for the board designer
 
-**The job:** design this board in KiCad (version 8 or later) from this document, for manufacture and assembly by the chosen maker
-(an Italian/European assembler, or JLCPCB/PCBWay).
+**The job:** starting from the existing schematic in [carrier/](carrier/README.md), review it against this document, choose the parts,
+lay out the board in KiCad (version 8 or later; the project is in KiCad 7 format and opens in 8) and build it, for manufacture and
+assembly by the chosen maker (an Italian/European assembler, or JLCPCB/PCBWay).
 It is a two-layer board of moderate density; the only demanding parts are the two high-current paths and the antenna keep-out.
+Please confirm the points in [Manufacturer review and sign-off](carrier/README.md#manufacturer-review-and-sign-off) before layout.
+
+**Hand-over of the schematic:** up to now the schematic has been generated from `carrier/parts.py` by a script. From the hand-over,
+**the KiCad schematic becomes the master**: edit it directly in KiCad, and the generator scripts are retired. Any change you make to
+the circuit is listed in your BOM notes and shown in the updated schematic PDF.
 
 **Deliverables**
 
-1. KiCad project (schematic and board), in a shareable archive.
-2. Schematic as PDF.
+1. KiCad project: the existing schematic, with any corrections, plus the board layout, in a shareable archive.
+2. Schematic as PDF (updated).
 3. BOM with manufacturer part numbers (and the assembler's own stock codes where it has them), all confirmed in stock.
 4. Pick-and-place (CPL) file and Gerbers in the assembler's format, plus a 3D render of the assembled board, top and bottom.
 5. A clean design-rule check (DRC) and the assembler's manufacturability check passed.
@@ -32,8 +38,8 @@ that the assembler can source, meeting the ratings in the table. List any substi
 - Mounting holes: 4 × M3, 3.5 mm in from the corners, until the client confirms the box. Board outline about 100 × 80 mm; smaller is fine.
 - ESP32 pin order: from the ELEGOO 30-pin (USB-C) pinout; the client sends a photo of both sides of a delivered board.
 
-**Review:** before anything is ordered, the client's reviewer checks the schematic PDF, BOM and 3D render against this
-document. Expect one round of corrections.
+**Review:** before layout, the manufacturer confirms the sign-off points in carrier/README.md. Before anything is ordered,
+the client checks the updated schematic PDF, BOM and 3D render against this document. Expect one round of corrections.
 
 **Order quantity:** v1, 5 boards, fully assembled (SMD and through-hole).
 
@@ -46,7 +52,8 @@ maximum series fuse 9 A, 1581 × 809 × 40 mm, 15.6 kg. Field wiring at least 4 
 
 | Decision | Choice |
 | --- | --- |
-| Board drawn by | A freelancer in KiCad, from this document |
+| Schematic | Drawn: KiCad project in [carrier/](carrier/README.md), generated from this document and reviewed twice (review log in carrier/README.md) |
+| Layout and build | The chosen maker (design-and-build), or a KiCad designer plus a maker |
 | ESP32 | ELEGOO ESP32 30-pin (USB-C) dev board, **plugged into two 1 × 15 female header sockets** (removable) |
 | Buck converter | ANGEEK 8–60 V module, **beside the board**, joined by 4 short wires (screw terminal to screw terminal) |
 | Clock | DS3231 chip **on the board**, CR2032 holder, **no charging circuit** |

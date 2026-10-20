@@ -32,7 +32,7 @@ The board as a sundial on its panel, and its mounting: [SUNDIAL.md](../SUNDIAL.m
 
 **Drawing style.** Each pin has a short wire and a net label; parts are joined by net name, not drawn wires. Each section of CARRIER.md has its own block on the sheet. This is a standard KiCad style, and it means the drawing is exactly the netlist.
 
-**To change the board,** edit `parts.py` and run `./build.sh`. Hand edits to `carrier.kicad_sch` are overwritten by the next build.
+**To change the board before hand-over,** edit `parts.py` and run `./build.sh`; hand edits to `carrier.kicad_sch` would be overwritten. **From the hand-over to the board designer,** the KiCad schematic becomes the master and the generator scripts are retired (see CARRIER.md, *Hand-over of the schematic*).
 
 ## How it was checked
 
