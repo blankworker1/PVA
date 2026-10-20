@@ -1,21 +1,34 @@
 # Carrier board v1 — schematic draft
 
-A KiCad schematic for the carrier board, generated from the specification in [../CARRIER.md](../CARRIER.md).
+A KiCad schematic for the carrier board, generated from the specification in [CARRIER.md](../CARRIER.md).
 
-> **Status: draft-1, 20 Oct 2026. Not reviewed. Do not manufacture from this.**
-> It is a faithful drawing of the spec, checked by script, but it must be reviewed by an electronics engineer before anyone lays out or builds the board. The board switches a 45 V panel's full short-circuit current every 10 seconds.
+> **Status: draft-1, reviews 1 and 2 applied, 20 Oct 2026. Awaiting the manufacturer's review. Do not manufacture from this yet.**
+> It is a faithful drawing of the spec, checked by script and by two reviews. Before layout it needs the manufacturer's review and sign-off ([below](#manufacturer-review-and-sign-off)). The board switches a 45 V panel's full short-circuit current every 10 seconds.
+
+## Start here (for the board designer)
+
+Everything needed is linked from this page:
+
+1. **[Specification: CARRIER.md](../CARRIER.md)** (also as a [PDF](../PVA_carrier_board_spec_v1.pdf)): what the board does, every part with its rating, layout rules, bench test.
+2. **[Schematic PDF](carrier_schematic.pdf)** (A1): the full drawing, with notes on current paths and measurement ranges.
+3. **[Bill of materials: bom.csv](bom.csv)**: references, values and ratings, footprints, fitted or not.
+4. **KiCad files:** [carrier.kicad_pro](carrier.kicad_pro), [carrier.kicad_sch](carrier.kicad_sch), and the netlist with footprints [carrier.net](carrier.net). Download the whole folder to open the project.
+5. **[Design checks: checks.txt](checks.txt)**: the calculations behind the ranges and ratings.
+6. **[Review log](#review-log)** and **[manufacturer sign-off](#manufacturer-review-and-sign-off)**, further down this page.
+
+The board as a sundial on its panel, and its mounting: [SUNDIAL.md](../SUNDIAL.md). The firmware it runs: [panel_page_server.ino](../../firmware/panel_page_server/panel_page_server.ino).
 
 ## Files
 
 | File | What |
 | --- | --- |
-| `carrier.kicad_pro`, `carrier.kicad_sch` | KiCad project and schematic (KiCad 7 format; opens in KiCad 7 and 8) |
-| `carrier_schematic.pdf` | The schematic as a PDF (A1), for review |
-| `carrier.net` | Netlist exported by KiCad, with footprints: what a layout designer imports |
-| `bom.csv` | Bill of materials: references, values and ratings, footprints, fitted or not, notes |
-| `checks.py`, `checks.txt` | Calculations: divider and current-sense ranges, supercap ride-through, AUX diode heat |
-| `parts.py` | **The source:** every part, footprint and pin-to-net connection, transcribed from CARRIER.md |
-| `gen_schematic.py`, `gen_bom.py`, `verify.py`, `build.sh` | Regenerate everything with `./build.sh` |
+| [carrier.kicad_pro](carrier.kicad_pro), [carrier.kicad_sch](carrier.kicad_sch) | KiCad project and schematic (KiCad 7 format; opens in KiCad 7 and 8) |
+| [carrier_schematic.pdf](carrier_schematic.pdf) | The schematic as a PDF (A1), for review |
+| [carrier.net](carrier.net) | Netlist exported by KiCad, with footprints: what a layout designer imports |
+| [bom.csv](bom.csv) | Bill of materials: references, values and ratings, footprints, fitted or not, notes |
+| [checks.py](checks.py), [checks.txt](checks.txt) | Calculations: divider and current-sense ranges, supercap ride-through, AUX diode heat |
+| [parts.py](parts.py) | **The source:** every part, footprint and pin-to-net connection, transcribed from CARRIER.md |
+| [gen_schematic.py](gen_schematic.py), [gen_bom.py](gen_bom.py), [verify.py](verify.py), [build.sh](build.sh) | Regenerate everything with `./build.sh` |
 
 **Drawing style.** Each pin has a short wire and a net label; parts are joined by net name, not drawn wires. Each section of CARRIER.md has its own block on the sheet. This is a standard KiCad style, and it means the drawing is exactly the netlist.
 

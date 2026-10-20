@@ -71,6 +71,7 @@ texts/
 hardware/
   CARRIER.md                  the carrier board: everything factory-fitted except the ESP32 and buck converter
   PVA_carrier_board_spec_v1.pdf  the same as a PDF, for sending to a board designer
+  carrier/                    the carrier board schematic draft (KiCad project, PDF, netlist, BOM): start at carrier/README.md
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations); rules-2 for Sole planned
