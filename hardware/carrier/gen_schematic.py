@@ -154,6 +154,36 @@ text("Power flags (ERC)", fx - 10, fy)
 for i, net in enumerate(PWR_FLAGS):
     place(f"#FLG0{i+1}", "power", "PWR_FLAG", "PWR_FLAG", "", {"1": net}, fx + 10, fy + 20 + i * 15, in_bom=False, power=True)
 
+
+# design notes on the sheet (added after the first review)
+def note_block(lines, x, y, title):
+    text(title, x, y, 2.0)
+    body = "\\n".join(lines)
+    items.append(f'  (text "{body}" (at {x:.2f} {y + 6:.2f} 0) (effects (font (size 1.5 1.5)) (justify left top)) (uuid {U()}))')
+
+nx = fx - 10
+note_block([
+    "1. SUN-SENSOR LOOP: J1 -> D0 -> Q1 -> RSH1 -> GND",
+    "   Panel short-circuit current, ~1 ms every 10 s. Panel Isc 5.40 A (label), max ~6 A in cold strong sun.",
+    "   A vertical panel peaks near 1.8 A at noon. The panel cannot supply more than its Isc.",
+    "2. BOARD SUPPLY: PV+ -> F1 (2 A) -> D1 (3 A) -> buck -> +5V",
+    "   Under 0.3 A continuous. F1 and D1 are NOT in the measured current path:",
+    "   F1 sits after the Q1 node so the short-circuit pulses never pass through it.",
+    "3. AUX (optional add-on): PV+ -> F4 (fitted only with an add-on, <= 9 A) -> D5 -> J12",
+    "   Never through the shunt. D0 and D5 need cooling above ~2 A.",
+    "J1 and J12 '>= 15 A' is the terminal and wire rating, not a measured current.",
+], nx, 170, "Current paths")
+note_block([
+    "ISENSE (GPIO 35): RSH1 5 mOhm x INA180A3 gain 100 = 0.5 V/A.",
+    "   Measured range 0-6 A (pulsed). 1.8 A -> 0.9 V; 5.4 A -> 2.7 V. Output clamps at the 3.3 V supply (~6.6 A): harmless.",
+    "   Gain 100 is deliberate: low vertical-panel currents stay well inside the ADC's range.",
+    "   Shunt dissipation 0.18 W only during each 1 ms pulse; 2 W rating is for pulse robustness.",
+    "VDIV (GPIO 34): R1 100k / R2 4k7 = x 22.3 (R2 was 5k6, changed after review).",
+    "   Panel Voc 44.5 V -> 2.00 V; cold morning 48 V -> 2.15 V; board rating 60 V -> 2.69 V.",
+    "   ESP32 ADC accurate to ~2.45 V (= 54 V panel); pin absolute max 3.6 V. R1 limits any fault current to < 1 mA.",
+    "   Firmware: DIVIDER = (100 + 4.7) / 4.7 (pva-fw-6.1.1).",
+], nx, 225, "Measurement ranges")
+
 sch = ['(kicad_sch (version 20230121) (generator eeschema)', f'  (uuid {ROOT})', '  (paper "A1")',
        '  (title_block (title "PVA carrier board v1") (date "2026-10-20") (rev "draft-1") (company "photovoltaic-art / SUNDIAL")',
        '    (comment 1 "Generated from hardware/CARRIER.md by gen_schematic.py") (comment 2 "Draft: engineer review required before manufacture"))',

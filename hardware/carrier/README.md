@@ -45,11 +45,19 @@ A KiCad schematic for the carrier board, generated from the specification in [..
 
 ## What the calculations show (`checks.txt`)
 
-- **Panel voltage (GPIO 34):** the ESP32's analog input reads reliably up to about 2.45 V, which is about 46 V of panel voltage. The panel's 44.5 V open-circuit voltage reads correctly; a cold-morning 48 V reads slightly low. That doesn't affect the dawn gate (12 V) or dusk (7 V).
+- **Panel voltage (GPIO 34):** R2 is now 4.7 kΩ (was 5.6 kΩ). The ESP32's analog input reads accurately up to about 2.45 V, which is now about 54 V of panel voltage: the 44.5 V open-circuit voltage gives 2.00 V, a cold-morning 48 V gives 2.15 V, and the board's 60 V rating gives 2.69 V, under the pin's 3.6 V absolute maximum. The 7 V dusk threshold still gives 0.31 V.
 - **Sun current (GPIO 35):** 0.5 V per amp, reliable to about 4.9 A. A vertical panel peaks near 1.8 A (0.9 V), with plenty of margin. Only a tilted panel in full sun would exceed the reliable range.
 - **Supercaps (5 F at 5 V):** about 45 seconds of ride-through at 0.5 W, as USES.md states.
 - **Shunt:** 0.18 W during each 1 ms pulse at 6 A, negligible on average.
 - **AUX:** above about 2 A the diodes D0 and D5 need real cooling (6 W in D5 at 9 A).
+
+## Review log
+
+**Review 1 (20 Oct 2026), schematic PDF only.** Three points, all answered:
+
+1. *Current-sense range too low for 15 A.* The sensor only sees the panel's own short-circuit current: 5.40 A on the label, about 6 A at most. 15 A is the terminal and wire rating. Gain 100 is deliberate for a vertical panel (about 1.8 A at noon). Saturation above about 6.6 A is harmless. **Change:** measurement ranges noted on the sheet.
+2. *2 A fuse and 3 A diode on a 15 A input?* F1 and D1 are only in the board-supply branch (under 0.3 A), not in the measured current path; F1 sits after the Q1 node so short-circuit pulses never pass through it. **Change:** current-path note on the sheet.
+3. *60 V gives 3.17 V at the divider: little margin.* 60 V is the board rating, not an expected voltage (Voc 44.5 V, about 48 V on a cold morning). It was still below the pin's 3.6 V maximum, but above the ADC's accurate range. **Change:** R2 5.6 kΩ → 4.7 kΩ; firmware `DIVIDER` updated (pva-fw-6.1.1).
 
 ## Next steps
 

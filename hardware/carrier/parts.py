@@ -50,7 +50,7 @@ SECTIONS.append(("2. Fuse, diode, divider", [
     ("D1", ("Device", "D"), "S3M (1000 V 3 A)", "Diode_SMD:D_SMC", {"1": "BUCK_IN+", "2": "PV_F"}, "Reverse polarity; blocks Q1 pulses"),
     ("J2", ("Connector", "Screw_Terminal_01x02"), "BUCK IN + / -", T2_508, {"1": "BUCK_IN+", "2": "GND"}, "To ANGEEK buck input"),
     R("R1", "100k 1%", R0805, "PV_F", "VDIV"),
-    R("R2", "5k6 1%", R0603, "VDIV", "GND"),
+    R("R2", "4k7 1%", R0603, "VDIV", "GND", "Was 5k6; changed after review (48 V -> 2.15 V)"),
     C("C5", "100n", C0603, "VDIV", "GND"),
 ]))
 

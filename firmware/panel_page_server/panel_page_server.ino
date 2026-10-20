@@ -63,7 +63,7 @@
     input capacitor from being shorted.
   - TVS diode SMAJ5.0A across the 5 V output (stage 2).
   - DS18B20 on the panel back: red 3.3 V, black GND, yellow GPIO 4, 4.7k GPIO 4 to 3.3 V.
-  - Panel voltage (stage 2): Panel + -> 100k -> GPIO 34 -> 5.6k -> GND (+ 100 nF).
+  - Panel voltage (stage 2): Panel + -> 100k -> GPIO 34 -> 4.7k -> GND (+ 100 nF). 48 V -> 2.15 V, 60 V -> 2.7 V.
     Must be GPIO 32–39 on the original ESP32 (ADC1): the others stop working with Wi-Fi.
   - DS3231 (stage 2): 3.3 V, GND, SDA GPIO 21, SCL GPIO 22.
   - Sun sensor (stage 2): logic-level N-MOSFET (>=60 V, >=20 A) across the panel,
@@ -141,7 +141,7 @@
 const char* PANEL_ID      = PVA_PANEL_ID;           // also the Wi-Fi name
 const char* AP_PASS       = PVA_AP_PASS;            // "" = open network
 const char* ADMIN_KEY     = PVA_ADMIN_KEY;          // a different key per panel
-const char* FW_VERSION    = "pva-fw-6.1";
+const char* FW_VERSION    = "pva-fw-6.1.1";
 const char* RULES_VERSION = "rules-1";              // keep in step with index.html
 
 // ---------------- place ----------------
@@ -149,7 +149,7 @@ const char*  TZ_INFO = "CET-1CEST,M3.5.0,M10.5.0/3"; // Italy
 const double LAT = 40.2986, LNG = 8.4970;            // Bosa: the dial runs on the town's sun
 
 // ---------------- behaviour ----------------
-const float    DIVIDER        = (100.0 + 5.6) / 5.6;
+const float    DIVIDER        = (100.0 + 4.7) / 4.7;   // R1 100k, R2 4k7 (carrier v1)
 const float    SHUNT_OHM      = 0.005;              // sun sensor shunt
 const float    SENSE_GAIN     = 100.0;              // INA180A3 (gain 100: a vertical panel gives only ~1/3 of Isc)
 const float    SUN_FRACTION   = 1.0 / 3;            // sun = above this share of clear-noon current

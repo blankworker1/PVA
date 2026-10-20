@@ -4,6 +4,7 @@ firmware/**/panel_config.h
 # raw data downloaded from the panels
 *.csv
 !firmware/**/partitions.csv
+!hardware/carrier/bom.csv
 
 # generated output
 tools/*.pdf

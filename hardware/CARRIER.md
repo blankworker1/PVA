@@ -105,8 +105,8 @@ Scale: 0.5 V per amp at GPIO 35 (`SHUNT_OHM 0.005`, `SENSE_GAIN 100`). The panel
 | D1 | Rectifier diode | 1000 V 3 A, SMC (S3M class) | Reverse-polarity protection; stops Q1 pulses draining the buck's input capacitor |
 | J2 | Screw terminal, 2-way | 5.0 mm pitch, ≥ 5 A | `BUCK IN +` (after D1), `BUCK IN −` (GND) |
 | R1 | Resistor | 100 kΩ, 1 %, 0805 | From F1/D1 node |
-| R2 | Resistor | 5.6 kΩ, 1 %, 0603 | To GND |
-| C5 | Capacitor | 100 nF, 0603 | Across R2; divider to GPIO 34 (45 V → 2.4 V, 60 V → 3.2 V) |
+| R2 | Resistor | 4.7 kΩ, 1 %, 0603 | To GND (was 5.6 kΩ: changed after review so a cold-morning 48 V stays inside the ADC's accurate range) |
+| C5 | Capacitor | 100 nF, 0603 | Across R2; divider to GPIO 34 (45 V → 2.0 V, 48 V → 2.15 V, 60 V → 2.7 V; the ESP32 reads accurately to about 2.45 V, i.e. 54 V) |
 
 ### 3. 5 V rail
 
@@ -260,7 +260,7 @@ add-on use that spare power through its own converter, switched by the relay out
 
 ## Firmware
 
-Firmware 6.1 matches: pins GPIO 4/21/22/25/34/35, `SHUNT_OHM 0.005`, `SENSE_GAIN 100`.
+Firmware 6.1.1 matches: pins GPIO 4/21/22/25/34/35, `SHUNT_OHM 0.005`, `SENSE_GAIN 100`, `DIVIDER (100 + 4.7) / 4.7`.
 The gate driver is non-inverting, so GPIO 25 high still means "short the panel".
 The microSD socket and the spare pins are unused until a later firmware adds them; nothing on them affects boot.
 

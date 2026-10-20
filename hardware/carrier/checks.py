@@ -1,5 +1,5 @@
 # Design checks for the PVA carrier board v1 (figures from hardware/CARRIER.md)
-R1, R2 = 100e3, 5.6e3
+R1, R2 = 100e3, 4.7e3
 k = R2/(R1+R2)
 print("Divider ratio %.4f (x%.2f)" % (k, 1/k))
 for v in (7, 8, 12, 37.5, 44.5, 48, 60):

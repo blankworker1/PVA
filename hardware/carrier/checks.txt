@@ -1,12 +1,12 @@
-Divider ratio 0.0530 (x18.86)
-  panel   7.0 V -> GPIO34 0.371 V
-  panel   8.0 V -> GPIO34 0.424 V
-  panel  12.0 V -> GPIO34 0.636 V
-  panel  37.5 V -> GPIO34 1.989 V
-  panel  44.5 V -> GPIO34 2.360 V
-  panel  48.0 V -> GPIO34 2.545 V
-  panel  60.0 V -> GPIO34 3.182 V
-  ESP32 ADC, 12 dB attenuation: recommended range 0.15-2.45 V -> top of reliable range = 46.2 V panel
+Divider ratio 0.0449 (x22.28)
+  panel   7.0 V -> GPIO34 0.314 V
+  panel   8.0 V -> GPIO34 0.359 V
+  panel  12.0 V -> GPIO34 0.539 V
+  panel  37.5 V -> GPIO34 1.683 V
+  panel  44.5 V -> GPIO34 1.998 V
+  panel  48.0 V -> GPIO34 2.155 V
+  panel  60.0 V -> GPIO34 2.693 V
+  ESP32 ADC, 12 dB attenuation: recommended range 0.15-2.45 V -> top of reliable range = 54.6 V panel
 Current sense 0.50 V/A
   Isc 0.60 A -> GPIO35 0.300 V   shunt dissipation during pulse 0.002 W
   Isc 1.80 A -> GPIO35 0.900 V   shunt dissipation during pulse 0.016 W
