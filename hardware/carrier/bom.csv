@@ -11,10 +11,11 @@ D2,1,"SMAJ5.0A (TVS, unidirectional)",Diode_SMD:D_SMA,yes,3,
 D3,1,ESD 3.3 V (e.g. PESD3V3L1BA),Diode_SMD:D_SOD-323,yes,6,At the terminal
 D4,1,SS14 (flyback clamp),Diode_SMD:D_SMA,yes,9,
 D5,1,Schottky >=100 V >=10 A (MBR10100 class),Package_TO_SOT_THT:TO-220-2_Vertical,yes,10,Essential: isolates add-on capacitors from Q1 pulses; heatsink if AUX > ~2 A
+D6,1,DNP: SMCJ58A TVS (fit after bench test if needed),Diode_SMD:D_SMC,no (DNP),1,"ADDED, review 2: footprint only. If fitted, Q1 must be >= 100 V (clamp ~90 V)"
 F1,1,2 A slow-blow,Fuse:Fuse_1812_4532Metric,yes,2,After the Q1 node
 F2,1,PTC 0.5 A hold,Fuse:Fuse_1206_3216Metric,yes,9,
 F3,1,PTC 0.2 A hold,Fuse:Fuse_0805_2012Metric,yes,9,Feeds J11 3V3 and the header 3V3 pins
-F4,1,"ATO blade holder, fuse NOT fitted (<=9 A)",Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165,holder only,10,Empty holder = AUX dead
+F4,1,"ATO blade holder, fuse NOT fitted (<=3 A on v1; 9 A only with D5 heatsink)",Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165,holder only,10,Empty holder = AUX dead
 H1 H2 H3 H4,4,M3,MountingHole:MountingHole_3.2mm_M3,yes,Mechanical,"3.5 mm from corners, provisional"
 J1,1,"PANEL+ / PANEL- (>=15 A, 4-6 mm2)",TerminalBlock_MetzConnect:TerminalBlock_MetzConnect_Type067_RT01902HDWC_1x02_P10.00mm_Horizontal,yes,1,Board edge; GND here is PANEL-
 J2,1,BUCK IN + / -,"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",yes,2,To ANGEEK buck input
@@ -33,7 +34,7 @@ J14,1,"ESP32 left row: EN,36,39,34,35,32,33,25,26,27,14,12,13,GND,VIN",Connector
 J15,1,"ESP32 right row: 23,22,1,3,21,19,18,5,17,16,4,2,15,GND,3V3",Connector_PinSocket_2.54mm:PinSocket_1x15_P2.54mm_Vertical,yes,4,"EN, 1, 3, 2, 12, 15 not brought out"
 JP1,1,Jumper: remove = sun sensor off,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,yes,1,
 LED1,1,"Green, ~0.3 mA",LED_SMD:LED_0603_1608Metric,yes,3,5 V present; dim on purpose
-Q1,1,N-MOSFET >=60 V >=20 A Rds(on)<=20 mOhm @4.5 V,Package_TO_SOT_SMD:TO-252-2,yes,1,Sun sensor: shorts the panel ~1 ms every 10 s
+Q1,1,N-MOSFET >=60 V (>=100 V if D6 fitted) >=20 A Rds(on)<=20 mOhm @4.5 V,Package_TO_SOT_SMD:TO-252-2,yes,1,Sun sensor: shorts the panel ~1 ms every 10 s
 R1,1,100k 1%,Resistor_SMD:R_0805_2012Metric,yes,2,
 R2,1,4k7 1%,Resistor_SMD:R_0603_1608Metric,yes,2,Was 5k6; changed after review (48 V -> 2.15 V)
 R4,1,10R,Resistor_SMD:R_0603_1608Metric,yes,1,
@@ -42,7 +43,7 @@ R6,1,1k,Resistor_SMD:R_0603_1608Metric,yes,1,
 R7 R8,2,10k,Resistor_SMD:R_0805_2012Metric,yes,3,Balancing
 R10 R11 R12,3,4k7,Resistor_SMD:R_0603_1608Metric,yes,5,
 R13,1,100R,Resistor_SMD:R_0603_1608Metric,yes,6,
-R18,1,100k,Resistor_SMD:R_0603_1608Metric,yes,9,Switched output off at boot
+R18 R21,2,100k,Resistor_SMD:R_0603_1608Metric,yes,1,"ADDED, review 2: Q1 gate-source pull-down; holds Q1 off while U3 is unpowered at dawn; Switched output off at boot"
 R19,1,0R,Resistor_SMD:R_0603_1608Metric,yes,9,Remove to free GPIO 27
 R20,1,DNP,Resistor_SMD:R_0603_1608Metric,no (DNP),6,Spec ref R12b. Footprint only: stronger pull-up for long cable
 RSH1,1,5m 1% 2512 >=2 W,Resistor_SMD:R_2512_6332Metric,yes,1,Spec ref R_SH. Kelvin connections to U2; star ground at the GND end

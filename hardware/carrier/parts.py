@@ -24,7 +24,7 @@ SECTIONS.append(("1. Panel input and sun sensor", [
     ("D0", ("Device", "D_Schottky_Dual_CommonCathode_AKA_Parallel"), ">=100 V >=15 A dual Schottky (e.g. 20 A 100 V)",
         "Package_TO_SOT_SMD:TO-263-2", {"1": "PANEL+", "2": "PV+", "3": "PANEL+"},
         "Input protection; cooling area; carries AUX current too"),
-    ("Q1", ("Device", "Q_NMOS_GDS"), "N-MOSFET >=60 V >=20 A Rds(on)<=20 mOhm @4.5 V", "Package_TO_SOT_SMD:TO-252-2",
+    ("Q1", ("Device", "Q_NMOS_GDS"), "N-MOSFET >=60 V (>=100 V if D6 fitted) >=20 A Rds(on)<=20 mOhm @4.5 V", "Package_TO_SOT_SMD:TO-252-2",
         {"1": "GATE", "2": "PV+", "3": "SHUNT_TOP"}, "Sun sensor: shorts the panel ~1 ms every 10 s"),
     R("RSH1", "5m 1% 2512 >=2 W", "Resistor_SMD:R_2512_6332Metric", "SHUNT_TOP", "GND",
         "Spec ref R_SH. Kelvin connections to U2; star ground at the GND end"),
@@ -40,6 +40,9 @@ SECTIONS.append(("1. Panel input and sun sensor", [
     C("C11", "1u", C0603, "+5V", "GND", "ADDED, not in spec v1: U3 supply decoupling (datasheet requirement)"),
     R("R4", "10R", R0603, "GATE_DRV", "GATE"),
     R("R5", "10k", R0603, "GATE_IN", "GND", "Q1 stays off while the ESP32 boots"),
+    R("R21", "100k", R0603, "GATE", "SHUNT_TOP", "ADDED, review 2: Q1 gate-source pull-down; holds Q1 off while U3 is unpowered at dawn"),
+    ("D6", ("Device", "D_Zener"), "DNP: SMCJ58A TVS (fit after bench test if needed)", "Diode_SMD:D_SMC", {"1": "PV+", "2": "GND"},
+        "ADDED, review 2: footprint only. If fitted, Q1 must be >= 100 V (clamp ~90 V)"),
     ("JP1", ("Jumper", "Jumper_2_Open"), "Jumper: remove = sun sensor off", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
         {"1": "GPIO25_GATE", "2": "GATE_IN"}, ""),
 ]))
@@ -155,7 +158,7 @@ SECTIONS.append(("9. Power take-off for add-ons", [
 SECTIONS.append(("10. AUX power out", [
     ("J12", ("Connector", "Screw_Terminal_01x02"), "AUX + / - (>=15 A)", T2_HC, {"1": "AUX+", "2": "GND"},
         "AUX- is PANEL-: never through the shunt"),
-    ("F4", ("Device", "Fuse"), "ATO blade holder, fuse NOT fitted (<=9 A)", "Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165",
+    ("F4", ("Device", "Fuse"), "ATO blade holder, fuse NOT fitted (<=3 A on v1; 9 A only with D5 heatsink)", "Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165",
         {"1": "PV+", "2": "AUX_F"}, "Empty holder = AUX dead"),
     ("D5", ("Device", "D_Schottky"), "Schottky >=100 V >=10 A (MBR10100 class)", "Package_TO_SOT_THT:TO-220-2_Vertical",
         {"1": "AUX+", "2": "AUX_F"}, "Essential: isolates add-on capacitors from Q1 pulses; heatsink if AUX > ~2 A"),

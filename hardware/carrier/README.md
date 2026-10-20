@@ -35,8 +35,9 @@ A KiCad schematic for the carrier board, generated from the specification in [..
 3. **Q1** uses a DPAK (TO-252) footprint: gate pad 1, drain on the tab, source pad 3.
 4. **Shunt RSH1** (spec R_SH) is a 2-pin 2512 resistor. The Kelvin connection to U2 is a **layout** rule: two thin traces from the inner ends of the pads.
 5. **U1** uses KiCad's DS3231M symbol, which has the same 16-pin pinout as the DS3231SN. Pins 5–12 go to GND, as the DS3231SN datasheet requires. RST is left unconnected.
-6. **U4 load switch:** AP22804AW5 (current-limited, SOT-23-5), fed from +5V as the spec describes. Confirm the enable polarity of the exact part (the spec needs active-high); its fault flag is not used.
+6. **U4 load switch:** AP22804AW5 (SOT-23-5), fed from +5V as the spec describes; its fault flag is not used. **Checked against the datasheet (review 2):** pin 1 OUT, 2 GND, 3 FLG, 4 EN, 5 IN; the "A" version is active-high; current limit 2.7–3.3 A; built-in soft start.
 7. **Added, not in spec v1:** C11 (1 µF, U3 gate-driver supply decoupling, required by its datasheet), and C12 and C13 (1 µF, U4 input and output). Remove them if the reviewer disagrees.
+13. **Added in review 2:** R21 (100 kΩ, Q1 gate to source), and D6 (SMCJ58A TVS on PV+, footprint only). Both are now also in CARRIER.md.
 8. **D2** (SMAJ5.0A, unidirectional TVS) is drawn with a Zener symbol; **D3** (3.3 V ESD on the probe line) as a bidirectional TVS.
 9. **High-current terminals J1 and J12** use a 10 mm-pitch footprint (MetzConnect Type 067) as a placeholder. The designer chooses an equivalent rated ≥ 15 A for 4–6 mm² wire.
 10. **microSD J8:** Hirose DM3AT push-push socket. Its detect switch connects SD_CD to GND, and R17 pulls SD_CD up. Whether the switch closes or opens when a card is inserted depends on the socket: check the datasheet, and set the firmware's polarity to match.
@@ -58,6 +59,16 @@ A KiCad schematic for the carrier board, generated from the specification in [..
 1. *Current-sense range too low for 15 A.* The sensor only sees the panel's own short-circuit current: 5.40 A on the label, about 6 A at most. 15 A is the terminal and wire rating. Gain 100 is deliberate for a vertical panel (about 1.8 A at noon). Saturation above about 6.6 A is harmless. **Change:** measurement ranges noted on the sheet.
 2. *2 A fuse and 3 A diode on a 15 A input?* F1 and D1 are only in the board-supply branch (under 0.3 A), not in the measured current path; F1 sits after the Q1 node so short-circuit pulses never pass through it. **Change:** current-path note on the sheet.
 3. *60 V gives 3.17 V at the divider: little margin.* 60 V is the board rating, not an expected voltage (Voc 44.5 V, about 48 V on a cold morning). It was still below the pin's 3.6 V maximum, but above the ADC's accurate range. **Change:** R2 5.6 kΩ → 4.7 kΩ; firmware `DIVIDER` updated (pva-fw-6.1.1).
+
+**Review 2 (20 Oct 2026), GitHub Copilot on parts.py, README and checks.txt; it could not see CARRIER.md.**
+
+1. *Critical: ESP32 boot/strap network missing.* Not applicable. The carrier takes a complete ELEGOO dev board, which has the EN pull-up, reset and boot buttons, USB-serial and strapping resistors. EN and GPIO 0, 2, 12, 15 are deliberately not brought out; GPIO 5 is held high by R14. **Change:** note on the sheet.
+2. *Critical: AP22804AW5 pinout unchecked.* Checked against the datasheet: pinout as wired, active-high enable, 2.7–3.3 A current limit, soft start. **No change.**
+3. *Critical: AUX at 9 A is thermally marginal.* Agreed: about 6 W in D5 and 4.5 W in D0. **Change:** AUX limited to a 3 A fuse on v1; 9 A only with D5 on a heatsink and D0's copper checked (CARRIER.md F4, parts.py, sheet note).
+4. *Should fix: no gate pull-down at Q1.* Agreed, and more than a robustness point: at dawn U3 is unpowered (no 5 V yet), its output floats, and the rising panel voltage can couple through Q1's drain-gate capacitance and turn Q1 partly on, shorting the panel before the board can start. **Change:** R21 100 kΩ gate to source.
+5. *Should fix: transients at the panel front end.* Partly agreed. When Q1 switches off, the panel lead's inductance can push PV+ above Voc. The energy is small (about 36 µJ for 2 µH at 6 A) and the buck's input capacitors should absorb it through F1 and D1, but it should be measured. **Change:** D6 TVS footprint (fit if needed; then Q1 ≥ 100 V), and a PV+ overshoot check added to the bench test.
+6. *Should fix: U4 depends on boot timing.* As intended: R18 keeps the switched output off until firmware enables it; GPIO 27 is not a strapping pin. **No change.**
+7. *Notes on the 60 V divider and INA180 margin:* covered by review 1. Above about 6.6 A the amplifier output clamps at its 3.3 V supply, which is harmless. **No change.**
 
 ## Next steps
 

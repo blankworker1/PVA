@@ -84,7 +84,7 @@ through a small fuse every 10 seconds. The fuse protects only the board side, so
 | --- | --- | --- | --- |
 | J1 | Screw terminal, 2-way, high current | ≥ 15 A, accepts 4–6 mm² (or ferrules), 7.62–10 mm pitch | Board edge; labelled `PANEL +` `PANEL −` |
 | D0 | Schottky diode, input protection | ≥ 100 V, ≥ 15 A, TO-220 or D2PAK (e.g. dual 20 A 100 V) | In `PANEL +`, straight after J1. **Protects Q1:** without it, a panel connected backwards would push its full short-circuit current through Q1's internal diode continuously and overheat it. Its ~0.5 V drop does not change the short-circuit reading. With AUX in use, D0 carries the AUX current too: size its cooling to that load |
-| Q1 | N-MOSFET | V_DS ≥ 60 V, I_D ≥ 20 A, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, DPAK/D2PAK or PowerPAK | Drain on the D0 cathode node (`PV+`), source on R_SH top |
+| Q1 | N-MOSFET | V_DS ≥ 60 V (≥ 100 V preferred if D6 is fitted, see below), I_D ≥ 20 A, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, DPAK/D2PAK or PowerPAK | Drain on the D0 cathode node (`PV+`), source on R_SH top |
 | R_SH | Shunt resistor | 5 mΩ, 1 %, 2512, ≥ 2 W | Between Q1 source and GND |
 | R_SH2 | Footprint only | 2512, parallel to R_SH | Option: two 10 mΩ in parallel instead of one 5 mΩ |
 | U2 | Current-sense amplifier **INA180A3** | Gain 100 V/V, SOT-23-5 | Supply 3V3 (output then can never exceed 3.3 V); IN+ to R_SH top, IN− to R_SH bottom by **Kelvin traces** |
@@ -93,6 +93,8 @@ through a small fuse every 10 seconds. The fuse protects only the board side, so
 | U3 | Low-side gate driver, non-inverting | Supply 4.5–18 V, input threshold works from 3.3 V (TC4427A / MCP1416 class), SOT-23-5 or SOIC-8 | Powered from 5V rail, so Q1 gets 5 V gate drive |
 | R4 | Gate resistor | 10 Ω, 0603 | U3 output to Q1 gate |
 | R5 | Pull-down | 10 kΩ, 0603 | U3 input to GND: Q1 stays off while the ESP32 boots |
+| R21 | Gate pull-down | 100 kΩ, 0603 | Q1 gate to source (`SHUNT_TOP`), at Q1. Added in review 2: before the 5 V rail exists (dawn), U3 is unpowered and its output floats; without R21 the rising panel voltage could couple through Q1's drain-gate capacitance and turn Q1 partly on, shorting the panel before the board can start |
+| D6 | TVS, footprint only (fit after the bench test if needed) | SMCJ58A class (stand-off 58 V), SMC | `PV+` to GND. Added in review 2: when Q1 switches off, the panel lead's inductance can kick `PV+` above V_oc. The buck's input capacitors (through F1 and D1) should absorb this; the v1 bench test checks it on the oscilloscope. If D6 is fitted, Q1 must be ≥ 100 V, because the TVS clamps at about 90 V |
 | JP1 | 2-pin header + jumper | | GPIO 25 to U3 input. **Remove the jumper to disable the sun sensor** |
 
 Scale: 0.5 V per amp at GPIO 35 (`SHUNT_OHM 0.005`, `SENSE_GAIN 100`). The panel (Trina TSM-185DC01) has I_sc 5.40 A, so full sun on a tilted panel would give 2.7 V, inside the ESP32's range. **Why gain 100, not 20:** mounted vertically, the clear-noon current is only about a third of I_sc (≈ 1.8 A → 0.9 V), and the sun threshold is a third of that (≈ 0.6 A → 0.3 V). With gain 20 these would sit at 0.04–0.2 V, where the ESP32's analog input reads poorly or not at all.
@@ -224,7 +226,7 @@ add-on use that spare power through its own converter, switched by the relay out
 | Ref | Part | Value / rating | Notes |
 | --- | --- | --- | --- |
 | J12 | Screw terminal, 2-way, high current | ≥ 15 A, 4–6 mm² | `AUX +`, `AUX −`. Board edge, beside J1 |
-| F4 | Fuse holder, blade (ATO) or 5 × 20 mm | fuse up to **9 A** (the panel's maximum series fuse) | **Fuse not fitted**: the builder fits one sized to the add-on. Empty holder = AUX dead |
+| F4 | Fuse holder, blade (ATO) or 5 × 20 mm | fuse up to **3 A on v1**; up to 9 A (the panel's maximum series fuse) only with D5 on a heatsink and D0's copper checked (review 2: at 9 A, D5 dissipates about 6 W and D0 about 4.5 W) | **Fuse not fitted**: the builder fits one sized to the add-on. Empty holder = AUX dead |
 | D5 | Schottky diode | ≥ 100 V, ≥ 10 A (TO-220 or D2PAK, e.g. MBR10100 class) | In `AUX +`, cathode towards J12 |
 
 - `AUX +` is taken from `PV+` (after D0, **before F1**, the same node as Q1's drain), then through F4 and D5. `AUX −` is `PANEL −`, so AUX current never passes through the shunt.
@@ -270,5 +272,5 @@ The microSD socket and the spare pins are unused until a later firmware adds the
 
 1. **Jumper JP1 off.** Power the board from a 12–24 V bench supply into J1, with the buck connected: check 5V, `MID` (about half of 5V), 3V3, the LED, the clock (set from the admin page, unplug, plug back in) and the probe. Reverse the supply leads briefly: nothing should happen.
 2. Connect a real panel, jumper JP1 off: check `VDIV` against a multimeter on the panel voltage.
-3. Jumper on, clear sun near noon: check `ISENSE` on an oscilloscope or by the firmware's `isc` reading against a multimeter's short-circuit current reading of the same panel.
+3. Jumper on, clear sun near noon: check `PV+` on the oscilloscope at Q1 turn-off for an overshoot above V_oc (decides whether D6 is fitted, review 2). Check `ISENSE` on an oscilloscope or by the firmware's `isc` reading against a multimeter's short-circuit current reading of the same panel.
 4. Run a full day with `BENCH 0`, then fix anything in v2.

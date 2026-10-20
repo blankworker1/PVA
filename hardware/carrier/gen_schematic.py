@@ -169,7 +169,7 @@ note_block([
     "2. BOARD SUPPLY: PV+ -> F1 (2 A) -> D1 (3 A) -> buck -> +5V",
     "   Under 0.3 A continuous. F1 and D1 are NOT in the measured current path:",
     "   F1 sits after the Q1 node so the short-circuit pulses never pass through it.",
-    "3. AUX (optional add-on): PV+ -> F4 (fitted only with an add-on, <= 9 A) -> D5 -> J12",
+    "3. AUX (optional add-on): PV+ -> F4 (fitted only with an add-on; <= 3 A on v1, 9 A only with D5 on a heatsink) -> D5 -> J12",
     "   Never through the shunt. D0 and D5 need cooling above ~2 A.",
     "J1 and J12 '>= 15 A' is the terminal and wire rating, not a measured current.",
 ], nx, 170, "Current paths")
@@ -183,6 +183,13 @@ note_block([
     "   ESP32 ADC accurate to ~2.45 V (= 54 V panel); pin absolute max 3.6 V. R1 limits any fault current to < 1 mA.",
     "   Firmware: DIVIDER = (100 + 4.7) / 4.7 (pva-fw-6.1.1).",
 ], nx, 225, "Measurement ranges")
+note_block([
+    "The ESP32 is a complete ELEGOO dev board plugged into J14/J15. Its EN pull-up, reset and boot buttons,",
+    "USB-serial converter and strapping resistors are on that board, not on the carrier.",
+    "EN and GPIO 0, 1, 2, 3, 12, 15 are deliberately not brought out. GPIO 5 (strapping) is held high by R14.",
+    "Q1 gate: U3 drives it when +5V exists; R21 (100k, gate-source) holds Q1 off before that, at dawn.",
+    "D6 (TVS on PV+): footprint only; fitted if the v1 bench test shows turn-off overshoot. Then Q1 >= 100 V.",
+], nx, 285, "ESP32 module and Q1 gate (review 2)")
 
 sch = ['(kicad_sch (version 20230121) (generator eeschema)', f'  (uuid {ROOT})', '  (paper "A1")',
        '  (title_block (title "PVA carrier board v1") (date "2026-10-20") (rev "draft-1") (company "photovoltaic-art / SUNDIAL")',
