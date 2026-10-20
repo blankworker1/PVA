@@ -3,7 +3,9 @@
 One small board per panel. It carries everything except the ESP32 and the buck converter, which plug in or wire on.
 Every part on the board is fitted by the board maker; the builder only plugs in, screws down and fits a coin cell.
 
-> Status: specification for the board designer, not yet drawn. v1 is also the bench test of the sun sensor,
+> Status: specification for the board designer. A **schematic draft** generated from this document is in [carrier/](carrier/README.md): KiCad project, PDF, netlist and BOM, not yet reviewed.
+>
+> v1 is also the bench test of the sun sensor,
 > so it carries test points and options. Order 5 for v1; fix, then order 10 of v2.
 
 ## Brief for the board designer

@@ -1,0 +1,28 @@
+Divider ratio 0.0530 (x18.86)
+  panel   7.0 V -> GPIO34 0.371 V
+  panel   8.0 V -> GPIO34 0.424 V
+  panel  12.0 V -> GPIO34 0.636 V
+  panel  37.5 V -> GPIO34 1.989 V
+  panel  44.5 V -> GPIO34 2.360 V
+  panel  48.0 V -> GPIO34 2.545 V
+  panel  60.0 V -> GPIO34 3.182 V
+  ESP32 ADC, 12 dB attenuation: recommended range 0.15-2.45 V -> top of reliable range = 46.2 V panel
+Current sense 0.50 V/A
+  Isc 0.60 A -> GPIO35 0.300 V   shunt dissipation during pulse 0.002 W
+  Isc 1.80 A -> GPIO35 0.900 V   shunt dissipation during pulse 0.016 W
+  Isc 3.00 A -> GPIO35 1.500 V   shunt dissipation during pulse 0.045 W
+  Isc 4.95 A -> GPIO35 2.475 V   shunt dissipation during pulse 0.123 W
+  Isc 5.40 A -> GPIO35 2.700 V   shunt dissipation during pulse 0.146 W
+  Isc 6.00 A -> GPIO35 3.000 V   shunt dissipation during pulse 0.180 W
+  reliable to 4.90 A (2.45 V); INA180 output clips near 3.28 V (=6.56 A)
+  shunt drop at 6 A: 30 mV (INA180 differential input full scale with gain 100 at 3.3 V supply ~ 33 mV)
+Supercap 5 F, 5.0->4.0 V: 22.5 J -> 56 s at 0.4 W
+Supercap 5 F, 5.0->4.0 V: 22.5 J -> 45 s at 0.5 W
+Supercap 5 F, 5.0->4.0 V: 22.5 J -> 38 s at 0.6 W
+Supercap per cell at 5.0 V: 2.50 V (rated 2.7 V); balancing leakage 0.25 mA
+RC filter R6 C7: tau = 10 us
+LED1 current: 0.30 mA
+Pulse duty: 1 ms every 10 s -> mean shunt loss 18.0 uW at 6 A
+AUX 2 A: D5 (~0.7 V) 1.4 W, D0 (~0.5 V) 1.0 W -> heatsinking needed above ~2 A
+AUX 5 A: D5 (~0.7 V) 3.5 W, D0 (~0.5 V) 2.5 W -> heatsinking needed above ~2 A
+AUX 9 A: D5 (~0.7 V) 6.3 W, D0 (~0.5 V) 4.5 W -> heatsinking needed above ~2 A
