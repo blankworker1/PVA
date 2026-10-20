@@ -70,6 +70,23 @@ A KiCad schematic for the carrier board, generated from the specification in [..
 6. *Should fix: U4 depends on boot timing.* As intended: R18 keeps the switched output off until firmware enables it; GPIO 27 is not a strapping pin. **No change.**
 7. *Notes on the 60 V divider and INA180 margin:* covered by review 1. Above about 6.6 A the amplifier output clamps at its 3.3 V supply, which is harmless. **No change.**
 
+## Manufacturer review and sign-off
+
+This package (CARRIER.md, this folder, `bom.csv`, the KiCad project) goes to the design-and-build company for review before layout. Please confirm each point in writing.
+
+**For the manufacturer**
+
+1. **Parts:** a part number for every BOM line, in stock at your supplier, with any substitutions listed. Especially D0, Q1, RSH1, U2, U3, U4, J1 and J12 (≥ 15 A terminals), and the microSD socket J8.
+2. **Q1 voltage rating:** quote one 60 V and one 100 V part (both logic-level, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, I_D ≥ 20 A). The 100 V part is needed if D6 is fitted after the bench test.
+3. **Layout:** the layout rules in CARRIER.md, in particular the two high-current loops, the Kelvin connections from RSH1 to U2, the star ground, the copper for D0, and the ESP32 antenna keep-out.
+4. **Manufacturability:** footprints, clearances (60 V on the panel side), board outline and mounting holes, and anything you would change to make the board easier or cheaper to build.
+5. **Scope of your review:** please state whether it covers the circuit design itself, or manufacturability and parts only.
+
+**Kept by PVA**
+
+- The ESP32 pin order and row spacing (photo of the ELEGOO board), and the box size for the mounting holes: supplied before layout.
+- The bench test of the v1 boards (CARRIER.md, "v1 bench test"), including the PV+ overshoot check that decides D6.
+
 ## Next steps
 
 1. Confirm the ESP32 pin order and spacing, and the box size for the mounting holes.
