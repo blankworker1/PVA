@@ -22,7 +22,7 @@ The three layers are specified against the carrier board in **[SUNDIAL.md](SUNDI
 
 | Layer | What it is | When | Where |
 | --- | --- | --- | --- |
-| **Sundial** | Gnomon, hour brackets and wall plate on the panel ([hardware/SUNDIAL.md](hardware/SUNDIAL.md)) | Always | On the wall |
+| **Sundial** | Gnomon, hour brackets and wall plate on the panel ([hardware/GNOMON.md](hardware/GNOMON.md)) | Always | On the wall |
 | **Sole** | The panels' daily record of sun, collected every fortnight, published as weekly editions of 63 dials | All year | The SUNDIAL website |
 | **The annual event** | Each day's dial drawn live and sealed at sunset; the visitors' book; one print per event | One week a year | The panel's own Wi-Fi, then the website |
 
@@ -72,7 +72,7 @@ hardware/
   CARRIER.md                  the carrier board: everything factory-fitted except the ESP32 and buck converter
   PVA_carrier_board_spec_v1.pdf  the same as a PDF, for sending to a board designer
   carrier/                    the carrier board schematic draft (KiCad project, PDF, netlist, BOM): start at carrier/README.md
-  SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
+  GNOMON.md                   the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations); rules-2 for Sole planned
   pva_import.py, sole_edition.py  planned: round downloads → SUNDIAL pages and Sole editions (SUNDIAL.md 3.4)
@@ -120,7 +120,7 @@ Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the s
 5. **Power chain.** Buck converter set to exactly 5.0 V before anything is connected; then fuse, diode, supercapacitor, TVS.
 6. **Sensors.** Probe on GPIO 4 · divider on GPIO 34 · DS3231 on GPIO 21/22 · sun sensor gate on GPIO 25, amplifier on GPIO 35.
 7. **Bench test.** On USB: set the clock, set the exhibition dates to today, check status (clock module fitted, probe found, voltage plausible), watch a dial form.
-8. **Frame.** Drill from the template; fit the gnomon at 50°, the 13 numbered hour brackets and the stand-off brackets ([hardware/SUNDIAL.md](hardware/SUNDIAL.md)).
+8. **Frame.** Drill from the template; fit the gnomon at 50°, the 13 numbered hour brackets and the stand-off brackets ([hardware/GNOMON.md](hardware/GNOMON.md)).
 
 **On site**
 
@@ -186,7 +186,7 @@ The visitor's phone counts once per solar hour as a dot on the dial, never ident
 - [ ] **Sole tools and pages:** rules-2 in `pva_rules.py`, `pva_import.py`, `sole_edition.py`, `docs/sole/` and `docs/sundial/` (SUNDIAL.md 3.3–3.4).
 - [ ] **First compile and bench test** of firmware draft 6.
 - [ ] **The girasole:** sunflower variety and sowing in May; a moveable chalkboard and its stand; where it stands on the route.
-- [ ] **Hour lines on the glass** (test on the pilot panel): thin or dotted lines radiating from the gnomon root at the hour-line angles in `hardware/SUNDIAL.md`, in removable UV-stable pinstripe tape first. Measure short-circuit current near solar noon with and without the lines. If the loss is negligible and the dial reads well, keep the lines and shorten the gnomon (safer, less reach from the wall), since the shadow is then read along the line, not at the brackets.
+- [ ] **Hour lines on the glass** (test on the pilot panel): thin or dotted lines radiating from the gnomon root at the hour-line angles in `hardware/GNOMON.md`, in removable UV-stable pinstripe tape first. Measure short-circuit current near solar noon with and without the lines. If the loss is negligible and the dial reads well, keep the lines and shorten the gnomon (safer, less reach from the wall), since the shadow is then read along the line, not at the brackets.
 
 **Optional**
 
@@ -195,7 +195,7 @@ The visitor's phone counts once per solar hour as a dot on the dial, never ident
 
 ## Hardware per panel
 
-Each panel is also a vertical sundial, mounted vertical and facing due south: see [hardware/SUNDIAL.md](hardware/SUNDIAL.md) for the gnomon, the drilling template, the installation and the noon-shadow wall test.
+Each panel is also a vertical sundial, mounted vertical and facing due south: see [hardware/GNOMON.md](hardware/GNOMON.md) for the gnomon, the drilling template, the installation and the noon-shadow wall test.
 
 **Stage 1:** 36 V 180 W PV panel · DC-DC buck converter (8–60 V in), set to exactly 5.0 V with a multimeter **before** connecting anything · 5.5 V 4 F supercapacitor across the 5 V output (in the shaded box: it ages fast in heat) · ELEGOO ESP32 30-pin on a screw-terminal breakout · DS18B20 waterproof probe on the panel back, data on GPIO 4, 4.7 kΩ from GPIO 4 to 3.3 V.
 

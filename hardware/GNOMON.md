@@ -1,4 +1,4 @@
-# The sundial and mounting
+# The gnomon: the sundial and mounting
 
 Each PVA panel is also a real vertical sundial. It reads the same solar time as the digital dial on the visitor's phone: solar noon at the top, morning on the left, afternoon on the right. The digital dial is drawn by the panel's data; the sundial is read from the gnomon's shadow on the glass. Two dials, one sun.
 

@@ -37,7 +37,7 @@ This document takes the carrier board v1 ([hardware/CARRIER.md](hardware/CARRIER
 
 **Purpose:** a recycled panel on a wall that is also a real vertical sundial, readable by anyone, every day, with no phone and no electricity. This is the layer most people will ever meet.
 
-**Specified in** [hardware/SUNDIAL.md](hardware/SUNDIAL.md): a 60 cm gnomon at 50° on the panel's centre line, 13 numbered hour brackets for solar hours 6–18, due-south mounting with the wall test and the noon-shadow check. Everything bolts to the frame; nothing touches the glass.
+**Specified in** [hardware/GNOMON.md](hardware/GNOMON.md): a 60 cm gnomon at 50° on the panel's centre line, 13 numbered hour brackets for solar hours 6–18, due-south mounting with the wall test and the noon-shadow check. Everything bolts to the frame; nothing touches the glass.
 
 **What the passer-by sees:** a panel, its shadow and the hour numbers, and a small wall plate with the panel's number and a QR code. **No visible digital layer.** The Wi-Fi and the dial on the phone are found only by those who look.
 
@@ -85,7 +85,7 @@ section is sun if more than half its minutes have  isc_avg > SUN_FRACTION × exp
 
 - `K` comes from the existing calibration: `iref` divided by cos(incidence) at the moment it was taken. That moment is in the admin action log (4.3), so **no new calibration and no firmware change** are needed. Each year's pre-event calibration gives a new `K`; the tools use, for each day, the calibration in force on that day.
 - `D` is a small diffuse-light floor, set once from an overcast day's data.
-- The panels are packed out to face due south at installation ([hardware/SUNDIAL.md](hardware/SUNDIAL.md)), so the facing angle is 180° for all nine.
+- The panels are packed out to face due south at installation ([hardware/GNOMON.md](hardware/GNOMON.md)), so the facing angle is 180° for all nine.
 - Rules-2 works on the **1-minute sun log** (`isc_avg`), which firmware 6 keeps every day. Rules-1 counted the 10-second readings on the panel; outside the exhibition those are not stored, so rules-2 counts minutes instead.
 
 Each SUNDIAL year keeps the rules it was drawn with; Sole is always rules-2, and every edition says so. **The SUNDIAL prints remain the only canonical artworks;** Sole editions are the record.

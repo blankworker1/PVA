@@ -19,7 +19,7 @@
 1. **Bosa is built in.** Coordinates, time zone and the dial's day-length scale are written into four places (firmware, `pva_rules.py`, the panel page, the map), plus Bosa text in the tools.
 2. **One panel model.** The carrier is sized for the Trina 185 W; other end-of-life panels need a compatibility check.
 3. **One latitude.** The sundial drawings are calculated for 40.3° N.
-4. **No guide.** The knowledge needed is spread across README, SUNDIAL.md, CARRIER.md and hardware/SUNDIAL.md, with Bosa's texts but no templates.
+4. **No guide.** The knowledge needed is spread across README, SUNDIAL.md, CARRIER.md and hardware/GNOMON.md, with Bosa's texts but no templates.
 5. **No safe key set-up.** Nothing stops a copier from installing the example keys.
 
 **The fix, in one sentence:** move everything that belongs to Bosa into **one folder (`site/`)**, make every part of the system read from it, add a guide, check automatically that no Bosa remains outside that folder, prove it in the field, and only then add the licences.
