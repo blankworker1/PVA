@@ -347,3 +347,19 @@ SUNDIAL is a **permanent installation**: a sundial and monitor all year, with an
 | Monitoring | Sole on the website, weekly editions of 63 dials, rules-2, fortnightly round, run by PVA |
 | What the panel claims | Sun hours and temperature, never energy produced |
 | Notice board, structured feedback, service firmware | Dropped: outside the core proposition |
+
+---
+
+## 8. Beyond SUNDIAL: the battery tier
+
+Carrier v1 also runs a second kind of node, **unchanged**: an **interactive node** for GO TO BED (PVA no. 2), powered from a 12 V LiFePO₄ battery and a Victron SmartSolar MPPT 75/15 instead of straight from its panel. **The power tier follows the load, not the role:** a node that only serves pages stays a wall node; a node that moves, flips, lights or releases something is an interactive node.
+
+| | Wall node (SUNDIAL) | Interactive node |
+| --- | --- | --- |
+| Panel connects to | Carrier J1 | MPPT → battery → MPPT load output → carrier J1 |
+| JP1 | On | **Off, and the sun sensor compiled out:** Q1 would otherwise short the battery |
+| Sun reading | Short-circuit current (light) | Victron PV power over VE.Direct on J10 (energy harvested) |
+| GPIO 34 reads | Panel voltage | Battery voltage |
+| Firmware | Wall build | Interactive build |
+
+One board, two wirings, two firmware builds; the jumper says which. The full specification, and the first interactive node, the street auction, are in **[interactive-auction.md](interactive-auction.md)**. Nothing in it affects SUNDIAL.

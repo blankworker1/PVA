@@ -44,6 +44,7 @@ A visit during SUNDIAL: the flyer's QR code opens the map → at a pin, join tha
 
 ```
 USES.md                       the three layers specified against carrier v1: sundial, Sole, the annual event
+interactive-auction.md        carrier v1 on a battery (interactive nodes) and the street auction, for GO TO BED
 docs/
   index.html                  the map — the only part published on the website
   sundial/, sole/, data/      planned: SUNDIAL sheets and Sole editions (USES.md 3.3)
