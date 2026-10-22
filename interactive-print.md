@@ -4,7 +4,7 @@ A SUNSET interactive node that **turns digital stamps into paper stamps, and bac
 
 It runs on carrier v1 on the battery tier: the panel feeds a Victron SmartSolar MPPT 75/15 and a 12 V LiFePO₄ battery, with JP1 off and the sun sensor compiled out. The tier is specified in [interactive-auction.md](interactive-auction.md), sections 1 and 2; this document covers only what is different.
 
-> Status: draft 1, 22 Oct 2026. Concept and flows settled in discussion; artwork to be designed; nothing built. **Nothing here changes the carrier board.**
+> Status: draft 2, 22 Oct 2026 (each mint issues two parts: the stamp as artwork and a redeem sticker). Artwork to be designed; nothing built. **Nothing here changes the carrier board.**
 
 ---
 
@@ -31,27 +31,28 @@ It runs on carrier v1 on the battery tier: the panel feeds a Victron SmartSolar 
 
 ### 2.1 The object
 
-- **Round thermal labels on a roll.** Each stamp is a round, self-adhesive label, printed by the node.
-- **Cut square.** The printer's cutter cuts the backing between labels, so each stamp comes out as a **square of backing paper carrying one round label**, like a postage stamp on its sheet. It can be kept, handed on, or peeled and stuck.
-- **Artwork to be decided.** The design is open (5). Candidates for what each stamp carries:
+- **Round thermal labels on a roll.** Each label is round and self-adhesive, printed by the node.
+- **Cut square.** The printer's cutter cuts the backing between labels, so each label comes out on a **square of backing paper**, like a postage stamp on its sheet.
+- **Every mint issues two parts:**
 
-| Element | Purpose |
-| --- | --- |
-| The node's 5 × 5 logo | Where it was minted, as on digital stamps |
-| Value | 1, 5 or 10 stamps (2.2) |
-| Date and serial | Each stamp is unique |
-| QR code | The signed one-time code, for redemption (3.2) |
-| Short typed code | Fallback if the QR is damaged |
-| *(possible)* The day's sundial dial, dithered | Every stamp shows the sun of the day it was minted |
+| Part | What it is | Carries |
+| --- | --- | --- |
+| **The stamp** (artwork) | A gift. It has **no value** and can be kept, given, shown, photographed or stuck anywhere | The artwork (to be decided, 5); the node's 5 × 5 logo; date and serial. *(Possible:* the day's sundial dial, dithered, so every stamp shows the sun of the day it was minted*)* |
+| **The redeem sticker** | The value. A plain round sticker that turns back into digital stamps (3.2) | Value; the same serial; the QR code with the signed one-time code; a short typed code as fallback |
+
+- **Separating art and value.** The artwork can travel freely as promotion for SUNSET, because copying it costs nothing: there is nothing to steal. All the value, and all the security, sits on the plain sticker. The QR also gets a whole label to itself, so it can be printed larger and read more reliably.
+- **The shared serial** links the pair, so a stamp and its sticker can always be matched (provenance), but only the sticker can be redeemed.
+- **Stuck to things.** The redeem sticker is adhesive: stuck on an object, it attaches a value to it. A postcard, a bottle or a lot at the auction can carry its price on its back.
+- **Printed together.** The two labels are printed one after the other. The cutter can cut after each label (two separate squares) or after the pair (one strip of two, like a *se-tenant* pair of postage stamps). Chosen with the artwork (5).
 
 ### 2.2 Denominations
 
-Paper stamps are printed in **denominations** (for example 1, 5 and 10), so paper behaves like cash: a handful of notes rather than a sheet of ones. The values are set in the pilot.
+Redeem stickers are printed in **denominations** (for example 1, 5 and 10), so paper behaves like cash: a handful of notes rather than a sheet of ones. The values are set in the pilot.
 
 ### 2.3 Its weaknesses, stated
 
 - **Thermal paper is fragile.** It fades with time and light, and darkens with heat (thermal coatings react at roughly 60–70 °C). Stored in the shade it lasts years; left on a dashboard it does not. The project can accept this as a feature: paper money that slowly disappears.
-- **Copies are possible.** A photocopy of the QR is as good as the original until one of them is redeemed. Section 3.3 limits the damage to "first to redeem wins". It is the old question of every printed note, run as a street experiment: what makes a piece of paper trustworthy when anyone can copy it?
+- **Copies are possible.** A photocopy of a redeem sticker's QR is as good as the original until one of them is redeemed. Section 3.3 limits the damage to "first to redeem wins". It is the old question of every printed note, run as a street experiment: what makes a piece of paper trustworthy when anyone can copy it?
 
 ---
 
@@ -61,15 +62,15 @@ Paper stamps are printed in **denominations** (for example 1, 5 and 10), so pape
 
 1. At the print node, the visitor opens the mint page and chooses the value to print.
 2. The stamps are **spent into the node** from the passport page (marked spent on the public list), plus the printing fee (3.4). This is the same step as placing a bid at the auction (interactive-auction.md 3.4).
-3. The node writes the new paper stamp to flash (serial, value, code, unspent), signs it, then prints and cuts it.
-4. The visitor takes the stamp from the output slot.
+3. The node writes the new paper stamp to flash (serial, value, code, unspent), signs it, then prints and cuts **the stamp and the redeem sticker**.
+4. The visitor takes both from the output slot.
 
 ### 3.2 Paper to digital (redeeming)
 
-1. The holder joins the **printing node's** Wi-Fi and scans the stamp's QR with the phone's ordinary camera app, which opens the node's redeem page. (A web page served by the node cannot use the camera itself, because the node's pages are plain HTTP; the phone's own camera app can read the QR and open the link.) The short code can be typed instead.
+1. The holder joins the **printing node's** Wi-Fi and scans the redeem sticker's QR with the phone's ordinary camera app, which opens the node's redeem page. (A web page served by the node cannot use the camera itself, because the node's pages are plain HTTP; the phone's own camera app can read the QR and open the link.) The short code can be typed instead.
 2. The node checks the signature and that the paper stamp is unspent.
 3. It marks the paper stamp spent and issues fresh digital stamps of the same value to the phone (commit and reveal, as in interactive-auction.md 3.5).
-4. **The redemption slot:** the redeemed paper can be dropped into a perspex box beside the node, a growing, visible pile of spent money. Dropping it in is not enforced; the node's spent list is what counts.
+4. **The redemption slot:** the redeemed sticker can be dropped into a perspex box beside the node, a growing, visible pile of spent money. Dropping it in is not enforced; the node's spent list is what counts.
 
 ### 3.3 Why redemption is at the printing node only
 
@@ -79,7 +80,7 @@ SUNSET nodes learn of each other's spends only when couriers carry blocks betwee
 
 ### 3.4 The printing fee
 
-Minting costs a small fee in stamps (for example 1 per print), set in the pilot. It covers the paper in spirit, and it is a **sink**: those stamps leave circulation. Redeeming is free.
+Minting costs a small fee in stamps (for example 1 per print), set in the pilot. **The fee is what pays for the artwork stamp:** the gift half of every mint. It is a **sink**: those stamps leave circulation. Redeeming is free.
 
 ---
 
@@ -130,7 +131,9 @@ The label roll must stay well below the temperature at which thermal paper darke
 
 | Question | Notes |
 | --- | --- |
-| **Artwork** | The design of the round label and of the square it is cut from: what each stamp shows (2.1) |
+| **Artwork** | The design of the round stamp and the square it is cut from; the plain design of the redeem sticker (2.1) |
+| Cut pattern | Each label cut separately, or the pair cut together as a strip of two |
+| Artwork-only prints | Whether a visitor can print a stamp without a redeem sticker for the printing fee alone: a paper artwork bought with stamps, which would make the print node a spending node too |
 | Label size and printer | Label diameter, paper width, and a printer that prints and cuts die-cut labels reliably |
 | Denominations | Which values, and whether each has its own design |
 | Printing fee | How many stamps per print |
@@ -143,7 +146,7 @@ The label roll must stay well below the temperature at which thermal paper darke
 | Task | What to settle |
 | --- | --- |
 | Printer and labels | Printing on round labels, cutting square, gap sensing, jams |
-| QR on a small label | Smallest QR that phone cameras read reliably, with the signature inside it |
+| QR on the redeem sticker | Smallest label and QR that phone cameras read reliably, with the signature inside it |
 | Heat | Temperature inside the enclosure on a summer afternoon; any darkening of the roll |
 | Refills | How fast a roll is used, and how refills fit the round of the nodes |
 | Copies | Try photocopying a stamp and redeeming both: the second must be refused |
