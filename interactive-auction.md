@@ -2,7 +2,7 @@
 
 The PVA carrier board v1 ([hardware/CARRIER.md](hardware/CARRIER.md)) was designed for a SUNDIAL wall panel: no battery, awake from dawn to dusk. This document specifies a second way of using **the same board, unchanged**: an **interactive node** on a battery, and the first interactive node, **the street auction**.
 
-The interactive nodes belong to **SUNSET** (PVA no. 2, formerly GO TO BED), a network of panels that carry messages and stamps between walls. Where SUNDIAL is about time, SUNSET is about one moment in it: every day's business closes at sunset. They are specified here because they are a use of carrier v1, like the three layers in [USES.md](USES.md).
+The interactive nodes belong to **SUNSET** (PVA no. 2, formerly GO TO BED), a network of panels that carry messages and stamps between walls. Where SUNDIAL is about time, SUNSET is about one moment in it: every day's business closes at sunset. They are specified here because they are a use of carrier v1, like the three layers in [SUNDIAL.md](SUNDIAL.md).
 
 > Status: draft 2, 22 Oct 2026 (three lockers; business in daylight only; evening lights on the battery). Concept and rules settled in discussion; nothing built. Nothing here changes the carrier board.
 
@@ -181,7 +181,7 @@ No separate escrow is needed: **the firmware is the escrow.** Every lot ends wit
 
 ### 3.5 Tokens on an open network
 
-The node's Wi-Fi is open and plain HTTP: anything sent can be read by anyone in range (USES.md 4.3). A token sent in clear could be copied by a bystander, who would reach the locker first. So tokens are **commit and reveal**:
+The node's Wi-Fi is open and plain HTTP: anything sent can be read by anyone in range (SUNDIAL.md 4.3). A token sent in clear could be copied by a bystander, who would reach the locker first. So tokens are **commit and reveal**:
 
 1. **At bid time** (or at listing, for the seller), the phone makes its own random secret and sends only its hash. The node records the hash against the bid or lot and signs the receipt (HMAC-SHA256 with a key only the node holds).
 2. **At collection,** the phone reveals the secret. The node checks it against the hash, opens the door at once and marks the token used.

@@ -14,9 +14,9 @@ Each panel is three things at once, in order of importance:
 
 First event: **SUNDIAL · La Meridiana**, Bosa, summer 2027. SUNDIAL 2027 is a bare-bones trial of the technology and the dial: there is no story or media layer.
 
-The three layers are specified against the carrier board in **[USES.md](USES.md)**. PVA runs all three.
+The three layers are specified against the carrier board in **[SUNDIAL.md](SUNDIAL.md)**. PVA runs all three.
 
-> Status: drafts, not yet compiled or tested on hardware. Firmware draft 6 records everything the dial needs (sun sections, heat, presence); the panel page and `tools/pva_rules.py` both draw rules v1. Firmware 6.2 (security, visitors' book, pages built into the firmware, event archive by year) and the Sole tools are specified in USES.md, not yet written.
+> Status: drafts, not yet compiled or tested on hardware. Firmware draft 6 records everything the dial needs (sun sections, heat, presence); the panel page and `tools/pva_rules.py` both draw rules v1. Firmware 6.2 (security, visitors' book, pages built into the firmware, event archive by year) and the Sole tools are specified in SUNDIAL.md, not yet written.
 
 ## How it fits together
 
@@ -43,7 +43,7 @@ A visit during SUNDIAL: the flyer's QR code opens the map → at a pin, join tha
 ## Repository
 
 ```
-USES.md                       the three layers specified against carrier v1: sundial, Sole, the annual event
+SUNDIAL.md                    the three layers specified against carrier v1: sundial, Sole, the annual event
 SUNSET.md                     SUNSET (PVA no. 2): the nine panels, the stamp economy, the day and the layout
 interactive-auction.md        carrier v1 on a battery (interactive nodes) and the street auction, for SUNSET (PVA no. 2)
 interactive-audio.md          the SUNSET set: an audio interactive node, for SUNSET (PVA no. 2)
@@ -52,7 +52,7 @@ interactive-print.md          proof of print: a mint node turning digital stamps
 interactive-flipdot.md        the flip-dot wall: a cash-only node where paper stamps flip mechanical pixels, for SUNSET (PVA no. 2)
 docs/
   index.html                  the map — the only part published on the website
-  sundial/, sole/, data/      planned: SUNDIAL sheets and Sole editions (USES.md 3.3)
+  sundial/, sole/, data/      planned: SUNDIAL sheets and Sole editions (SUNDIAL.md 3.3)
 firmware/panel_page_server/
   panel_page_server.ino       ESP32 firmware
   partitions.csv              4 MB flash layout for the ELEGOO ESP32 (~2 MB for pages and data)
@@ -81,7 +81,7 @@ hardware/
   SUNDIAL.md                  the panel as a sundial: gnomon, drilling template, installation, wall test
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations); rules-2 for Sole planned
-  pva_import.py, sole_edition.py  planned: round downloads → SUNDIAL pages and Sole editions (USES.md 3.4)
+  pva_import.py, sole_edition.py  planned: round downloads → SUNDIAL pages and Sole editions (SUNDIAL.md 3.4)
   sample_a4.py                A4 sample sheet, invented data
   poster_mockup.py            A4 mock-up of the canonical print, invented data
   requirements.txt
@@ -99,7 +99,7 @@ Pins are placed on site: open the map with `?edit` after the address, drag the p
 2. **Build stage.** Set the four switches at the top of the firmware (see the table below). Pins are preset for the ELEGOO 30-pin board; on an ESP32-S3, set them by hand.
 3. **Media.** Edit `data/media/title.txt` (panel name) and `data/media/map.txt` (map address).
 4. **Build.** Arduino IDE, ESP32 core 3.x; libraries OneWire, DallasTemperature, RTClib. ELEGOO: board *ESP32 Dev Module*, Flash 4 MB, Partition Scheme *Custom* (uses `partitions.csv` in the sketch folder). ESP32-S3: board *ESP32S3 Dev Module*, Flash 16 MB, PSRAM OPI, and rename `partitions_16mb.csv` to `partitions.csv`.
-5. **Flash.** Erase all flash first (essential on any board that ever held keys), upload the firmware, then upload `data/` with the LittleFS uploader. **First installation only:** erasing or uploading `data/` wipes the panel's archive and logs. From firmware 6.2 the pages are built into the firmware, and a later update flashes the firmware alone, after a full download (USES.md 4.4).
+5. **Flash.** Erase all flash first (essential on any board that ever held keys), upload the firmware, then upload `data/` with the LittleFS uploader. **First installation only:** erasing or uploading `data/` wipes the panel's archive and logs. From firmware 6.2 the pages are built into the firmware, and a later update flashes the firmware alone, after a full download (SUNDIAL.md 4.4).
 6. **Set up on site.** Join the panel's Wi-Fi, open `http://192.168.4.1/admin.html`, enter the key, set the clock from your phone and set the exhibition's first and last day.
 7. **Calibrate the sun sensor** (if fitted): on a clear day near solar noon, tap **Calibrate now**, **in the two weeks before each event**. On a vertical panel the noon current changes strongly with the season, so the reference must come from the event's own season. Until then the panel still logs the raw current, and the dial's sun sections are drawn as outline.
 
@@ -130,7 +130,7 @@ Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the s
 
 **On site**
 
-9. **Permission** from the wall owner and the Comune (and heritage authorities in the centro storico) **for a permanent installation**, plus public liability insurance (USES.md section 5).
+9. **Permission** from the wall owner and the Comune (and heritage authorities in the centro storico) **for a permanent installation**, plus public liability insurance (SUNDIAL.md section 5).
 10. **Wall test.** Compass for a first reading, then the noon-shadow test: which edge packs out, and by how much.
 11. **Mount.** Cut the stand-offs, hang, spirit level against the glass; box on the deep side, probe on the panel back.
 12. **Wall plate** beside the panel: its number and the QR code.
@@ -155,9 +155,9 @@ Without the divider (`PANEL_SENSE 0`) there is no dawn gate or dusk close: the s
 
 **All year (Sole)**
 
-20. **Fortnightly round, every second Monday:** status, clock check, full download, clean the glass, check gnomon, plate and box; one line per panel in the round log. Then import, build the two new weekly editions, push. Details: USES.md 3.2.
+20. **Fortnightly round, every second Monday:** status, clock check, full download, clean the glass, check gnomon, plate and box; one line per panel in the round log. Then import, build the two new weekly editions, push. Details: SUNDIAL.md 3.2.
 
-**Every year (USES.md 4.4)**
+**Every year (SUNDIAL.md 4.4)**
 
 21. **Spring visit:** full download first; firmware only if something changed (never erase, never upload `data/`); check supercaps, coin cell, probe, seals; set the new event's dates.
 22. **The two weeks before the event:** calibrate every panel.
@@ -186,10 +186,10 @@ The visitor's phone counts once per solar hour as a dot on the dial, never ident
 - [ ] **"How to read the dial" key** in the panel page's info overlay, as well as on the flyer and website.
 - [ ] **Italian and English** on the panel page, info overlay and map.
 - [ ] **"Stay connected"** wording on the flyer or wall plate: some phones warn about or drop a network with no internet.
-- [x] **After the last day:** the panel page shows the archive of past events (USES.md 4.1).
-- [ ] **Firmware 6.2** (USES.md 4.1): challenge-and-response admin login with round and setup keys, lockout and action log; the visitors' book; pages built into the firmware; no visitor clock-setting when the clock module is fitted; rules version check; event archive by year.
-- [ ] **Permissions** for a permanent installation: wall owners, Comune and heritage, insurance (USES.md section 5).
-- [ ] **Sole tools and pages:** rules-2 in `pva_rules.py`, `pva_import.py`, `sole_edition.py`, `docs/sole/` and `docs/sundial/` (USES.md 3.3–3.4).
+- [x] **After the last day:** the panel page shows the archive of past events (SUNDIAL.md 4.1).
+- [ ] **Firmware 6.2** (SUNDIAL.md 4.1): challenge-and-response admin login with round and setup keys, lockout and action log; the visitors' book; pages built into the firmware; no visitor clock-setting when the clock module is fitted; rules version check; event archive by year.
+- [ ] **Permissions** for a permanent installation: wall owners, Comune and heritage, insurance (SUNDIAL.md section 5).
+- [ ] **Sole tools and pages:** rules-2 in `pva_rules.py`, `pva_import.py`, `sole_edition.py`, `docs/sole/` and `docs/sundial/` (SUNDIAL.md 3.3–3.4).
 - [ ] **First compile and bench test** of firmware draft 6.
 - [ ] **The girasole:** sunflower variety and sowing in May; a moveable chalkboard and its stand; where it stands on the route.
 - [ ] **Hour lines on the glass** (test on the pilot panel): thin or dotted lines radiating from the gnomon root at the hour-line angles in `hardware/SUNDIAL.md`, in removable UV-stable pinstripe tape first. Measure short-circuit current near solar noon with and without the lines. If the loss is negligible and the dial reads well, keep the lines and shorten the gnomon (safer, less reach from the wall), since the shadow is then read along the line, not at the brackets.
