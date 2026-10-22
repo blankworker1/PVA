@@ -352,7 +352,7 @@ SUNDIAL is a **permanent installation**: a sundial and monitor all year, with an
 
 ## 8. Beyond SUNDIAL: the battery tier
 
-Carrier v1 also runs a second kind of node, **unchanged**: an **interactive node** for GO TO BED (PVA no. 2), powered from a 12 V LiFePO₄ battery and a Victron SmartSolar MPPT 75/15 instead of straight from its panel. **The power tier follows the load, not the role:** a node that only serves pages stays a wall node; a node that moves, flips, lights or releases something is an interactive node.
+Carrier v1 also runs a second kind of node, **unchanged**: an **interactive node** for SUNSET (PVA no. 2, formerly GO TO BED), powered from a 12 V LiFePO₄ battery and a Victron SmartSolar MPPT 75/15 instead of straight from its panel. **The power tier follows the load, not the role:** a node that only serves pages stays a wall node; a node that moves, flips, lights or releases something is an interactive node.
 
 | | Wall node (SUNDIAL) | Interactive node |
 | --- | --- | --- |
