@@ -16,7 +16,7 @@ Everything needed is linked from this page:
 5. **[Design checks: checks.txt](checks.txt)**: the calculations behind the ranges and ratings.
 6. **[Review log](#review-log)** and **[manufacturer sign-off](#manufacturer-review-and-sign-off)**, further down this page.
 
-The board as a sundial on its panel, and its mounting: [SUNDIAL.md](../SUNDIAL.md). The firmware it runs: [panel_page_server.ino](../../firmware/panel_page_server/panel_page_server.ino).
+The board as a sundial on its panel, and its mounting: [GNOMON.md](../GNOMON.md). The firmware it runs: [panel_page_server.ino](../../firmware/panel_page_server/panel_page_server.ino).
 
 ## Files
 
