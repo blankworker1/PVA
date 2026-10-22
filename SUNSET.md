@@ -36,7 +36,7 @@ Every panel uses the **PVA carrier board v1** ([hardware/CARRIER.md](hardware/CA
 
 ## 2. The stamp economy
 
-**One stamp type** everywhere. Each stamp carries the **5 × 5 logo** of the node that issued it, so its origin is visible, but every stamp spends the same. Stamps are **bearer**: no accounts, no names. They live in the visitor's **passport page** on their phone, or on paper.
+**One stamp type** everywhere. Each stamp carries the **5 × 5 logo** of the node that issued it, so its origin is visible, but every stamp spends the same. **Every node's logo is unique, and no node's logo is ever the same as the Photovoltaic Art logo:** the PVA mark stands for the project, never for a node or a stamp. Stamps are **bearer**: no accounts, no names. They live in the visitor's **passport page** on their phone, or on paper.
 
 ### 2.1 Every node is a proof
 
@@ -207,6 +207,7 @@ Any node can post a **service notice:** a free node notice, carried by couriers 
 | Rule | Where it is specified |
 | --- | --- |
 | Business only in daylight; sunset from the clock, as SUNDIAL's seal | interactive-auction.md 1.2 |
+| Every node's 5 × 5 logo is unique, and never the same as the Photovoltaic Art logo | wall-node.md 5.1 |
 | No identities: no accounts, no names; bearer stamps and tokens | interactive-auction.md 3.5 |
 | Commit and reveal for every token and stamp sent over the open Wi-Fi | interactive-auction.md 3.5 |
 | Every state change written to flash before it is acted on | interactive-auction.md 3.5 |

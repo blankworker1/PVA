@@ -126,6 +126,7 @@ To be specified in full separately; every SUNSET node depends on it.
 
 - A **bearer receipt:** whoever holds it can spend it. No accounts, no names.
 - Issued by a node, carrying that node's **5 × 5 logo,** a serial and the panel's time.
+- **Node logos:** each node's logo is unique within the network, and **never the same as the Photovoltaic Art logo.** The PVA mark belongs to the project as a whole; it never appears as a node's logo or on a stamp as its issuer.
 - **No cash value.** Stamps have only uses, never redemption for money.
 
 ### 5.2 The public unspent list
