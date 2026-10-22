@@ -362,4 +362,4 @@ Carrier v1 also runs a second kind of node, **unchanged**: an **interactive node
 | GPIO 34 reads | Panel voltage | Battery voltage |
 | Firmware | Wall build | Interactive build |
 
-One board, two wirings, two firmware builds; the jumper says which. The full specification, and the first interactive node, the street auction, are in **[interactive-auction.md](interactive-auction.md)**. The audio node that plays the SUNSET set is in **[interactive-audio.md](interactive-audio.md)**. Nothing in it affects SUNDIAL.
+One board, two wirings, two firmware builds; the jumper says which. The full specification, and the first interactive node, the street auction, are in **[interactive-auction.md](interactive-auction.md)**. The audio node that plays the SUNSET set is in **[interactive-audio.md](interactive-audio.md)**. The robot-arm dexterity game is in **[interactive-arm-game.md](interactive-arm-game.md)**. Nothing in it affects SUNDIAL.
