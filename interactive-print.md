@@ -1,0 +1,149 @@
+# Proof of print — a mint interactive node on carrier v1
+
+A SUNSET interactive node that **turns digital stamps into paper stamps, and back.** The visitor spends stamps from their phone and the node prints a small paper stamp: a bearer note that can be handed to anyone in the street, with no phone involved. Brought back to the node, the paper turns into digital stamps again.
+
+It runs on carrier v1 on the battery tier: the panel feeds a Victron SmartSolar MPPT 75/15 and a 12 V LiFePO₄ battery, with JP1 off and the sun sensor compiled out. The tier is specified in [interactive-auction.md](interactive-auction.md), sections 1 and 2; this document covers only what is different.
+
+> Status: draft 1, 22 Oct 2026. Concept and flows settled in discussion; artwork to be designed; nothing built. **Nothing here changes the carrier board.**
+
+---
+
+## 1. The idea
+
+- **A mint, not a shop.** The print node neither pays stamps for an act nor sells anything. It converts: digital to paper, paper to digital.
+- **Proof of print.** The paper is printed and cut by the machine, signed by it, and recorded by it. It is the same stamp in a different body.
+- **Paper circulates by hand.** Once printed, a paper stamp can pass from person to person, like cash, with no phone and no network. It goes back to the printing node only to be turned digital again.
+- **Daylight only,** like all SUNSET business: minting and redeeming run from sunrise to sunset.
+
+### Where it sits in SUNSET
+
+| Node | Proof | Direction |
+| --- | --- | --- |
+| Wall (message nodes) | walk | earn |
+| Arm game ([interactive-arm-game.md](interactive-arm-game.md)) | skill | earn |
+| Street auction ([interactive-auction.md](interactive-auction.md)) | bid | transfer; listing fee is a sink |
+| **Print node** | **print** | **convert** (digital ⇄ paper); printing fee is a sink |
+| Spending nodes (e.g. a flip-dot pixel wall, to be specified) | mark | spend |
+
+---
+
+## 2. The paper stamp
+
+### 2.1 The object
+
+- **Round thermal labels on a roll.** Each stamp is a round, self-adhesive label, printed by the node.
+- **Cut square.** The printer's cutter cuts the backing between labels, so each stamp comes out as a **square of backing paper carrying one round label**, like a postage stamp on its sheet. It can be kept, handed on, or peeled and stuck.
+- **Artwork to be decided.** The design is open (5). Candidates for what each stamp carries:
+
+| Element | Purpose |
+| --- | --- |
+| The node's 5 × 5 logo | Where it was minted, as on digital stamps |
+| Value | 1, 5 or 10 stamps (2.2) |
+| Date and serial | Each stamp is unique |
+| QR code | The signed one-time code, for redemption (3.2) |
+| Short typed code | Fallback if the QR is damaged |
+| *(possible)* The day's sundial dial, dithered | Every stamp shows the sun of the day it was minted |
+
+### 2.2 Denominations
+
+Paper stamps are printed in **denominations** (for example 1, 5 and 10), so paper behaves like cash: a handful of notes rather than a sheet of ones. The values are set in the pilot.
+
+### 2.3 Its weaknesses, stated
+
+- **Thermal paper is fragile.** It fades with time and light, and darkens with heat (thermal coatings react at roughly 60–70 °C). Stored in the shade it lasts years; left on a dashboard it does not. The project can accept this as a feature: paper money that slowly disappears.
+- **Copies are possible.** A photocopy of the QR is as good as the original until one of them is redeemed. Section 3.3 limits the damage to "first to redeem wins". It is the old question of every printed note, run as a street experiment: what makes a piece of paper trustworthy when anyone can copy it?
+
+---
+
+## 3. The flows
+
+### 3.1 Digital to paper (minting)
+
+1. At the print node, the visitor opens the mint page and chooses the value to print.
+2. The stamps are **spent into the node** from the passport page (marked spent on the public list), plus the printing fee (3.4). This is the same step as placing a bid at the auction (interactive-auction.md 3.4).
+3. The node writes the new paper stamp to flash (serial, value, code, unspent), signs it, then prints and cuts it.
+4. The visitor takes the stamp from the output slot.
+
+### 3.2 Paper to digital (redeeming)
+
+1. The holder joins the **printing node's** Wi-Fi and scans the stamp's QR with the phone's ordinary camera app, which opens the node's redeem page. (A web page served by the node cannot use the camera itself, because the node's pages are plain HTTP; the phone's own camera app can read the QR and open the link.) The short code can be typed instead.
+2. The node checks the signature and that the paper stamp is unspent.
+3. It marks the paper stamp spent and issues fresh digital stamps of the same value to the phone (commit and reveal, as in interactive-auction.md 3.5).
+4. **The redemption slot:** the redeemed paper can be dropped into a perspex box beside the node, a growing, visible pile of spent money. Dropping it in is not enforced; the node's spent list is what counts.
+
+### 3.3 Why redemption is at the printing node only
+
+SUNSET nodes learn of each other's spends only when couriers carry blocks between walls. If a paper stamp could be redeemed anywhere, a photocopy could be redeemed at two nodes before either heard of the other. **Redeemed only where it was printed,** the printing node's own spent list is always up to date, and a copy can never be redeemed twice.
+
+**Checking is everywhere; redeeming is at home.** The node signs each stamp with a **public-key signature** (Ed25519 or ECDSA P-256, both within the ESP32's means). Any node, or any phone with the public key, can check that a paper stamp is genuine without being able to redeem it.
+
+### 3.4 The printing fee
+
+Minting costs a small fee in stamps (for example 1 per print), set in the pilot. It covers the paper in spirit, and it is a **sink**: those stamps leave circulation. Redeeming is free.
+
+---
+
+## 4. Hardware
+
+### 4.1 The printer
+
+| Part | Notes |
+| --- | --- |
+| **Thermal printer with auto-cutter and label sensing** | A kiosk-type 58 mm (or 80 mm) module with a serial interface, an auto-cutter, and a gap or black-mark sensor so it prints on each round label and cuts the backing between labels. To be confirmed in the pilot: not every receipt module handles die-cut labels |
+| **Label roll** | Round die-cut thermal labels on a liner, sized to the printer's paper width. A roll holds a few hundred stamps; refills are a routine task |
+| **Printer supply** | From the battery through its own fuse, via a buck converter if the printer needs other than 12 V. Thermal printing and cutting draw roughly 1.5–3 A in short bursts |
+| **Output slot** | In the enclosure wall, under cover from rain, with a short chute so the stamp is reachable but the cutter is not |
+| **Redemption slot** (optional) | A small perspex box with a letter slot, beside the node |
+
+### 4.2 Pins
+
+The carrier's UART header J10 is taken by the Victron (VE.Direct). The ESP32 has a second hardware UART that can be routed to any spare pins:
+
+| Use | GPIO | Header | Notes |
+| --- | --- | --- | --- |
+| Printer serial TX | 32 | J9 | UART1, routed to J9 |
+| Printer serial RX | 33 | J9 | Printer status: paper out, cutter error, cover open |
+| Printer power enable | 26 | J9 | MOSFET or relay on the printer supply; off at boot (pull-down) and between prints |
+| Paper-low sensor (optional) | 36 | J9 | If the printer has no serial status for it; input only, external pull-up |
+| VE.Direct | 16 RX, 17 TX | J10 | As on every interactive node |
+| Clock | 21 / 22 | on board | Dates on the stamps; sunrise and sunset |
+| Enclosure temperature probe | 4 | J4 / J5 | Heat check for the paper (4.4) |
+| Spare | 13, 14, 27 | J9 | 27 via R19 to the switched 5 V output, unchanged |
+
+### 4.3 Power
+
+| Load | Draw | Notes |
+| --- | --- | --- |
+| ESP32, Wi-Fi on, sunrise to sunset | about 0.5 W | about 6 Wh a day |
+| Printer, per stamp | a few seconds at 1.5–3 A | well under 1 Wh for dozens of stamps |
+| Printer idle | none | powered only to print |
+
+The print node is one of the lightest interactive nodes: the battery is there for the printer's bursts, not for its total use.
+
+### 4.4 Heat
+
+The label roll must stay well below the temperature at which thermal paper darkens. Shade or a north-facing site, a ventilated enclosure, and **no printing above a set temperature** read from the probe; the page says why.
+
+---
+
+## 5. Open questions
+
+| Question | Notes |
+| --- | --- |
+| **Artwork** | The design of the round label and of the square it is cut from: what each stamp shows (2.1) |
+| Label size and printer | Label diameter, paper width, and a printer that prints and cuts die-cut labels reliably |
+| Denominations | Which values, and whether each has its own design |
+| Printing fee | How many stamps per print |
+| Signature scheme | Ed25519 or ECDSA P-256; how the public key is published so phones can check stamps |
+| Redemption slot | Whether to fit it, and what happens to the pile (an artwork in itself, a yearly count) |
+| Paper's life | Whether fading is accepted as part of the work, or a longer-life thermal stock is used |
+
+## 6. Pilot tasks
+
+| Task | What to settle |
+| --- | --- |
+| Printer and labels | Printing on round labels, cutting square, gap sensing, jams |
+| QR on a small label | Smallest QR that phone cameras read reliably, with the signature inside it |
+| Heat | Temperature inside the enclosure on a summer afternoon; any darkening of the roll |
+| Refills | How fast a roll is used, and how refills fit the round of the nodes |
+| Copies | Try photocopying a stamp and redeeming both: the second must be refused |

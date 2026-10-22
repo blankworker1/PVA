@@ -47,6 +47,7 @@ USES.md                       the three layers specified against carrier v1: sun
 interactive-auction.md        carrier v1 on a battery (interactive nodes) and the street auction, for SUNSET (PVA no. 2)
 interactive-audio.md          the SUNSET set: an audio interactive node, for SUNSET (PVA no. 2)
 interactive-arm-game.md       the arm game: a dexterity interactive node (pegs in holes), for SUNSET (PVA no. 2)
+interactive-print.md          proof of print: a mint node turning digital stamps into paper stamps and back, for SUNSET (PVA no. 2)
 docs/
   index.html                  the map — the only part published on the website
   sundial/, sole/, data/      planned: SUNDIAL sheets and Sole editions (USES.md 3.3)
