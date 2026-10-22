@@ -4,7 +4,7 @@ The PVA carrier board v1 ([hardware/CARRIER.md](hardware/CARRIER.md)) was design
 
 The interactive nodes belong to **SUNSET** (PVA no. 2, formerly GO TO BED), a network of panels that carry messages and stamps between walls. Where SUNDIAL is about time, SUNSET is about one moment in it: every day's business closes at sunset. They are specified here because they are a use of carrier v1, like the three layers in [USES.md](USES.md).
 
-> Status: draft 1, 22 Oct 2026. Concept and rules settled in discussion; nothing built. Nothing here changes the carrier board.
+> Status: draft 2, 22 Oct 2026 (three lockers; business in daylight only; four evening hours of light). Concept and rules settled in discussion; nothing built. Nothing here changes the carrier board.
 
 ---
 
@@ -20,7 +20,7 @@ The interactive nodes belong to **SUNSET** (PVA no. 2, formerly GO TO BED), a ne
 | Sun reading | The carrier's own short-circuit current: true light level | Victron PV voltage and power over VE.Direct: energy harvested |
 | GPIO 34 divider reads | Panel voltage (dawn and dusk gates) | Battery voltage (a cross-check of the Victron's figure) |
 | Battery data | None | Victron: battery voltage and current, charge state, yield today |
-| Awake | Dawn to dusk, off at night | Can stay awake into the evening; the day's business closes at sunset (1.2) |
+| Awake | Dawn to dusk, off at night | Business sunrise to sunset; lights on for four hours after sunset, then asleep until sunrise (1.2) |
 | Temperature probe, clock, Wi-Fi, storage | Same | Same |
 | Firmware | Wall build | Interactive build |
 
@@ -39,8 +39,10 @@ The carrier cannot keep its own sun measurement on this tier: the panel now feed
 SUNDIAL seals each day's dial at Bosa's sunset. SUNSET keeps the same moment: **the day's business closes at sunset.** The auction's hammer falls, the day's records seal, and the whole network keeps one rhythm.
 
 - **Sunset comes from the clock,** computed for Bosa as SUNDIAL's seal already is (`sunTimes`), not from the panel or battery voltage. A cloudy afternoon must not end the auction early.
-- **With a battery, an interactive node can stay awake after sunset.** In Sardinia the street is busiest in the evening, so the node may keep showing the sealed result for a while. How long, and what can still be done after the hammer, is decided per node (5).
-- The battery smooths cloudy days and motor or solenoid surges. It does not move the close of the day.
+- **All business is in daylight.** Listing, bidding, collecting and returning happen between sunrise and sunset, and nowhere else. At sunset the Wi-Fi closes.
+- **The battery keeps the lights on for four hours after sunset.** In Sardinia the street is busiest in the evening, so each locker stays lit in its state colour: the result of the day's hammer, and tomorrow's lot waiting in the wings, readable from the pavement. Nothing can be done until sunrise.
+- **Then the node sleeps.** After four hours the lights go out and the ESP32 deep-sleeps until sunrise.
+- The battery smooths cloudy days and motor or solenoid surges, and lights the evening. It does not move the close of the day.
 
 **The sun is the coin slot.** Actions that cost energy (a grab, a flip, a door) are offered only when the battery's charge state allows. A dull week means fewer actions, and the page says so.
 
@@ -79,20 +81,22 @@ All from the spare-pins header J9 and the UART header J10. Nothing on the ESP32 
 | --- | --- | --- | --- |
 | Lock, locker A | 26 | J9 | To the driver's MOSFET gate; pull-down on the driver board |
 | Lock, locker B | 13 | J9 | Same |
+| Lock, locker C | 27 | J9 | Same. **Remove R19** on the carrier: this gives up the switched 5 V output (U4), which nothing on the battery tier uses |
 | Door switch, locker A | 32 | J9 | Reed switch to GND, pull-up to the header's 3V3 |
 | Door switch, locker B | 33 | J9 | Same |
-| Interior lights (LED data) | 14 | J9 | Through a 3.3 → 5 V level shifter on the driver board. GPIO 14 toggles briefly at boot: the lights may flicker on reset, the locks never do |
+| Door switch, locker C | 36 | J9 | Same; input only, and has no internal pull-up, so the external pull-up is required |
+| Interior lights (LED data) | 14 | J9 | One data line for all three lockers (addressable strips chain). Through a 3.3 → 5 V level shifter on the driver board. GPIO 14 toggles briefly at boot: the lights may flicker on reset, the locks never do |
 | VE.Direct | 16 RX, 17 TX | J10 | Divider on RX if the Victron sends 5 V |
 | Clock | 21 / 22 | on board | DS3231, already fitted |
 | Temperature probe | 4 | J4 | Inside the locker housing: the heat check (3.6) |
-| Spare | 36 | J9 | Input only |
-| Switched 5 V | 27 | via R19 to U4 | Unchanged |
+
+Every J9 pin is now in use. More lockers, or a switch for the light supply, would come from an I2C port expander (MCP23017 class, 16 pins) on the I2C header J13, with no other change.
 
 ### 2.3 The off-board driver
 
 A small board beside the carrier, on the 12 V line:
 
-- 2 logic-level N-MOSFETs with flyback diodes and gate pull-downs, one per lock;
+- 3 logic-level N-MOSFETs with flyback diodes and gate pull-downs, one per lock;
 - a 12 V → 5 V buck for the interior lights (addressable RGB, a short strip per locker);
 - a 74AHCT125-class level shifter for the LED data line;
 - screw terminals for the locks, lights and door switches.
@@ -103,26 +107,33 @@ A small board beside the carrier, on the 12 V line:
 
 | Load | Draw | Per day |
 | --- | --- | --- |
-| ESP32, Wi-Fi on, daytime | ~0.5 W | ~6 Wh over 12 h |
-| Interior lights | depends on strip and brightness | the largest item; dim them, and switch off when the node closes for the night |
+| ESP32, Wi-Fi on, sunrise to sunset | ~0.5 W | ~6 Wh over 12 h |
+| ESP32, Wi-Fi off, four evening hours | ~0.1–0.2 W | < 1 Wh |
+| Interior lights, three lockers, dimmed | ~1–2 W per locker | the largest item: ~12–24 Wh for the four evening hours, plus whatever daytime lighting is chosen |
+| Light strips switched to black overnight | standby of the LED chips | ~1–3 Wh; removable later with a supply switch on an expander pin |
 | Locks | ~0.5–1 A at 12 V for ~1 s, a few times a day | negligible |
 
-A 12 V 20–40 Ah LiFePO₄ pack and a recycled panel cover this with days in reserve. Size the battery to the lights.
+Roughly 30–40 Wh a day. A 12 V 20–40 Ah LiFePO₄ pack (about 250–500 Wh) and a recycled panel cover this with several dull days in reserve. Size the battery to the lights. If the charge state falls low, the evening lights are the first thing to shorten.
 
 ---
 
 ## 3. The street auction
 
-A fully automated street auction: two lockers with lit interiors and transparent perspex doors, one lot a day, settled in SUNSET stamps. Nobody attends it. **The catalogue is the street itself:** everything for sale is visible from the pavement all day.
+A fully automated street auction: three lockers with lit interiors and transparent perspex doors, one lot a day, settled in SUNSET stamps. Nobody attends it. **The catalogue is the street itself:** everything for sale is visible from the pavement all day.
 
 ### 3.1 Stage and wings
 
-Two lockers swap roles every morning:
+Three lockers, each with one job a day. The roles rotate at every sunrise:
 
-- **The stage:** today's lot, on auction until sunset.
-- **The wings:** yesterday's lot going out, tomorrow's lot coming in.
+| Locker | Today's job | At next sunrise becomes |
+| --- | --- | --- |
+| **Wings in** | Takes tomorrow's lot, any time from sunrise to sunset (1 stamp to list) | Stage |
+| **Stage** | Today's lot on auction; the hammer falls at sunset | Wings out |
+| **Wings out** | Yesterday's lot: the winner collects until midday, then the seller takes it back until sunset | Wings in (empty) |
 
-One lot is auctioned per day. If nobody has submitted a lot, the stage is empty and it is a rest day.
+One lot is auctioned per day. If nobody lists a lot, tomorrow's stage is empty and it is a rest day.
+
+Each door has one job a day, so a seller can list at any hour of daylight, and the winner and the seller never compete with a new listing for the same door.
 
 ### 3.2 A lot's life
 
@@ -130,25 +141,30 @@ One lot is auctioned per day. If nobody has submitted a lot, the stage is empty 
 | --- | --- |
 | Day N, sunrise to sunset | The lot is on the **stage**. Anyone at the node can bid in stamps |
 | Day N, sunset | **The hammer.** Bidding ends; no further bids. The highest bid wins |
-| Day N+1, morning to midday | The locker is now in the **wings**. The winner collects with their winning-bid token |
-| Day N+1, from morning | The seller can redeem the winning stamps at any time (no locker needed; the node holds them) |
+| Day N, sunset to four hours after | Business is closed. The stage locker shows *sold* or *unsold* in its light |
+| Day N+1, sunrise to midday | The locker is now **wings out**. The winner collects with their winning-bid token |
+| Day N+1, from sunrise | The seller can redeem the winning stamps at any time in daylight (no locker needed; the node holds them) |
 | Day N+1, midday to sunset | If not collected, the winner forfeits: the seller keeps the stamps **and** can take the goods back with their seller token. The node posts an automatic **shout** ("Locker A uncollected"), which couriers carry to every wall |
-| Day N+1, once empty, until sunset | Once empty, the locker takes a new lot (1 stamp to list), which goes on stage the next day |
-| Day N+1, still full at sunset | The lot stays where it is and **becomes tomorrow's lot**, relisted automatically. Its proceeds are burned |
+| Day N+1, still full at sunset | The lot is abandoned. At the next sunrise it **goes back on stage**, relisted automatically; its proceeds are burned |
 
-A lot with no bids at the hammer goes to the wings for the seller to take back, under the same timings; if still there at sunset, it is relisted the same way.
+A lot with no bids at the hammer goes to wings out for the seller to take back, under the same timings, and is relisted the same way if still there at sunset.
+
+**When an abandoned lot is relisted,** two lots want tomorrow's stage: the relisted one and the new one waiting in wings in. **The relisted lot goes on stage first; the new lot waits one more day in wings in,** and no new listings are taken until it moves. It is rare, and the rotation stays intact.
 
 ### 3.3 Locker states
 
 | State | Light colour | Who can open the door |
 | --- | --- | --- |
-| Empty | (dim or off) | A seller, for 1 stamp |
+| Empty (wings in) | (dim or off) | A seller, for 1 stamp |
 | On stage | for sale | Nobody |
 | Sold, awaiting collection | sold | The winner's token, until midday |
 | Uncollected or unsold | return to seller | The seller's token, until sunset |
+| Listed, waiting in wings in | coming tomorrow | Nobody |
 | Relisted | for sale (next day) | Nobody |
 
 **The light is the message.** Without accounts or contact details, the node cannot tell anyone anything directly; the colour of each locker, readable from the street, is the status. The seller token also shows the lot's status on the node's page, and uncollected lots are announced by shout.
+
+After sunset the lights hold their state colours for four hours (1.2), so the street can read the day's result in the evening.
 
 A door switch on each locker confirms that the door was opened and closed again, so each locker resets itself.
 
@@ -191,10 +207,10 @@ Same firmware family as the wall nodes, built with:
 | `SUN_SENSOR` | 1 | 0 (GPIO 25 never driven) |
 | `PANEL_SENSE` | panel voltage, dawn and dusk gates | battery voltage, cross-check only |
 | `VE_DIRECT` | 0 | 1, on UART2 (GPIO 16/17) |
-| Close of the day | dusk from panel voltage | Bosa's sunset from the clock; the node may stay awake after it |
+| Close of the day | dusk from panel voltage | Bosa's sunset from the clock: Wi-Fi closes, lights stay on four hours, then deep sleep until sunrise |
 | Node role | wall | auction (locks, door switches, lights) |
 
-New for the auction: the locker state machine (3.3), bid handling and stamp issue (3.4), commit-and-reveal tokens (3.5), the automatic shout, and the colour code on the lights.
+New for the auction: the three-locker rotation (3.1) and locker states (3.3), bid handling and stamp issue (3.4), commit-and-reveal tokens (3.5), the automatic shout, and the colour code on the lights.
 
 ---
 
@@ -204,7 +220,7 @@ New for the auction: the locker state machine (3.3), bid handling and stamp issu
 | --- | --- |
 | A maintenance path for a dead controller | BOX's rule is "no override, ever", but a dead board would trap a lot. Decide between that purity and a sealed, tamper-screwed manual release |
 | Exact cut-off times | Midday for collection, sunset for seller returns: confirm against how people actually use the street |
-| After the hammer | Whether the winner can collect the same evening, while the street is busy, instead of waiting for the morning: possible on the battery tier, and it would free the stage locker sooner |
+| Daytime lighting | Whether the interiors are lit during the day too, or only in the four evening hours; daylight may wash them out anyway |
 | Bid steps and opening bid | Minimum increment; whether the seller can set a reserve |
 | Comune permission | An unattended street exchange is the piece most likely to need a word with the comune before Bosa 2027 |
 | Stamp format | Depends on SUNSET's bearer-stamp spec (public unspent list, node logos, passport page) |
