@@ -44,6 +44,7 @@ A visit during SUNDIAL: the flyer's QR code opens the map → at a pin, join tha
 
 ```
 USES.md                       the three layers specified against carrier v1: sundial, Sole, the annual event
+SUNSET.md                     SUNSET (PVA no. 2): the nine panels, the stamp economy, the day and the layout
 interactive-auction.md        carrier v1 on a battery (interactive nodes) and the street auction, for SUNSET (PVA no. 2)
 interactive-audio.md          the SUNSET set: an audio interactive node, for SUNSET (PVA no. 2)
 interactive-arm-game.md       the arm game: a dexterity interactive node (pegs in holes), for SUNSET (PVA no. 2)
