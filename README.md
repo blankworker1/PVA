@@ -14,7 +14,7 @@ Each panel is three things at once, in order of importance:
 
 First event: **SUNDIAL · La Meridiana**, Bosa, summer 2027. SUNDIAL 2027 is a bare-bones trial of the technology and the dial: there is no story or media layer.
 
-The three layers are specified against the carrier board in **[SUNDIAL.md](SUNDIAL.md)**. PVA runs all three.
+The three layers are specified against the carrier board in **[SUNDIAL.md](SUNDIAL.md)**. PVA runs all three. The same carrier board also runs PVA's second work, [SUNSET](https://github.com/photovoltaic-art/sunset), in its own repository.
 
 > Status: drafts, not yet compiled or tested on hardware. Firmware draft 6 records everything the dial needs (sun sections, heat, presence); the panel page and `tools/pva_rules.py` both draw rules v1. Firmware 6.2 (security, visitors' book, pages built into the firmware, event archive by year) and the Sole tools are specified in SUNDIAL.md, not yet written.
 
@@ -44,13 +44,6 @@ A visit during SUNDIAL: the flyer's QR code opens the map → at a pin, join tha
 
 ```
 SUNDIAL.md                    the three layers specified against carrier v1: sundial, Sole, the annual event
-SUNSET.md                     SUNSET (PVA no. 2): the nine panels, the stamp economy, the day and the layout
-wall-node.md                  SUNSET's message walls: the visitor's experience, messages, couriers, proof of walk
-interactive-auction.md        carrier v1 on a battery (interactive nodes) and the street auction, for SUNSET (PVA no. 2)
-interactive-audio.md          the SUNSET set: an audio interactive node, for SUNSET (PVA no. 2)
-interactive-arm-game.md       the arm game: a dexterity interactive node (pegs in holes), for SUNSET (PVA no. 2)
-interactive-print.md          proof of print: a mint node turning digital stamps into paper stamps and back, for SUNSET (PVA no. 2)
-interactive-flipdot.md        the flip-dot wall: a cash-only node where paper stamps flip mechanical pixels, for SUNSET (PVA no. 2)
 docs/
   index.html                  the map — the only part published on the website
   sundial/, sole/, data/      planned: SUNDIAL sheets and Sole editions (SUNDIAL.md 3.3)
