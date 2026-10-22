@@ -91,20 +91,20 @@ The positions are chosen on site, framed for the best possible outcomes. The log
 
 | Panel | Where | Why |
 | --- | --- | --- |
-| **Print node + flip-dot wall: the gateway** | **As a pair (a hard requirement),** within ESP-NOW range of each other, at the **entrance** to the route, **near businesses that already have footfall** | The way in to SUNSET (4.1). They share one spent list; the mint, and the wall where its money is spent |
-| **Walls 1–4** | Spread to the edges of the route | Distance is what makes proof of walk mean something: the walls set the shape of the walk |
+| **Print node + flip-dot wall: the gateway** | **As a pair (a hard requirement),** within ESP-NOW range of each other, at the **entrance** to the installation, **near businesses that already have footfall** | The way in to SUNSET (4.1). They share one spent list; the mint, and the wall where its money is spent |
+| **Walls 1–4** | Spread to the edges of the installation | Distance is what makes proof of walk mean something: the walls set the shape of the walk |
 | **Street auction** | Where people already pass | Its catalogue is the street itself |
 | **The SUNSET set** | The town's **sunset spot,** a west-facing place where people already gather to watch the sun go down | The set starts at sunset; choose neighbours who can live with an hour of music |
 | **Arm game** | In shade | Servos and electronics in a perspex case |
 
-The walls and the interactive nodes interleave along the route, so a walk between walls passes the places to spend.
+The walls and the interactive nodes are interleaved across the area, so walks between walls pass the places to spend. There is no set route (4.3).
 
 ### 4.1 The gateway
 
 The print node and the flip-dot wall together are **the entrance to the installation.**
 
 - **The first thing people see:** the flip-dot picture, made by the town a paid dot at a time, and the sticker wall beside it. It shows at a glance that something is happening, and that people take part.
-- **Where the rules are explained** (5), and where the route and the map start.
+- **Where the rules are explained** (5), and where most visitors first see the map.
 - **Where paper meets the town.** Placed near bars, cafés and shops that already have footfall, the gateway draws their customers in, and gives those businesses the infrastructure to take part: paper stamps redeemed or checked at the print node from their own counter (4.2), and paid shouts to advertise on every wall.
 
 ### 4.2 Hosts
@@ -115,11 +115,21 @@ Every panel needs a wall, and the owner's consent. Hosting is a fair exchange: w
 | --- | --- |
 | **The gateway** (print node, flip-dot wall) | The installation's entrance at the door: footfall, and, within the print node's Wi-Fi range (roughly 30–50 m outdoors, less through walls), **live settlement** of paper stamps from the counter: redeem a sticker the moment it is handed over, or check its status by serial (interactive-print.md 3.6) |
 | **A wall node** | Couriers arriving all day; the town's shouts on the wall; spends known "as far as this wall has heard" |
-| **Any node** | A place on the route, and the shouts that point people to it |
+| **Any node** | A place on people's daily routes, and the shouts that point people to it |
 
 Hosts are chosen because their wall fits the layout, not the other way round: walls stay spread, and the gateway pair stays together.
 
 ---
+
+### 4.3 Routes
+
+**SUNSET has no route.** The map shows where the nodes are, not how to walk between them.
+
+- **Each visitor makes their own.** Which nodes, in what order, and how often depends on what they want: stamps from walking, a turn at the arm game, a bid before the hammer, paper for the flip-dot wall, the set at sunset.
+- **Route planning is part of the daily routine.** The town's state changes every day, and the nodes show it: each wall's dial tone shows which walls haven't heard from each other for a while (where a courier is most needed, and where the first delivery is still to be made), the shouts say what is happening where, and the auction's lockers show what is on stage and in the wings.
+- **The same people walk different routes on different days.** Over a season, the paths people choose are the shape of the network.
+
+SUNDIAL is a trail; SUNSET is a town to move through.
 
 ## 5. The first five minutes
 
@@ -132,7 +142,38 @@ A visitor meets five kinds of node in one day. Each needs one obvious first step
 
 ---
 
-## 6. Rules shared by every node
+## 6. Pages
+
+SUNSET has two sets of pages: those served by the nodes themselves, offline, and a small static website.
+
+### 6.1 On the nodes (offline)
+
+The real dashboard of SUNSET, seen only standing at a node, on its own Wi-Fi:
+
+| Node | Pages |
+| --- | --- |
+| Wall nodes | The dial tone, messages, paid shouts, the courier ticker, the passport page (wall-node.md) |
+| Gateway: print node | The one-screen rules; mint, souvenir, redeem; status by serial (interactive-print.md) |
+| Gateway: flip-dot wall | The picture and its history; spent-sticker check (interactive-flipdot.md) |
+| Street auction | Today's lot, bidding, tokens, the lockers' states (interactive-auction.md) |
+| Arm game | The queue and the controls (interactive-arm-game.md) |
+| The SUNSET set | Whether tonight's set plays, and past sets (interactive-audio.md) |
+
+### 6.2 The website (online, static)
+
+Published like SUNDIAL's website (GitHub Pages), in Italian and English:
+
+| Page | What it shows |
+| --- | --- |
+| **The map** | The nine panels with their type, the gateway marked as the way in, and the visitor's own position. **Nodes only, no route** (4.3). Can reuse SUNDIAL's map code |
+| **Today** | Sunrise and sunset for the town, computed in the browser: when business opens and closes today |
+| **How it works** | The economy in plain words: earn, spend, paper, sunset; the five kinds of node; hosts |
+| **Verify** | The paper-stamp check: scan a sticker and confirm it is **genuine** with the print node's public key. It runs entirely on the phone, sends nothing anywhere (the QR carries the redeem code), and can be saved to work offline. It cannot say whether a sticker is **unspent**; only the print node can (interactive-print.md 3.6) |
+| **Archive** | Only what is collected from the nodes: the flip-dot picture at each sunset (the season's time-lapse) and simple counts (lots auctioned, stamps minted, dots flipped). **Never messages, and nothing attributable** |
+
+**The honest limit:** the website shows nothing live. The nodes have no internet, so it cannot know today's bids, tonight's set or the current shouts. The map says so: *the network is in the street; this is only the map.*
+
+## 7. Rules shared by every node
 
 | Rule | Where it is specified |
 | --- | --- |
@@ -145,7 +186,7 @@ A visitor meets five kinds of node in one day. Each needs one obvious first step
 
 ---
 
-## 7. Not in the first season
+## 8. Not in the first season
 
 Each of these fits SUNSET's design and is kept for a later season or a fork:
 
@@ -155,7 +196,7 @@ Each of these fits SUNSET's design and is kept for a later season or a fork:
 
 ---
 
-## 8. Open questions
+## 9. Open questions
 
 | Question | Notes |
 | --- | --- |
@@ -164,4 +205,4 @@ Each of these fits SUNSET's design and is kept for a later season or a fork:
 | Site plan | Where each of the nine panels goes, against section 4 |
 | Permissions | Comune, wall owners, amplified sound, an unattended street auction |
 | Build order | Which nodes are piloted first, and in which order the nine are built |
-| Verify page | A small offline page on the SUNSET website, with the print node's public key, so anyone can check a paper stamp is genuine on their own phone (2.4) |
+| Collection | The archive (6.2) needs data collected from the nodes: SUNSET joins SUNDIAL's fortnightly round if both are in the same town, has its own occasional collection, or keeps the archive minimal |

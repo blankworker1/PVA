@@ -101,7 +101,7 @@ Anyone on the print node's Wi-Fi can ask whether a paper stamp is **spent or uns
 - The node answers from its own spent list, which is always up to date (3.3).
 - Useful to anyone accepting paper, such as a bar near the print node (SUNSET.md 4.2). A bar can also simply **redeem a sticker on the spot,** from its counter, the moment it is handed over: a sticker redeemed this second cannot have been spent elsewhere.
 
-**The print node is also the gateway** to SUNSET: the entrance to the route, paired with the flip-dot wall and placed near businesses with footfall (SUNSET.md 4.1).
+**The print node is also the gateway** to SUNSET: the entrance to the installation, paired with the flip-dot wall and placed near businesses with footfall (SUNSET.md 4.1).
 
 ## 4. Hardware
 
