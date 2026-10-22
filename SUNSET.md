@@ -42,7 +42,7 @@ Every panel uses the **PVA carrier board v1** ([hardware/CARRIER.md](hardware/CA
 
 | Node | Proof | Direction | Notes |
 | --- | --- | --- | --- |
-| Wall nodes | **walk** | earn | Stamps for carrying messages between walls |
+| Wall nodes | **walk** | earn, and spend | Stamps for carrying messages between walls; **shouts are paid for**, a sink |
 | Arm game | **skill** | earn | Stamps for a peg dropped cleanly; harder holes pay more |
 | Street auction | **bid** | transfer | Buyer's stamps go to the seller; the listing fee is a sink |
 | Print node | **print** | convert, and spend | Digital ⇄ paper; the printing fee and the souvenir are sinks |
@@ -52,7 +52,7 @@ Every panel uses the **PVA carrier board v1** ([hardware/CARRIER.md](hardware/CA
 ### 2.2 Stamps in, stamps out
 
 - **In:** walking (walls) and skill (arm game). Both are limited by the sun: the walls are awake only in daylight, and the arm game only plays while its battery allows. **Issuance is energy-backed.**
-- **Out (sinks):** the auction's listing fee and burned relists, the print node's fee and souvenirs, and every flip of a dot.
+- **Out (sinks):** paid shouts, the auction's listing fee and burned relists, the print node's fee and souvenirs, and every flip of a dot.
 - **Moving:** auctions move stamps between people; paper moves them hand to hand, with no phone.
 - **No cash value, ever.** Stamps cannot be bought or redeemed for money. Their value is only in what they can be used for in the town.
 
@@ -61,6 +61,15 @@ Every panel uses the **PVA carrier board v1** ([hardware/CARRIER.md](hardware/CA
 The print node turns digital stamps into **paper stamps**: an artwork stamp (a gift, no value) and a **redeem sticker** (the value). Paper can pass from hand to hand like cash, so **people without a phone can take part:** someone hands them a sticker, and they spend it at the flip-dot wall, which accepts only paper. The print node and the flip-dot wall share one spent list over ESP-NOW, so a copied sticker can never be spent twice.
 
 ---
+
+### 2.4 Stamps in the town: a possible outcome, not a feature
+
+Paper stamps pass from hand to hand, so nothing stops people trading with them outside the nodes. A café owner might shout that today a coffee costs a few stamps, cash only, to bring people in.
+
+- **SUNSET neither invites nor prevents it.** It does not recruit shops, set prices or promise any value. Stamps are never sold or redeemed for money by SUNSET.
+- **What a trader can do with stamps taken:** spend paper at the flip-dot wall, hand it on, or redeem it at the print node and bid, list a lot, buy souvenirs or pay for shouts. The auction is the only place stamps buy *things* from other people.
+- **What it would mean:** stamps would find a price in the real town, and walking and skill would be worth more. The sun-limited issuance would become the currency's real monetary policy.
+- **The trader's risks are the trader's:** a sticker can be checked as **genuine** with the print node's public key, but only the print node and the flip-dot wall know whether it is **unspent**, so prompt redemption is the protection. Any sale for stamps is the trader's own business, receipts and tax included.
 
 ## 3. A day of SUNSET
 
@@ -135,3 +144,4 @@ Each of these fits SUNSET's design and is kept for a later season or a fork:
 | Site plan | Where each of the nine panels goes, against section 4 |
 | Permissions | Comune, wall owners, amplified sound, an unattended street auction |
 | Build order | Which nodes are piloted first, and in which order the nine are built |
+| Verify page | A small offline page on the SUNSET website, with the print node's public key, so anyone can check a paper stamp is genuine on their own phone (2.4) |

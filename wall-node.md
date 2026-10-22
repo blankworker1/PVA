@@ -4,7 +4,7 @@ The four **wall nodes** are the backbone of [SUNSET](SUNSET.md). Each is a recyc
 
 A wall node is a **wall-tier** panel: the panel straight into the carrier board, no battery, awake from dawn to dusk, the same hardware as a SUNDIAL panel ([SUNDIAL.md](SUNDIAL.md), [hardware/CARRIER.md](hardware/CARRIER.md)).
 
-> Status: draft 1, 22 Oct 2026. Brings together the decisions made so far; nothing built. The shared stamp format is outlined here (5) and will get its own specification.
+> Status: draft 2, 22 Oct 2026 (shouts are paid for). Brings together the decisions made so far; nothing built. The shared stamp format is outlined here (5) and will get its own specification.
 
 ---
 
@@ -28,7 +28,7 @@ Every wall opens on its **dial tone:** a simple picture that says the network is
 - **Read** the wall's messages: whispers left here, and shouts from around the town.
 - **Write** a short message. No account, no login. A name is only what someone types into the message.
 - **Reply** to a message with one tap.
-- **Promote** any whisper to a shout (2.2).
+- **Shout:** pay to promote any whisper to a shout (2.2).
 
 ### 1.4 Carrying, without trying
 
@@ -56,8 +56,8 @@ A town where the walls talk to each other only through the people walking betwee
 
 - A message **carried to the whole town:** couriers take shouts from wall to wall, so every wall shows them as they arrive.
 - **The dashboard shows three shouts** at a time: the town's current headlines.
-- **Anyone can promote any whisper to a shout,** their own or someone else's.
-- **Interactive nodes shout too:** the auction's "Locker A uncollected", the SUNSET set's "the set plays tonight". They enter the network the same way and couriers carry them.
+- **Shouts are paid for.** Anyone can promote any whisper to a shout, their own or someone else's, by spending stamps (the price is set in the pilot). A shout is **community advertising:** whoever wants the town to hear something pays for it, whether it's a party, a lost dog or a café selling coffee for stamps. The stamps spent leave circulation: a sink.
+- **Node notices are free.** Interactive nodes shout too: the auction's "Locker A uncollected", the SUNSET set's "the set plays tonight". They enter the network the same way and couriers carry them.
 
 ### 2.3 Rules
 
@@ -147,7 +147,7 @@ To be specified in full separately; every SUNSET node depends on it.
 | --- | --- |
 | **Phone storage** | Couriers carry blocks in the browser. The captive-portal pop-up browser on some phones keeps no storage between networks; visitors may need to open the page in their normal browser. Test on iPhone and Android first |
 | Message length | The limit for whispers and shouts |
-| Pay to shout | Whether promoting a whisper to a shout should cost a stamp (a sink, and a brake on noise), or stay free |
+| Shout price | How many stamps a shout costs, and whether the price rises when many shouts are waiting |
 | Stamps per delivery | One per first delivery, or scaled by how much new information is carried |
 | Farming | Two people shuttling between two walls: whether "new information" is enough of a limit, or a per-courier daily cap is needed (without identities) |
 | Replies | How a reply shows: threaded under the message, or as a new whisper quoting it |
