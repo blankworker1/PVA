@@ -199,6 +199,17 @@ Anyone listening sees the secret only at the moment it stops being worth anythin
 
 ---
 
+### 3.7 Service notices
+
+The auction watches its own lockers and posts a service notice (SUNSET.md 7.1) when something needs care:
+
+- a lock that doesn't confirm (the door switch shows no opening after a pulse);
+- a door switch that reads open with no lock pulse (a forced or badly closed door);
+- a door left open after a collection or listing;
+- repeated restarts, a low battery or excessive heat.
+
+The notice names only the locker ("Locker B out of service"), never the fault. A locker in fault is taken out of the rotation: if it was the stage, that day is a rest day; if it holds a lot, the lot stays safe behind its fail-secure lock until PVA attends.
+
 ## 4. Firmware: the interactive build
 
 Same firmware family as the wall nodes, built with:

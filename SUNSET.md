@@ -173,7 +173,36 @@ Published like SUNDIAL's website (GitHub Pages), in Italian and English:
 
 **The honest limit:** the website shows nothing live. The nodes have no internet, so it cannot know today's bids, tonight's set or the current shouts. The map says so: *the network is in the street; this is only the map.*
 
-## 7. Rules shared by every node
+## 7. Operations in public
+
+**SUNSET runs its own upkeep in the open.** The nodes know when they need care, and they say so publicly, the same way they announce everything else.
+
+### 7.1 Service notices
+
+Any node can post a **service notice:** a free node notice, carried by couriers like a shout, that asks for upkeep.
+
+| Node | Notices (examples) | How it knows |
+| --- | --- | --- |
+| Print node | *Labels running low* · *Out of labels* | Counts every label it prints against the roll it was loaded with; the printer's paper-end sensor as a backstop (interactive-print.md 4.5) |
+| Street auction | *Locker B out of service* | Lock or door-switch faults, a door left open, repeated restarts (interactive-auction.md 3.7) |
+| Any interactive node | *Battery low* · *Too hot, paused* | The Victron's figures; the enclosure temperature probe |
+| Any node | *Not heard from in N days* | Seen at the walls: a node whose updates stop arriving (wall-node.md 1.2) |
+
+- **Service notices don't take the headlines.** The three shouts are paid community advertising; service notices sit on their own line on the dial tone, so upkeep never crowds out the town's news.
+- **Worded safely.** A notice says *what* needs care, never *how* a fault could be exploited: "Locker B out of service", not which part failed. Locks are fail-secure, so a faulty locker stays shut.
+- **Anyone can read them; the right person acts.** PVA, or a host who has agreed to a small task (7.2), sees the notice on the next wall they pass. The town sees the installation looking after itself.
+
+### 7.2 The rhythm of care
+
+| Task | Rhythm |
+| --- | --- |
+| Data collection (archive, counts) | **Fortnightly**, with SUNDIAL's round when both are in the same town. SUNSET produces very little data: a day's flip-dot picture is under 50 bytes, so even a monthly round would lose nothing |
+| Battery, Victron, heat and enclosure checks | Fortnightly, on the same round |
+| Sticker wall | Photographed each round; cleared when full |
+| **Print node labels** | **On demand,** when the node posts *labels running low*. The gateway's host can be the one who refills them, with access to the paper compartment only, never the electronics |
+| Faults | On demand, from the service notice |
+
+## 8. Rules shared by every node
 
 | Rule | Where it is specified |
 | --- | --- |
@@ -186,7 +215,7 @@ Published like SUNDIAL's website (GitHub Pages), in Italian and English:
 
 ---
 
-## 8. Not in the first season
+## 9. Not in the first season
 
 Each of these fits SUNSET's design and is kept for a later season or a fork:
 
@@ -196,7 +225,7 @@ Each of these fits SUNSET's design and is kept for a later season or a fork:
 
 ---
 
-## 9. Open questions
+## 10. Open questions
 
 | Question | Notes |
 | --- | --- |
@@ -205,4 +234,3 @@ Each of these fits SUNSET's design and is kept for a later season or a fork:
 | Site plan | Where each of the nine panels goes, against section 4 |
 | Permissions | Comune, wall owners, amplified sound, an unattended street auction |
 | Build order | Which nodes are piloted first, and in which order the nine are built |
-| Collection | The archive (6.2) needs data collected from the nodes: SUNSET joins SUNDIAL's fortnightly round if both are in the same town, has its own occasional collection, or keeps the archive minimal |

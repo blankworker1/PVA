@@ -21,6 +21,7 @@ Every wall opens on its **dial tone:** a simple picture that says the network is
 - **Who is here:** how many phones are connected to this wall right now.
 - **The network:** the other nodes, each with the **time of its last update** from this wall's point of view. A wall that hasn't heard from another for a long time shows it, so the network's gaps are visible, and so is where to walk.
 - **The three shouts:** the town's current news (2.2).
+- **Service notices,** on their own line: the installation asking for upkeep, in public (SUNSET.md 7.1).
 - **The rules on one screen** (SUNSET.md 5): earn by walking messages or by skill; spend at the auction, the print node or the flip-dot wall; paper works without a phone; everything closes at sunset.
 
 ### 1.3 Reading and writing

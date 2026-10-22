@@ -146,6 +146,15 @@ The label roll must stay well below the temperature at which thermal paper darke
 
 ---
 
+### 4.5 Counting labels
+
+The node knows how many labels are left:
+
+- **At each refill** the roll's label count is entered (setup on the admin page, or a fixed roll size).
+- **Every label printed is counted** and written to flash, so the count survives restarts.
+- **Below a threshold** (set in the pilot, for example a day's typical use), the node posts the service notice *labels running low*; at zero, *out of labels*, and minting pauses with a message on its page. The printer's own paper-end sensor is the backstop if the count drifts.
+- Minting uses **two labels** (stamp and redeem sticker); a souvenir uses one. The count reflects both.
+
 ## 5. Open questions
 
 | Question | Notes |
