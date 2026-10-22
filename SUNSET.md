@@ -4,7 +4,7 @@ SUNSET is the second work of **PVA (Photovoltaic Art)**, after [SUNDIAL](README.
 
 SUNSET is **nine recycled solar panels** on the walls of a town, forming a small offline network with its own currency. People earn **stamps** by walking messages between walls and by skill, and spend them at an auction, a mint and a wall of mechanical pixels. Every panel runs on its own sun, on the same carrier board as SUNDIAL, and everything that happens is unattended, anonymous and over by sunset.
 
-> Status: draft 1, 22 Oct 2026. The five interactive nodes are specified in their own documents; the wall nodes and the stamp format are still to be written. Nothing is built.
+> Status: draft 1, 22 Oct 2026. The five interactive nodes are specified in their own documents; the wall nodes in [wall-node.md](wall-node.md); the stamp format is outlined there and still to be specified in full. Nothing is built.
 
 ---
 
@@ -14,7 +14,7 @@ SUNSET is **nine recycled solar panels** on the walls of a town, forming a small
 
 | Panel | Kind | What it does | Specification |
 | --- | --- | --- | --- |
-| Wall 1–4 | **Wall node** | Message walls: visitors post and read messages; couriers (visitors) carry messages between walls and earn stamps for it. The network's news, and the main source of new stamps | To be written |
+| Wall 1–4 | **Wall node** | Message walls: visitors post and read messages; couriers (visitors) carry messages between walls and earn stamps for it. The network's news, and the main source of new stamps | [wall-node.md](wall-node.md) |
 | Street auction | Interactive | One lot a day in three lit perspex lockers; bids in stamps; the hammer falls at sunset | [interactive-auction.md](interactive-auction.md) |
 | Arm game | Interactive | A robot arm in a perspex case; drop a peg in a hole, earn a stamp | [interactive-arm-game.md](interactive-arm-game.md) |
 | Print node | Interactive | Turns digital stamps into paper stamps and back; sells the artwork stamp as a souvenir | [interactive-print.md](interactive-print.md) |
@@ -112,7 +112,7 @@ A visitor meets five kinds of node in one day. Each needs one obvious first step
 | Commit and reveal for every token and stamp sent over the open Wi-Fi | interactive-auction.md 3.5 |
 | Every state change written to flash before it is acted on | interactive-auction.md 3.5 |
 | Interactive nodes: JP1 off, sun sensor compiled out | interactive-auction.md 1.1 |
-| Messages on the walls vanish within 7 days; nothing attributable is kept | Wall node specification (to be written) |
+| Messages on the walls vanish within 7 days; nothing attributable is kept | wall-node.md 2.3 |
 
 ---
 
@@ -130,7 +130,6 @@ Each of these fits SUNSET's design and is kept for a later season or a fork:
 
 | Question | Notes |
 | --- | --- |
-| **Wall node specification** | Messages (whisper and shout), couriers and blocks, proof of walk, the passport page, firmware on the wall tier |
 | **Stamp format** | The bearer-stamp design shared by all nodes: the public unspent list, the 5 × 5 node logos, signatures |
 | Onboarding | The one-screen explanation at the first wall; the first stamp |
 | Site plan | Where each of the nine panels goes, against section 4 |
