@@ -93,6 +93,16 @@ Minting costs a small fee in stamps (for example 1 per print), set in the pilot.
 
 ---
 
+### 3.6 Status by serial
+
+Anyone on the print node's Wi-Fi can ask whether a paper stamp is **spent or unspent**, without redeeming it.
+
+- The phone sends **only the sticker's serial,** which is public. It never sends the redeem code, so nothing worth stealing crosses the open Wi-Fi.
+- The node answers from its own spent list, which is always up to date (3.3).
+- Useful to anyone accepting paper, such as a bar near the print node (SUNSET.md 4.2). A bar can also simply **redeem a sticker on the spot,** from its counter, the moment it is handed over: a sticker redeemed this second cannot have been spent elsewhere.
+
+**The print node is also the gateway** to SUNSET: the entrance to the route, paired with the flip-dot wall and placed near businesses with footfall (SUNSET.md 4.1).
+
 ## 4. Hardware
 
 ### 4.1 The printer

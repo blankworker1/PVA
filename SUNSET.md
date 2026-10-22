@@ -87,23 +87,43 @@ Paper stamps pass from hand to hand, so nothing stops people trading with them o
 
 ## 4. Layout
 
-The positions are chosen on site; the logic is:
+The positions are chosen on site, framed for the best possible outcomes. The logic:
 
 | Panel | Where | Why |
 | --- | --- | --- |
+| **Print node + flip-dot wall: the gateway** | **As a pair (a hard requirement),** within ESP-NOW range of each other, at the **entrance** to the route, **near businesses that already have footfall** | The way in to SUNSET (4.1). They share one spent list; the mint, and the wall where its money is spent |
 | **Walls 1–4** | Spread to the edges of the route | Distance is what makes proof of walk mean something: the walls set the shape of the walk |
-| **Print node + flip-dot wall** | **As a pair,** within ESP-NOW range (tens of metres along a street) | They share one spent list; the mint, and the wall where its money is spent |
 | **Street auction** | Where people already pass | Its catalogue is the street itself |
 | **The SUNSET set** | The town's **sunset spot,** a west-facing place where people already gather to watch the sun go down | The set starts at sunset; choose neighbours who can live with an hour of music |
 | **Arm game** | In shade | Servos and electronics in a perspex case |
 
 The walls and the interactive nodes interleave along the route, so a walk between walls passes the places to spend.
 
+### 4.1 The gateway
+
+The print node and the flip-dot wall together are **the entrance to the installation.**
+
+- **The first thing people see:** the flip-dot picture, made by the town a paid dot at a time, and the sticker wall beside it. It shows at a glance that something is happening, and that people take part.
+- **Where the rules are explained** (5), and where the route and the map start.
+- **Where paper meets the town.** Placed near bars, cafés and shops that already have footfall, the gateway draws their customers in, and gives those businesses the infrastructure to take part: paper stamps redeemed or checked at the print node from their own counter (4.2), and paid shouts to advertise on every wall.
+
+### 4.2 Hosts
+
+Every panel needs a wall, and the owner's consent. Hosting is a fair exchange: wall space and consent for the node's presence. **No money and no endorsement;** PVA runs every node.
+
+| Host of | What the host gets |
+| --- | --- |
+| **The gateway** (print node, flip-dot wall) | The installation's entrance at the door: footfall, and, within the print node's Wi-Fi range (roughly 30–50 m outdoors, less through walls), **live settlement** of paper stamps from the counter: redeem a sticker the moment it is handed over, or check its status by serial (interactive-print.md 3.6) |
+| **A wall node** | Couriers arriving all day; the town's shouts on the wall; spends known "as far as this wall has heard" |
+| **Any node** | A place on the route, and the shouts that point people to it |
+
+Hosts are chosen because their wall fits the layout, not the other way round: walls stay spread, and the gateway pair stays together.
+
 ---
 
 ## 5. The first five minutes
 
-A visitor meets five kinds of node in one day. Each needs one obvious first step, and the **first wall explains the whole economy on one screen:**
+A visitor meets five kinds of node in one day. Each needs one obvious first step. **The gateway explains the whole economy on one screen** when people arrive, and every wall repeats it for those who start elsewhere:
 
 1. **Earn** by walking messages between walls, or by skill at the arm game.
 2. **Spend** at the auction, the print node or the flip-dot wall.
