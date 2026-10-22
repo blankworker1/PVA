@@ -4,13 +4,13 @@ A SUNSET interactive node that **turns digital stamps into paper stamps, and bac
 
 It runs on carrier v1 on the battery tier: the panel feeds a Victron SmartSolar MPPT 75/15 and a 12 V LiFePO₄ battery, with JP1 off and the sun sensor compiled out. The tier is specified in [interactive-auction.md](interactive-auction.md), sections 1 and 2; this document covers only what is different.
 
-> Status: draft 2, 22 Oct 2026 (each mint issues two parts: the stamp as artwork and a redeem sticker). Artwork to be designed; nothing built. **Nothing here changes the carrier board.**
+> Status: draft 3, 22 Oct 2026 (each mint issues two parts, the stamp as artwork and a redeem sticker; the artwork stamp alone is also sold as a souvenir). Artwork to be designed; nothing built. **Nothing here changes the carrier board.**
 
 ---
 
 ## 1. The idea
 
-- **A mint, not a shop.** The print node neither pays stamps for an act nor sells anything. It converts: digital to paper, paper to digital.
+- **A mint and a shop.** The print node does two things: it **converts** digital stamps to paper and back, and it **sells** the artwork stamp alone as a souvenir, for digital stamps.
 - **Proof of print.** The paper is printed and cut by the machine, signed by it, and recorded by it. It is the same stamp in a different body.
 - **Paper circulates by hand.** Once printed, a paper stamp can pass from person to person, like cash, with no phone and no network. It goes back to the printing node only to be turned digital again.
 - **Daylight only,** like all SUNSET business: minting and redeeming run from sunrise to sunset.
@@ -22,7 +22,7 @@ It runs on carrier v1 on the battery tier: the panel feeds a Victron SmartSolar 
 | Wall (message nodes) | walk | earn |
 | Arm game ([interactive-arm-game.md](interactive-arm-game.md)) | skill | earn |
 | Street auction ([interactive-auction.md](interactive-auction.md)) | bid | transfer; listing fee is a sink |
-| **Print node** | **print** | **convert** (digital ⇄ paper); printing fee is a sink |
+| **Print node** | **print** | **convert** (digital ⇄ paper) and **spend** (souvenir stamp); fees are a sink |
 | Spending nodes (e.g. a flip-dot pixel wall, to be specified) | mark | spend |
 
 ---
@@ -78,7 +78,16 @@ SUNSET nodes learn of each other's spends only when couriers carry blocks betwee
 
 **Checking is everywhere; redeeming is at home.** The node signs each stamp with a **public-key signature** (Ed25519 or ECDSA P-256, both within the ESP32's means). Any node, or any phone with the public key, can check that a paper stamp is genuine without being able to redeem it.
 
-### 3.4 The printing fee
+### 3.4 The souvenir: the artwork stamp alone
+
+A visitor can also **buy the artwork stamp on its own,** spending digital stamps for a souvenir. No redeem sticker is printed; nothing is converted. The stamps spent leave circulation, so this is a spending node as well as a mint. The price is set in the pilot.
+
+| Mode | The visitor spends | The node prints | Value leaves digital circulation? |
+| --- | --- | --- | --- |
+| **Convert** | the value + the printing fee | artwork stamp + redeem sticker | The value moves to paper; only the fee leaves |
+| **Souvenir** | the souvenir price | artwork stamp only | All of it: a sink |
+
+### 3.5 The printing fee
 
 Minting costs a small fee in stamps (for example 1 per print), set in the pilot. **The fee is what pays for the artwork stamp:** the gift half of every mint. It is a **sink**: those stamps leave circulation. Redeeming is free.
 
@@ -133,7 +142,8 @@ The label roll must stay well below the temperature at which thermal paper darke
 | --- | --- |
 | **Artwork** | The design of the round stamp and the square it is cut from; the plain design of the redeem sticker (2.1) |
 | Cut pattern | Each label cut separately, or the pair cut together as a strip of two |
-| Artwork-only prints | Whether a visitor can print a stamp without a redeem sticker for the printing fee alone: a paper artwork bought with stamps, which would make the print node a spending node too |
+| Souvenir price | How many stamps the artwork stamp costs on its own (3.4) |
+| A cash-only node | Somewhere that accepts **only** paper redeem stickers as payment, so paper stamps have a use without a phone. To be specified separately |
 | Label size and printer | Label diameter, paper width, and a printer that prints and cuts die-cut labels reliably |
 | Denominations | Which values, and whether each has its own design |
 | Printing fee | How many stamps per print |
