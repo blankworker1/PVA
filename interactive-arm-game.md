@@ -23,7 +23,7 @@ It runs on carrier v1 on the battery tier: the panel feeds a Victron SmartSolar 
 | Wall (message nodes) | walk | earn |
 | **Arm game** | **skill** | **earn** |
 | Street auction ([interactive-auction.md](interactive-auction.md)) | bid | transfer buyer → seller; listing fee is a sink |
-| Spending nodes (e.g. a flip-dot pixel wall, to be specified) | mark | spend |
+| Flip-dot wall ([interactive-flipdot.md](interactive-flipdot.md)) | mark | spend, paper only |
 
 **One stamp type** everywhere. Each stamp carries the 5 × 5 logo of the node that issued it, so its origin is visible, but every stamp spends the same.
 

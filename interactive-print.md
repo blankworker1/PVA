@@ -23,7 +23,7 @@ It runs on carrier v1 on the battery tier: the panel feeds a Victron SmartSolar 
 | Arm game ([interactive-arm-game.md](interactive-arm-game.md)) | skill | earn |
 | Street auction ([interactive-auction.md](interactive-auction.md)) | bid | transfer; listing fee is a sink |
 | **Print node** | **print** | **convert** (digital ⇄ paper) and **spend** (souvenir stamp); fees are a sink |
-| Spending nodes (e.g. a flip-dot pixel wall, to be specified) | mark | spend |
+| Flip-dot wall ([interactive-flipdot.md](interactive-flipdot.md)) | mark | spend, paper only |
 
 ---
 
@@ -143,7 +143,7 @@ The label roll must stay well below the temperature at which thermal paper darke
 | **Artwork** | The design of the round stamp and the square it is cut from; the plain design of the redeem sticker (2.1) |
 | Cut pattern | Each label cut separately, or the pair cut together as a strip of two |
 | Souvenir price | How many stamps the artwork stamp costs on its own (3.4) |
-| A cash-only node | Somewhere that accepts **only** paper redeem stickers as payment, so paper stamps have a use without a phone. To be specified separately |
+| A cash-only node | Specified as the flip-dot wall ([interactive-flipdot.md](interactive-flipdot.md)), which shares the print node's spent list over ESP-NOW |
 | Label size and printer | Label diameter, paper width, and a printer that prints and cuts die-cut labels reliably |
 | Denominations | Which values, and whether each has its own design |
 | Printing fee | How many stamps per print |
