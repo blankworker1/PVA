@@ -4,7 +4,7 @@ The PVA carrier board v1 ([hardware/CARRIER.md](hardware/CARRIER.md)) was design
 
 The interactive nodes belong to **SUNSET** (PVA no. 2, formerly GO TO BED), a network of panels that carry messages and stamps between walls. Where SUNDIAL is about time, SUNSET is about one moment in it: every day's business closes at sunset. They are specified here because they are a use of carrier v1, like the three layers in [USES.md](USES.md).
 
-> Status: draft 2, 22 Oct 2026 (three lockers; business in daylight only; four evening hours of light). Concept and rules settled in discussion; nothing built. Nothing here changes the carrier board.
+> Status: draft 2, 22 Oct 2026 (three lockers; business in daylight only; evening lights on the battery). Concept and rules settled in discussion; nothing built. Nothing here changes the carrier board.
 
 ---
 
@@ -20,7 +20,7 @@ The interactive nodes belong to **SUNSET** (PVA no. 2, formerly GO TO BED), a ne
 | Sun reading | The carrier's own short-circuit current: true light level | Victron PV voltage and power over VE.Direct: energy harvested |
 | GPIO 34 divider reads | Panel voltage (dawn and dusk gates) | Battery voltage (a cross-check of the Victron's figure) |
 | Battery data | None | Victron: battery voltage and current, charge state, yield today |
-| Awake | Dawn to dusk, off at night | Business sunrise to sunset; lights on for four hours after sunset, then asleep until sunrise (1.2) |
+| Awake | Dawn to dusk, off at night | Business sunrise to sunset; lights after sunset (about four hours, set in the pilot), then asleep until sunrise (1.2) |
 | Temperature probe, clock, Wi-Fi, storage | Same | Same |
 | Firmware | Wall build | Interactive build |
 
@@ -40,8 +40,9 @@ SUNDIAL seals each day's dial at Bosa's sunset. SUNSET keeps the same moment: **
 
 - **Sunset comes from the clock,** computed for Bosa as SUNDIAL's seal already is (`sunTimes`), not from the panel or battery voltage. A cloudy afternoon must not end the auction early.
 - **All business is in daylight.** Listing, bidding, collecting and returning happen between sunrise and sunset, and nowhere else. At sunset the Wi-Fi closes.
-- **The battery keeps the lights on for four hours after sunset.** In Sardinia the street is busiest in the evening, so each locker stays lit in its state colour: the result of the day's hammer, and tomorrow's lot waiting in the wings, readable from the pavement. Nothing can be done until sunrise.
-- **Then the node sleeps.** After four hours the lights go out and the ESP32 deep-sleeps until sunrise.
+- **The battery keeps the lights on after sunset,** about four hours as the starting point. In Sardinia the street is busiest in the evening, so the lockers stay lit: the result of the day's hammer, and tomorrow's lot waiting in the wings, readable from the pavement. Nothing can be done until sunrise.
+- **Then the node sleeps.** The lights go out and the ESP32 deep-sleeps until sunrise.
+- **The lighting routine is not fixed here.** Which lockers are lit, in which colours, how bright, by day or only in the evening, and for how long, is a firmware setting, tuned on the built hardware during the pilot (6).
 - The battery smooths cloudy days and motor or solenoid surges, and lights the evening. It does not move the close of the day.
 
 **The sun is the coin slot.** Actions that cost energy (a grab, a flip, a door) are offered only when the battery's charge state allows. A dull week means fewer actions, and the page says so.
@@ -108,8 +109,8 @@ A small board beside the carrier, on the 12 V line:
 | Load | Draw | Per day |
 | --- | --- | --- |
 | ESP32, Wi-Fi on, sunrise to sunset | ~0.5 W | ~6 Wh over 12 h |
-| ESP32, Wi-Fi off, four evening hours | ~0.1–0.2 W | < 1 Wh |
-| Interior lights, three lockers, dimmed | ~1–2 W per locker | the largest item: ~12–24 Wh for the four evening hours, plus whatever daytime lighting is chosen |
+| ESP32, Wi-Fi off, evening lights | ~0.1–0.2 W | < 1 Wh |
+| Interior lights, three lockers, dimmed | ~1–2 W per locker | the largest item: ~12–24 Wh for four evening hours, plus any daytime lighting. An estimate until the pilot sets the routine |
 | Light strips switched to black overnight | standby of the LED chips | ~1–3 Wh; removable later with a supply switch on an expander pin |
 | Locks | ~0.5–1 A at 12 V for ~1 s, a few times a day | negligible |
 
@@ -164,7 +165,7 @@ A lot with no bids at the hammer goes to wings out for the seller to take back, 
 
 **The light is the message.** Without accounts or contact details, the node cannot tell anyone anything directly; the colour of each locker, readable from the street, is the status. The seller token also shows the lot's status on the node's page, and uncollected lots are announced by shout.
 
-After sunset the lights hold their state colours for four hours (1.2), so the street can read the day's result in the evening.
+After sunset the lights can show the day's result to the evening street (1.2); the colours and routine are set in the pilot (6).
 
 A door switch on each locker confirms that the door was opened and closed again, so each locker resets itself.
 
@@ -207,7 +208,7 @@ Same firmware family as the wall nodes, built with:
 | `SUN_SENSOR` | 1 | 0 (GPIO 25 never driven) |
 | `PANEL_SENSE` | panel voltage, dawn and dusk gates | battery voltage, cross-check only |
 | `VE_DIRECT` | 0 | 1, on UART2 (GPIO 16/17) |
-| Close of the day | dusk from panel voltage | Bosa's sunset from the clock: Wi-Fi closes, lights stay on four hours, then deep sleep until sunrise |
+| Close of the day | dusk from panel voltage | Bosa's sunset from the clock: Wi-Fi closes, the evening lighting routine runs, then deep sleep until sunrise |
 | Node role | wall | auction (locks, door switches, lights) |
 
 New for the auction: the three-locker rotation (3.1) and locker states (3.3), bid handling and stamp issue (3.4), commit-and-reveal tokens (3.5), the automatic shout, and the colour code on the lights.
@@ -220,8 +221,20 @@ New for the auction: the three-locker rotation (3.1) and locker states (3.3), bi
 | --- | --- |
 | A maintenance path for a dead controller | BOX's rule is "no override, ever", but a dead board would trap a lot. Decide between that purity and a sealed, tamper-screwed manual release |
 | Exact cut-off times | Midday for collection, sunset for seller returns: confirm against how people actually use the street |
-| Daytime lighting | Whether the interiors are lit during the day too, or only in the four evening hours; daylight may wash them out anyway |
 | Bid steps and opening bid | Minimum increment; whether the seller can set a reserve |
 | Comune permission | An unattended street exchange is the piece most likely to need a word with the comune before Bosa 2027 |
 | Stamp format | Depends on SUNSET's bearer-stamp spec (public unspent list, node logos, passport page) |
 | Prior art | Check "world's first fully automated street auction" before using it publicly |
+
+---
+
+## 6. Pilot tasks
+
+Settled on the built hardware, not on paper. The firmware is written so each of these is a setting, not a rebuild.
+
+| Task | What to settle |
+| --- | --- |
+| **Lighting routine** | Which lockers are lit and when (day, evening, both), colours for each state, brightness, how long after sunset (about four hours to start), and how the routine shortens when the battery is low |
+| Cut-off times | Midday for collection and sunset for seller returns, against how people actually use the street |
+| Heat | Temperature inside the housing on a summer afternoon, with and without daytime lighting |
+| Power budget | The real daily draw against the estimate in 2.4, and the battery size it calls for |
