@@ -2,7 +2,7 @@
 
 A KiCad schematic for the carrier board, generated from the specification in [CARRIER.md](../CARRIER.md).
 
-> **Status: draft-1, reviews 1 and 2 applied, 20 Oct 2026. Awaiting the manufacturer's review. Do not manufacture from this yet.**
+> **Status: draft-1, reviews 1 and 2 applied, 20 Oct 2026; part numbers added 23 Oct 2026. Awaiting the manufacturer's review. Do not manufacture from this yet.**
 > It is a faithful drawing of the spec, checked by script and by two reviews. Before layout it needs the manufacturer's review and sign-off ([below](#manufacturer-review-and-sign-off)). The board switches a 45 V panel's full short-circuit current every 10 seconds.
 
 ## Start here (for the board designer)
@@ -11,7 +11,7 @@ Everything needed is linked from this page:
 
 1. **[Specification: CARRIER.md](../CARRIER.md)** (also as a [PDF](../PVA_carrier_board_spec_v1.pdf)): what the board does, every part with its rating, layout rules, bench test.
 2. **[Schematic PDF](carrier_schematic.pdf)** (A1): the full drawing, with notes on current paths and measurement ranges.
-3. **[Bill of materials: bom.csv](bom.csv)**: references, values and ratings, footprints, fitted or not.
+3. **[Bill of materials: bom.csv](bom.csv)**: references, values and ratings, footprints, fitted or not, and a **proposed manufacturer and part number for every line** (equivalents welcome; the few lines to confirm are marked).
 4. **KiCad files:** [carrier.kicad_pro](carrier.kicad_pro), [carrier.kicad_sch](carrier.kicad_sch), and the netlist with footprints [carrier.net](carrier.net). Download the whole folder to open the project.
 5. **[Design checks: checks.txt](checks.txt)**: the calculations behind the ranges and ratings.
 6. **[Review log](#review-log)** and **[manufacturer sign-off](#manufacturer-review-and-sign-off)**, further down this page.
@@ -25,7 +25,10 @@ The board as a sundial on its panel, and its mounting: [GNOMON.md](../GNOMON.md)
 | [carrier.kicad_pro](carrier.kicad_pro), [carrier.kicad_sch](carrier.kicad_sch) | KiCad project and schematic (KiCad 7 format; opens in KiCad 7 and 8) |
 | [carrier_schematic.pdf](carrier_schematic.pdf) | The schematic as a PDF (A1), for review |
 | [carrier.net](carrier.net) | Netlist exported by KiCad, with footprints: what a layout designer imports |
-| [bom.csv](bom.csv) | Bill of materials: references, values and ratings, footprints, fitted or not, notes |
+
+**Using Altium or Allegro?** Recent versions of Altium Designer can import KiCad projects directly (Import Wizard). Otherwise the schematic PDF and the netlist are complete enough to redraw from: every part, value, footprint and pin connection is in them and in `bom.csv`.
+| [bom.csv](bom.csv) | Bill of materials: references, values and ratings, footprints, fitted or not, manufacturer and part number, what to confirm, notes |
+| [mpn.py](mpn.py) | The proposed manufacturer part numbers, by reference (feeds bom.csv) |
 | [checks.py](checks.py), [checks.txt](checks.txt) | Calculations: divider and current-sense ranges, supercap ride-through, AUX diode heat |
 | [parts.py](parts.py) | **The source:** every part, footprint and pin-to-net connection, transcribed from CARRIER.md |
 | [gen_schematic.py](gen_schematic.py), [gen_bom.py](gen_bom.py), [verify.py](verify.py), [build.sh](build.sh) | Regenerate everything with `./build.sh` |
@@ -89,7 +92,7 @@ This package (CARRIER.md, this folder, `bom.csv`, the KiCad project) goes to the
 
 **For the manufacturer**
 
-1. **Parts:** a part number for every BOM line, in stock at your supplier, with any substitutions listed. Especially D0, Q1, RSH1, U2, U3, U4, J1 and J12 (≥ 15 A terminals), and the microSD socket J8.
+1. **Parts:** `bom.csv` proposes a manufacturer and part number for every line. Please confirm them or list substitutions from your supplier, and settle the lines in the *Confirm* column (F1, Q1, C3, F3, J14/J15). Especially D0, Q1, RSH1, U2, U3, U4, J1 and J12 (≥ 15 A terminals), and the microSD socket J8.
 2. **Q1 voltage rating:** quote one 60 V and one 100 V part (both logic-level, R_DS(on) ≤ 20 mΩ at V_GS 4.5 V, I_D ≥ 20 A). The 100 V part is needed if D6 is fitted after the bench test.
 3. **Layout:** the layout rules in CARRIER.md, in particular the two high-current loops, the Kelvin connections from RSH1 to U2, the star ground, the copper for D0, and the ESP32 antenna keep-out.
 4. **Manufacturability:** footprints, clearances (60 V on the panel side), board outline and mounting holes, and anything you would change to make the board easier or cheaper to build.
