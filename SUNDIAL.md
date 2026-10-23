@@ -27,7 +27,7 @@ This document takes the carrier board v1 ([hardware/CARRIER.md](hardware/CARRIER
 | Sensors | Panel volts (GPIO 34), short-circuit current every 10 s (GPIO 35), panel temperature (J4), optional second probe (J5) | Sunlight, heat and site. **No measure of energy delivered:** the board draws under 1 W from a 185 W panel, so the panel is effectively unloaded (3.1) |
 | Radio | Wi-Fi access point, open, up to 10 phones at once, plain HTTP | No TLS: anything sent on the open network can be read by anyone in range (4.3). Pages must work in the phones' captive-portal mini-browser |
 | Interfaces on the object | None: no screen, no buttons | Every interaction is on the visitor's phone |
-| Expansion | I2C header, 9 spare GPIO, UART, switched 5 V, AUX panel power | Not used by any layer |
+| Expansion | I2C header, 9 spare GPIO, UART, switched 5 V, AUX panel power | Not used by any layer. The free-standing post uses AUX and switched 5 V for USB charging in daylight ([hardware/POST.md](hardware/POST.md)) |
 
 **What the hardware rules out, whatever the software:** running at night; knowing who a visitor is; measuring energy produced; any backhaul; and updating firmware or pages without opening the box.
 

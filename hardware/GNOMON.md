@@ -105,7 +105,7 @@ Stand-off depth for an 80 cm wide panel:
 | 15° | about 21 cm |
 | 20° | about 29 cm |
 
-Up to about 20° off south this works well. Beyond that the panel stands out from the wall like an opening door and the fixings carry real wind load: choose another wall, or a post turned to face due south. From the side the wedge is visible; where litter or nesting birds could collect in the gap, close its open side with a light screen.
+Up to about 20° off south this works well. Beyond that the panel stands out from the wall like an opening door and the fixings carry real wind load: choose another wall, or a post turned to face due south ([POST.md](POST.md): the free-standing panel, for private ground with no suitable wall). From the side the wedge is visible; where litter or nesting birds could collect in the gap, close its open side with a light screen.
 
 ## Testing a wall: the noon-shadow test
 

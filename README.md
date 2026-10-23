@@ -73,6 +73,7 @@ hardware/
   PVA_carrier_board_spec_v1.pdf  the same as a PDF, for sending to a board designer
   carrier/                    the carrier board schematic draft (KiCad project, PDF, netlist, BOM): start at carrier/README.md
   GNOMON.md                   the panel as a sundial: gnomon, drilling template, installation, wall test
+  POST.md                     the free-standing panel: post, base, USB charging from the sun
 tools/
   pva_rules.py                the dial rules as drawing code (canonical print, separations); rules-2 for Sole planned
   pva_import.py, sole_edition.py  planned: round downloads → SUNDIAL pages and Sole editions (SUNDIAL.md 3.4)
@@ -195,7 +196,7 @@ The visitor's phone counts once per solar hour as a dot on the dial, never ident
 
 ## Hardware per panel
 
-Each panel is also a vertical sundial, mounted vertical and facing due south: see [hardware/GNOMON.md](hardware/GNOMON.md) for the gnomon, the drilling template, the installation and the noon-shadow wall test.
+Each panel is also a vertical sundial, mounted vertical and facing due south: see [hardware/GNOMON.md](hardware/GNOMON.md) for the gnomon, the drilling template, the installation and the noon-shadow wall test. Where there is no suitable wall, a panel can stand on its own post on private ground, such as a café's seating area, with USB sockets that charge phones from its sun in daylight: [hardware/POST.md](hardware/POST.md).
 
 **Stage 1:** 36 V 180 W PV panel · DC-DC buck converter (8–60 V in), set to exactly 5.0 V with a multimeter **before** connecting anything · 5.5 V 4 F supercapacitor across the 5 V output (in the shaded box: it ages fast in heat) · ELEGOO ESP32 30-pin on a screw-terminal breakout · DS18B20 waterproof probe on the panel back, data on GPIO 4, 4.7 kΩ from GPIO 4 to 3.3 V.
 
