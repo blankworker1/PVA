@@ -122,5 +122,6 @@ Lighter than a wall over a street, because it is on private ground, but not none
 | Charger module | Which wide-input USB-C PD module holds its input voltage up; test it on a real panel under passing cloud |
 | One post or two | A central post is lighter to look at; two uprights hold the panel more simply |
 | Energy figure | Minutes only, or a current monitor on J13 for watt-hours |
+| Watering | A post with a closed IBC tank and a sun-watered flower bed is specified for SUNSET: [garden-node.md](https://github.com/photovoltaic-art/SUNSET/blob/main/garden-node.md) |
 | Bench | A panel on a test stand, the carrier, the charger and two phones for a day: the board never browns out; the sun record stays clean |
 | Base | Slab, footing or ballast at the first candidate site |
